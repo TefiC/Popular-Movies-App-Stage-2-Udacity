@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">UWatch</string>
+
+    <!--Spinner-->
+    <string-array name="sorting_options_array">
+        <item>Most Popular</item>
+        <item>Top Rated</item>
+    </string-array>
+
+    <string name="spinner_title">Sorting</string>
+
+    <!--Dialog-->
+    <string name="connection_dialog_title">WARNING</string>
+    <string name="connection_dialog_message">No Internet connection available. Please reconnect and try again.</string>
+    <string name="ok">OK</string>
+
+    <!--Details activity-->
+    <string name="vote_average">Rating</string>
+    <string name="release_date">Released</string>
+    <string name="poster_description">Movie poster</string>
+    <string name="plot">Plot</string>
+
+</resources>
