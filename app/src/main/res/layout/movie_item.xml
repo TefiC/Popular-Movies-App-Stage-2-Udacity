@@ -1,19 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="170dp"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="4dp"
-    android:layout_margin="4dp"
     android:layout_gravity="center"
-    android:background="@android:color/holo_red_dark">
+    android:layout_margin="4dp"
+    android:background="#282828"
+    android:gravity="center"
+    android:padding="4dp">
 
-    <!--IMAGE VIEW TO BE ADDED-->
+    <!--IMAGE VIEW TO BE ADDED BY ADAPTER-->
 
-    <TextView
-        android:id="@+id/movieTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <RelativeLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/movie_item_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:textColor="@android:color/white"
+            tools:text="Titanic" />
+
+        <!--Start and rating-->
+        <LinearLayout
+            android:id="@+id/movie_item_rating_star_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/movie_item_title"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:gravity="center">
+
+            <!--Star-->
+
+            <ImageView
+                android:id="@+id/movie_item_star"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/star" />
+
+            <TextView
+                android:id="@+id/movie_item_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:layout_margin="3dp"
+                tools:text="8.6" />
+
+        </LinearLayout>
+
+        <!--Adults?-->
+        <ImageView
+            android:id="@+id/movie_item_adults"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_below="@id/movie_item_title"
+            android:layout_gravity="end"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_toRightOf="@id/movie_item_rating_star_layout"
+            tools:src="@drawable/for_children" />
+
+        <!--Favorite?-->
+        <ImageView
+            android:id="@+id/movie_item_favorite"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/movie_item_title"
+            tools:src="@drawable/heart_not_pressed" />
+
+    </RelativeLayout>
 
 
 </LinearLayout>

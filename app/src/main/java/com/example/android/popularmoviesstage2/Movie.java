@@ -215,4 +215,6 @@ public class Movie implements Parcelable {
     public void setIsMovieForAdults(boolean isMovieForAdults) { this.isMoviewForAdults = isMovieForAdults; }
 
     public void setMovieBackdropPath(String movieBackdropPath) { this.movieBackdropPath = movieBackdropPath; }
+
+
 }

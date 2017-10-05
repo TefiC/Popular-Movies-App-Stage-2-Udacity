@@ -6,7 +6,7 @@
 
     <!-- draw a path -->
     <path
-        android:fillColor="#ff0000"
+        android:fillColor="#c12020"
         android:pathData="M20.5,9.5
                         c-1.955,0,-3.83,1.268,-4.5,3
                         c-0.67,-1.732,-2.547,-3,-4.5,-3

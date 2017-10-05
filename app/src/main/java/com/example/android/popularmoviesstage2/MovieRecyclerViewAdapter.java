@@ -1,6 +1,7 @@
 package com.example.android.popularmoviesstage2;
 
 import android.content.Context;
+import android.media.Image;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -9,11 +10,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeoutException;
 
 import static android.R.attr.id;
 import static android.content.ContentValues.TAG;
@@ -56,7 +59,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
         RectangularImageView movieView = new RectangularImageView(mContext);
         movieView.setAdjustViewBounds(true);
         movieView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        // CHECK COMPATIBILITY
+        // TODO: CHECK COMPATIBILITY
         mMoviePosterViewId = View.generateViewId();
         movieView.setId(mMoviePosterViewId);
 
@@ -77,7 +80,18 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
             // Listener
             holder.setOnClickListener(holder.mMoviePoster, movie);
 
-            holder.mMovieTitle.setText(mMoviesArray.get(position).getMovieTitle());
+            holder.mMovieTitleView.setText(movie.getMovieTitle());
+
+            holder.mMovieRatingView.setText(Double.toString(movie.getMovieVoteAverage()));
+
+            if(movie.getIsMovieForAdults()) {
+                holder.mMovieIsForAdultsView.setImageResource(R.drawable.for_adults);
+            } else {
+                holder.mMovieIsForAdultsView.setImageResource(R.drawable.for_children);
+            }
+
+            // TODO: WHEN FAVORITE IS IMPLEMENTED, CHANGED TO FILLED HEART
+            holder.mMovieIsFavoriteView.setImageResource(R.drawable.heart_not_pressed);
         }
     }
 
@@ -89,12 +103,24 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
     public class MovieViewHolder extends RecyclerView.ViewHolder {
 
         public RectangularImageView mMoviePoster;
-        public TextView mMovieTitle;
+
+        private TextView mMovieTitleView;
+        private ImageView mMovieRatingStarView;
+        private TextView mMovieRatingView;
+        private ImageView mMovieIsForAdultsView;
+        private ImageView mMovieIsFavoriteView;
 
         private MovieViewHolder(View itemView) {
             super(itemView);
-            mMovieTitle = (TextView) itemView.findViewById(R.id.movieTitle);
+
             mMoviePoster = (RectangularImageView) itemView.findViewById(mMoviePosterViewId);
+
+            mMovieTitleView = (TextView) itemView.findViewById(R.id.movie_item_title);
+            mMovieRatingStarView = (ImageView) itemView.findViewById(R.id.movie_item_star);
+            mMovieRatingView = (TextView) itemView.findViewById(R.id.movie_item_rating);
+            mMovieIsForAdultsView = (ImageView) itemView.findViewById(R.id.movie_item_adults);
+            mMovieIsFavoriteView = (ImageView) itemView.findViewById(R.id.movie_item_favorite);
+
         }
 
         /**
