@@ -8,13 +8,13 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 
@@ -32,8 +32,8 @@ import java.util.ArrayList;
 import static com.example.android.popularmoviesstage2.utils.LoaderUtils.MAIN_SEARCH_LOADER;
 
 
-public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler,
-        AdapterView.OnItemSelectedListener, LoaderManager.LoaderCallbacks<String> {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener,
+        LoaderManager.LoaderCallbacks<String>, MovieRecyclerViewAdapter.MovieAdapterOnClickHandler {
 
     /*
      * Fields
@@ -41,10 +41,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
     private String mSearchCriteria = "Most Popular"; // Default sort criteria
     private ArrayList<Movie> mMoviesArray = null;
-    private GridView mMainGridView;
     private ProgressBar mProgressBar;
+    private GridLayoutManager mGridLayoutManager;
 
-    public static Context mMainActivityContext;
+    MovieRecyclerViewAdapter mAdapter;
+    RecyclerView mList;
 
     /*
      * Constants
@@ -52,6 +53,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
     // Tag for logging
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    // RecyclerView
+    private static final int NUM_GRID_ITEMS = 12;
 
     // Constants to form the movie poster URL
     private static final String MOVIEDB_POSTER_BASE_URL = "http://image.tmdb.org/t/p/";
@@ -67,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_recycler);
 
         mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
@@ -121,8 +125,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         outState.putString("criteria", mSearchCriteria);
 
         // If the view was loaded correctly
-        if (mMainGridView != null) {
-            outState.putInt("gridScroll", mMainGridView.getFirstVisiblePosition());
+        if (mList != null) {
+            outState.putInt("gridScroll", mGridLayoutManager.findFirstVisibleItemPosition());
         }
 
         super.onSaveInstanceState(outState);
@@ -138,16 +142,16 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
      */
     private void makeSearchQuery(String searchCriteria) {
         if (NetworkUtils.isNetworkAvailable(this)) {
-            // TODO: CHANGED FOR LOADER MANAGER
-
-//            new QueryTask().execute(generalSearchURL);
             LoaderManager loaderManager = getSupportLoaderManager();
-            Loader<String> searchLoader = loaderManager.getLoader(MAIN_SEARCH_LOADER);
+            Loader<String> searchLoader = loaderManager.getLoader(LoaderUtils.MAIN_SEARCH_LOADER);
+
+            Bundle bundle = new Bundle();
+            bundle.putString("searchCriteria", searchCriteria);
 
             if (searchLoader == null) {
-                loaderManager.initLoader(LoaderUtils.MAIN_SEARCH_LOADER, null, this);
+                loaderManager.initLoader(LoaderUtils.MAIN_SEARCH_LOADER, bundle, this);
             } else {
-                loaderManager.restartLoader(LoaderUtils.MAIN_SEARCH_LOADER, null, this);
+                loaderManager.restartLoader(LoaderUtils.MAIN_SEARCH_LOADER, bundle, this);
             }
 
         } else {
@@ -164,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
      */
     private void restoreScrollPosition(Bundle savedInstanceState) {
         int position = savedInstanceState.getInt("gridScroll");
-        mMainGridView.smoothScrollToPosition(position);
+        mList.smoothScrollToPosition(position);
     }
 
     /**
@@ -197,7 +201,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         protected void onPostExecute(String s) {
             mProgressBar.setVisibility(View.INVISIBLE);
             createMovieObjects(s);
-            // TODO: LEAVE FOR LAST ASYNC TASK
             setAdapter();
         }
     }
@@ -292,17 +295,23 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
      * Sets the Movie Adapter for the main layout that will contain movie posters
      */
     public void setAdapter() {
-        MovieAdapter mMovieAdapter = new MovieAdapter(MainActivity.this, mMoviesArray, this);
 
-        mMainGridView = (GridView) findViewById(R.id.root_grid_view);
-        mMainGridView.invalidateViews();
-        mMainGridView.setAdapter(mMovieAdapter);
+        mList = (RecyclerView) findViewById(R.id.root_recycler_view);
+
+        int numberOfColumns = MovieRecyclerViewAdapter.calculateColumns(this);
+
+        mGridLayoutManager = new GridLayoutManager(this, numberOfColumns);
+        mList.setLayoutManager(mGridLayoutManager);
+
+        mAdapter = new MovieRecyclerViewAdapter(mMoviesArray, NUM_GRID_ITEMS, this, this);
+        mList.setAdapter(mAdapter);
+
     }
 
     // Listeners =======================================================================
 
     /**
-     * Implementation of the onClick method in the MovieAdapter class.
+     * Implementation of the onClick method in the MovieRecylerViewAdapter class.
      * It launches an activity passing the corresponding Movie object
      * through an intent
      *
@@ -411,7 +420,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     public void onRestart() {
         super.onRestart();
         if (mMoviesArray == null) {
-            Log.v(TAG, "RESTART");
             makeSearchQuery(mSearchCriteria);
         }
     }
@@ -431,11 +439,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                     mProgressBar.setVisibility(View.VISIBLE);
                 }
 
-                if (id == LoaderUtils.MAIN_SEARCH_LOADER) {
-
-                    if (mMoviesArray == null) {
-                        forceLoad();
-                    }
+                if (id == MAIN_SEARCH_LOADER) {
+                    forceLoad();
                 }
             }
 
@@ -443,15 +448,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             public String loadInBackground() {
                 String searchResults = null;
 
-                if(id == LoaderUtils.MAIN_SEARCH_LOADER) {
+                if(id == MAIN_SEARCH_LOADER) {
+                    URL searchURL = NetworkUtils.buildGeneralUrl(mSearchCriteria);
 
-                        URL searchURL = NetworkUtils.buildGeneralUrl(mSearchCriteria);
-
-                        try {
-                            searchResults = NetworkUtils.getResponseFromHttpUrl(searchURL);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                    try {
+                        searchResults = NetworkUtils.getResponseFromHttpUrl(searchURL);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 return searchResults;
@@ -462,10 +466,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     @Override
     public void onLoadFinished(Loader<String> loader, String data) {
 
-        if(loader.getId() == LoaderUtils.MAIN_SEARCH_LOADER) {
-                mProgressBar.setVisibility(View.INVISIBLE);
-                createMovieObjects(data);
-                setAdapter();
+        if(loader.getId() == MAIN_SEARCH_LOADER) {
+            mProgressBar.setVisibility(View.INVISIBLE);
+            createMovieObjects(data);
+            setAdapter();
         }
     }
 
@@ -474,5 +478,4 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         //
     }
 }
-
 

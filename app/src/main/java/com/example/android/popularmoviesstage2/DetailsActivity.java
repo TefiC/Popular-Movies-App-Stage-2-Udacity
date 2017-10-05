@@ -8,8 +8,9 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.popularmoviesstage2.utils.LoaderUtils;
@@ -41,6 +42,8 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     private TextView movieForAdultsView;
     private TextView movieBackdropView;
 
+    private ProgressBar mProgressBarDetails;
+
     /*
      * Constants
      */
@@ -57,6 +60,9 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+
+        mProgressBarDetails = (ProgressBar) findViewById(R.id.progress_bar_details);
+
 
         setupToolbar();
 
@@ -230,6 +236,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                 if (args == null) {
                     return;
                 }
+                mProgressBarDetails.setVisibility(View.VISIBLE);
                 forceLoad();
             }
 
@@ -258,9 +265,9 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     @Override
     public void onLoadFinished(Loader<String> loader, String data) {
-        Log.v(TAG, "LOAD FINISHED");
         addMovieDetails(data, movieSelected);
         fillMovieData(movieSelected);
+        mProgressBarDetails.setVisibility(View.GONE);
     }
 
     @Override

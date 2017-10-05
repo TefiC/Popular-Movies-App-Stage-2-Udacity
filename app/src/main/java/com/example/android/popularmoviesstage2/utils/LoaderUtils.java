@@ -1,7 +1,7 @@
 package com.example.android.popularmoviesstage2.utils;
 
 /**
- * Created by estef on 10/4/2017.
+ * Loader utilities
  */
 
 public class LoaderUtils {
