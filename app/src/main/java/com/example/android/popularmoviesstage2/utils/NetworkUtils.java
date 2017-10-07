@@ -38,6 +38,8 @@ public class NetworkUtils {
     private static final String PARAM_KEY = "api_key";
 
 
+
+
     // Values to build the URL
     // TODO: Uncomment this variable and initialize it by adding your "The Movie Database" API key
     // private final static String API_KEY = "YOUR API KEY"
@@ -102,6 +104,28 @@ public class NetworkUtils {
         URL url = null;
 
         Uri buildUri = Uri.parse(MOVIEDB_URL + movieId + "/reviews").buildUpon()
+                .appendQueryParameter(PARAM_KEY, API_KEY)
+                .build();
+
+        try {
+            url = new URL(buildUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return url;
+    }
+
+    /**
+     * Build a URL to fetch the trailers for the movie passed as argument
+     * @param movieId The movie ID
+     * @return The URL to fetch movie's trailers
+     */
+    public static URL buildMovieTrailersUrl(int movieId) {
+
+        URL url = null;
+
+        Uri buildUri = Uri.parse(MOVIEDB_URL + movieId + "/videos").buildUpon()
                 .appendQueryParameter(PARAM_KEY, API_KEY)
                 .build();
 

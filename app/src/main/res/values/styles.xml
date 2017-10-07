@@ -21,13 +21,65 @@
     <style name="TextAppearance.ExpandedTitle"
         parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="android:textSize">26sp</item>
-        <item name="android:text">Movie Details</item>
+
+        <!--CUSTOM-->
+        <item name="android:shadowColor">#000000</item>
+        <item name="android:shadowDy">10</item>
+        <item name="android:shadowDx">-5</item>
+        <item name="android:shadowRadius">2</item>
     </style>
 
     <style name="TextAppearance.CollapsedTitle"
         parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="android:textSize">15sp</item>
+
+        <!--CUSTOM-->
+        <item name="android:shadowColor">#000000</item>
+        <item name="android:shadowDy">2</item>
+        <item name="android:shadowDx">2</item>
     </style>
 
+
+    <!--Details activity styles-->
+
+    <style name="detailsText">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="detailsMovieTitle" parent="detailsText">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="detailsDataLogos">
+        <item name="android:layout_width">25dp</item>
+        <item name="android:layout_height">25dp</item>
+        <item name="android:layout_margin">10dp</item>
+    </style>
+
+    <style name="detailsMainDataText" parent="detailsText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">15dp</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="detailsSectionTitle" parent="detailsMovieTitle">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <!--Dividing bar-->
+    <style name="dividingBar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0.5dp</item>
+        <item name="android:background">#eeeff0</item>
+    </style>
+
+    <style name="detailsMovieParagraph" parent="detailsText">
+        <item name="android:layout_marginLeft">40dp</item>
+        <item name="android:layout_marginRight">40dp</item>
+        <item name="android:layout_marginBottom">40dp</item>
+
+    </style>
 
 </resources>

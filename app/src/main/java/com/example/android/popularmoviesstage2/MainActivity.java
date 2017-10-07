@@ -57,9 +57,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     // RecyclerView
     private static final int NUM_GRID_ITEMS = 12;
 
-    // Constants to form the movie poster URL
-    private static final String MOVIEDB_POSTER_BASE_URL = "http://image.tmdb.org/t/p/";
-    private static final String IMAGE_SIZE = "w185";
+
 
 
     /*
@@ -276,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             // Movie data
             int id = movie.getInt("id");
             String title = movie.getString("title");
-            String posterPath = MOVIEDB_POSTER_BASE_URL + IMAGE_SIZE + movie.getString("poster_path");
+            String posterPath = DetailsActivity.MOVIEDB_POSTER_BASE_URL + DetailsActivity.IMAGE_SIZE + movie.getString("poster_path");
             String plot = movie.getString("overview");
             String releaseDate = movie.getString("release_date");
             Double voteAverage = movie.getDouble("vote_average");

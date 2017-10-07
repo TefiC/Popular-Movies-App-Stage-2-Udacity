@@ -10,5 +10,6 @@ public class LoaderUtils {
 
     public static final int MAIN_SEARCH_LOADER = 20;
     public static final int DETAILS_SEARCH_LOADER = 58;
+    public static final int TRAILERS_SEARCH_LOADER = 30;
 
 }
