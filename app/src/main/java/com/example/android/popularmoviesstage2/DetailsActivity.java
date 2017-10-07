@@ -2,6 +2,7 @@ package com.example.android.popularmoviesstage2;
 
 import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
@@ -51,6 +52,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     private ProgressBar mProgressBarDetails;
 
     private GradientDrawable mGradient;
+
     /*
      * Constants
      */
@@ -66,6 +68,9 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     //Get movie trailer thumbnail
     private static final String TRAILER_THUMBNAIL_BASE_PATH = "https://img.youtube.com/vi/";
+
+    //Launch trailer
+    private static final String YOUTUBE_BASE_PATH = "https://www.youtube.com/watch?v=";
 
 
     private static final String TAG = DetailsActivity.class.getSimpleName();
@@ -259,6 +264,9 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     // AsyncTaskLoader ============================================================================
 
+    private String cachedDetails;
+    private String cachedTrailers;
+
     @Override
     public Loader<String> onCreateLoader(final int id, final Bundle args) {
         return new AsyncTaskLoader<String>(this) {
@@ -269,12 +277,34 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                 if (args == null) {
                     return;
                 }
-
-                forceLoad();
+                switch (id) {
+                    case LoaderUtils.DETAILS_SEARCH_LOADER:
+                        if (cachedDetails == null) {
+                            forceLoad();
+                        } else {
+                            deliverResult(cachedDetails);
+                        }
+                        break;
+                    case LoaderUtils.TRAILERS_SEARCH_LOADER:
+                        if (cachedTrailers == null) {
+                            forceLoad();
+                        } else {
+                            deliverResult(cachedTrailers);
+                        }
+                        break;
+                }
             }
 
             @Override
             public void deliverResult(String data) {
+                switch (id) {
+                    case LoaderUtils.DETAILS_SEARCH_LOADER:
+                        cachedDetails = data;
+                        break;
+                    case LoaderUtils.TRAILERS_SEARCH_LOADER:
+                        cachedTrailers = data;
+                        break;
+                }
                 super.deliverResult(data);
             }
 
@@ -286,6 +316,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
                 switch (id) {
                     case LoaderUtils.DETAILS_SEARCH_LOADER:
+                        Log.v(TAG, "LOADING DETAILS");
                         searchQueryURL = NetworkUtils.buildMovieDetailsUrl(movie.getMovieId());
 
                         try {
@@ -295,6 +326,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                         }
                         break;
                     case LoaderUtils.TRAILERS_SEARCH_LOADER:
+                        Log.v(TAG, "LOADING TRAILERS");
                         searchQueryURL = NetworkUtils.buildMovieTrailersUrl(movie.getMovieId());
 
                         try {
@@ -303,7 +335,6 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                             e.printStackTrace();
                         }
                 }
-
                 return searchResults;
             }
         };
@@ -317,13 +348,16 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                 fillMovieData(movieSelected);
                 break;
             case LoaderUtils.TRAILERS_SEARCH_LOADER:
+                Log.v(TAG, "CREATE TRAILERS");
                 createMovieTrailers(data, movieSelected);
+                break;
         }
     }
 
     /**
      * Creates ImageViews for each movie trailer, appends it to the corresponding ViewGroup
      * sets its properties and add an onClickListener
+     *
      * @param data
      * @param movieSelected
      */
@@ -347,6 +381,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
                     // Load the thumbnail
                     loadMovieTrailerThumbnail(trailerView, trailerKey);
+
                     // Set onClick listener
                     setTrailerOnClickListener(trailerView, trailerKey);
 
@@ -361,16 +396,25 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     }
 
+    /**
+     * Launches a movie trailer on Youtube with an implicit intent
+     * @param trailerKey The trailer's key to add to Youtube's base path
+     */
     private void launchTrailer(String trailerKey) {
-        // LAUNCH IMPLICIT INTENT TO WATCH TRAILER
-        Log.v(TAG, trailerKey);
+        Uri youtubeLink = Uri.parse(YOUTUBE_BASE_PATH + trailerKey);
+        Intent intent = new Intent(Intent.ACTION_VIEW, youtubeLink);
+
+        if(intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 
     /**
      * Sets an onClickListener for the trailer ImageView to launch an implicit
      * intent to the Youtube URL that corresponds to the trailer.
+     *
      * @param trailerView The trailer's ImageView
-     * @param trailerKey The trailer's key to append to Youtube's URL
+     * @param trailerKey  The trailer's key to append to Youtube's URL
      */
     private void setTrailerOnClickListener(ImageView trailerView, final String trailerKey) {
         trailerView.setOnClickListener(new View.OnClickListener() {
@@ -383,8 +427,9 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     /**
      * Sets the Trailer ImageView properties.
+     *
      * @param trailerView The ImageView
-     * @param trailerKey The Trailer's key
+     * @param trailerKey  The Trailer's key
      */
     private void setTrailerViewProperties(ImageView trailerView, String trailerKey) {
 
@@ -396,7 +441,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
         // Set margin
         int marginEnd = convertDpToPixels(10);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             params.setMarginEnd(marginEnd);
         } else {
             params.setMargins(marginEnd, marginEnd, marginEnd, marginEnd);
@@ -414,6 +459,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     /**
      * Converts Dp to Pixels to use when setting LayoutParams
+     *
      * @param dimensionInDp The dimension to convert
      * @return The dimention passed as argument in pixels
      */
@@ -423,6 +469,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     /**
      * Loads the movie trailer thumbnail from Youtube
+     *
      * @param trailerKey The corresponding trailer's key
      */
     private void loadMovieTrailerThumbnail(ImageView trailerView, String trailerKey) {
@@ -439,10 +486,6 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     public void onLoaderReset(Loader<String> loader) {
         //
     }
-
-    /*
-     * Helper methods
-     */
 
     /**
      * Adds movie details (language, runtime, isForAdults, backdrop path)
@@ -468,9 +511,8 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         }
     }
 
-
     /**
-     * Generate a full backgrop URL to load image from MovieDB API
+     * Generate a full backdrop URL to load image from MovieDB API
      *
      * @param backdropPath The final piece of the path to the movie's backdrop image
      * @return A full URL to request the image

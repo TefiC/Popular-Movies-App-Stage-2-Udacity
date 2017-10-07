@@ -5,6 +5,7 @@
     <string-array name="sorting_options_array">
         <item>Most Popular</item>
         <item>Top Rated</item>
+        <item>Favorites</item>
     </string-array>
 
     <string name="spinner_title">Sorting</string>

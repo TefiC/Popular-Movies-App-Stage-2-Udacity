@@ -27,13 +27,14 @@ public class Movie implements Parcelable {
 
     private double movieRuntime;
     private String[] movieCast;
-    private String[] movieTrailersURLs;
 
-    private String[] movieTrailersThumbnails;
     private MovieReview[] movieReviews;
     private boolean isMoviewForAdults;
 
     private String movieBackdropPath;
+
+    //Will be retrieved from the database, checking if ID exists
+    private boolean isFavorite;
 
 
     /*
@@ -42,8 +43,7 @@ public class Movie implements Parcelable {
 
     public Movie(int movieId, String movieTitle, String movieReleaseDate, String moviePoster,
                  double movieVoteAverage, String moviePlot,String movieLanguage, double movieRuntime,
-                 String[] movieCast, String[] movieTrailersURLs, String[] movieTrailersThumbnails,
-                MovieReview[] movieReviews, boolean isMoviewForAdults, String movieBackdropPath) {
+                 String[] movieCast, MovieReview[] movieReviews, boolean isMoviewForAdults, String movieBackdropPath) {
         this.movieId = movieId;
         this.movieTitle = movieTitle;
 
@@ -57,9 +57,6 @@ public class Movie implements Parcelable {
         this.movieRuntime = movieRuntime;
 
         this.movieCast = movieCast;
-        this.movieTrailersURLs = movieTrailersURLs;
-
-        this.movieTrailersThumbnails = movieTrailersThumbnails;
         this.movieReviews = movieReviews;
 
         this.isMoviewForAdults = isMoviewForAdults;
@@ -80,8 +77,6 @@ public class Movie implements Parcelable {
         movieRuntime = in.readDouble();
         movieCast = in.createStringArray();
 
-        movieTrailersURLs = in.createStringArray();
-        movieTrailersThumbnails = in.createStringArray();
         movieReviews = in.createTypedArray(MovieReview.CREATOR);
 
         isMoviewForAdults = (in.readInt() == 1);
@@ -110,8 +105,6 @@ public class Movie implements Parcelable {
         parcel.writeDouble(movieRuntime);
 
         parcel.writeStringArray(movieCast);
-        parcel.writeStringArray(movieTrailersURLs);
-        parcel.writeStringArray(movieTrailersThumbnails);
         parcel.writeTypedArray(movieReviews, i);
 
         parcel.writeValue(isMoviewForAdults ? 1 : 0);
@@ -163,10 +156,6 @@ public class Movie implements Parcelable {
 
     public String[] getMovieCast() { return this.movieCast; }
 
-    public String[] getMovieTrailersURLs() { return this.movieTrailersURLs; }
-
-    public String[] getMovieTrailersThumbnails() { return this.movieTrailersThumbnails; }
-
     public MovieReview[] getMovieReviews() { return this.movieReviews; }
 
     public boolean getIsMovieForAdults() { return this.isMoviewForAdults; }
@@ -205,10 +194,6 @@ public class Movie implements Parcelable {
     public void setMovieRuntime(double runtime) { this.movieRuntime = runtime; }
 
     public void setMovieCast(String[] cast) { this.movieCast = cast; }
-
-    public void setMovieTrailersURLs(String[] trailersURLs) { this.movieTrailersURLs = trailersURLs; }
-
-    public void setMovieTrailersThumbnails(String[] trailersThumbnails) { this.movieTrailersThumbnails = trailersThumbnails; }
 
     public void setMovieReviews(MovieReview[] movieReviews) { this.movieReviews = movieReviews; }
 

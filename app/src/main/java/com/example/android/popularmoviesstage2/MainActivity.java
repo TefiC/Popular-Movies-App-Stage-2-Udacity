@@ -18,6 +18,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 
+import com.example.android.popularmoviesstage2.DataUtils.DatabaseUtils;
+import com.example.android.popularmoviesstage2.DataUtils.MoviesDBHelper;
 import com.example.android.popularmoviesstage2.utils.LoaderUtils;
 import com.example.android.popularmoviesstage2.utils.NetworkUtils;
 
@@ -70,6 +72,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_recycler);
+
+        MoviesDBHelper dbHelper = new MoviesDBHelper(this);
+        DatabaseUtils dbUtils = new DatabaseUtils();
+        dbUtils.insertData(dbHelper);
+        dbUtils.testQuery(dbHelper);
 
         mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
@@ -279,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             String releaseDate = movie.getString("release_date");
             Double voteAverage = movie.getDouble("vote_average");
 
-            return new Movie(id, title, releaseDate, posterPath, voteAverage, plot, null, 0.0, null, null, null, null, false, null);
+            return new Movie(id, title, releaseDate, posterPath, voteAverage, plot, null, 0.0, null, null, false, null);
 
         } catch (JSONException e) {
             e.printStackTrace();
