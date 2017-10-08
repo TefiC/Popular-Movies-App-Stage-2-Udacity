@@ -32,9 +32,9 @@ public class Movie implements Parcelable {
     private boolean isMoviewForAdults;
 
     private String movieBackdropPath;
+    private String movieTrailersThumbnails;
 
-    //Will be retrieved from the database, checking if ID exists
-    private boolean isFavorite;
+    private boolean isFavorite = false;
 
 
     /*
@@ -43,7 +43,8 @@ public class Movie implements Parcelable {
 
     public Movie(int movieId, String movieTitle, String movieReleaseDate, String moviePoster,
                  double movieVoteAverage, String moviePlot,String movieLanguage, double movieRuntime,
-                 String[] movieCast, MovieReview[] movieReviews, boolean isMoviewForAdults, String movieBackdropPath) {
+                 String[] movieCast, MovieReview[] movieReviews, boolean isMoviewForAdults,
+                 String movieBackdropPath, String movieTrailersThumbnails) {
         this.movieId = movieId;
         this.movieTitle = movieTitle;
 
@@ -61,6 +62,7 @@ public class Movie implements Parcelable {
 
         this.isMoviewForAdults = isMoviewForAdults;
         this.movieBackdropPath = movieBackdropPath;
+        this.movieTrailersThumbnails = movieTrailersThumbnails;
     }
 
 
@@ -81,6 +83,7 @@ public class Movie implements Parcelable {
 
         isMoviewForAdults = (in.readInt() == 1);
         movieBackdropPath = in.readString();
+        movieTrailersThumbnails = in.readString();
     }
 
     /*
@@ -109,6 +112,7 @@ public class Movie implements Parcelable {
 
         parcel.writeValue(isMoviewForAdults ? 1 : 0);
         parcel.writeString(movieBackdropPath);
+        parcel.writeString(movieTrailersThumbnails);
     }
 
     public static Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>() {
@@ -162,6 +166,9 @@ public class Movie implements Parcelable {
 
     public String getMovieBackdropPath() { return this.movieBackdropPath; }
 
+    public boolean getIsMovieFavorite() { return this.isFavorite; }
+
+    public String getMovieTrailersThumbnails() { return this.movieTrailersThumbnails; }
 
     /*
      * Setters
@@ -201,5 +208,8 @@ public class Movie implements Parcelable {
 
     public void setMovieBackdropPath(String movieBackdropPath) { this.movieBackdropPath = movieBackdropPath; }
 
+    public void setIsMovieFavorite(boolean isFavorite) { this.isFavorite = isFavorite; }
+
+    public void setMovieTrailersThumbnails(String trailersThumbnails) { this.movieTrailersThumbnails = trailersThumbnails; }
 
 }

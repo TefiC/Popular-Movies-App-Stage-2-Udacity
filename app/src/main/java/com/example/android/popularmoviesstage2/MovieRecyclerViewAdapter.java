@@ -2,6 +2,7 @@ package com.example.android.popularmoviesstage2;
 
 import android.content.Context;
 import android.media.Image;
+import android.support.annotation.BoolRes;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -10,16 +11,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.example.android.popularmoviesstage2.DataUtils.FavoritesUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.concurrent.TimeoutException;
-
-import static android.R.attr.id;
-import static android.content.ContentValues.TAG;
 
 /**
  * RecyclerView for a grid of movies
@@ -73,26 +70,53 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
 
         Movie movie = mMoviesArray.get(position);
 
-        if(movie != null) {
+        if (movie != null) {
             String posterPath = movie.getMoviePosterPath();
             // Set data on the corresponding view
             loadMoviePoster(posterPath, holder.mMoviePoster);
             // Listener
             holder.setOnClickListener(holder.mMoviePoster, movie);
 
+            // Poster data
             holder.mMovieTitleView.setText(movie.getMovieTitle());
-
             holder.mMovieRatingView.setText(Double.toString(movie.getMovieVoteAverage()));
 
-            if(movie.getIsMovieForAdults()) {
-                holder.mMovieIsForAdultsView.setImageResource(R.drawable.for_adults);
-            } else {
-                holder.mMovieIsForAdultsView.setImageResource(R.drawable.for_children);
-            }
-
-            // TODO: WHEN FAVORITE IS IMPLEMENTED, CHANGED TO FILLED HEART
-            holder.mMovieIsFavoriteView.setImageResource(R.drawable.heart_not_pressed);
+            // Determine logos
+            determineForAdultsLogo(holder, movie.getIsMovieForAdults());
+            determineMainPosterFavoriteLogo(holder, movie);
         }
+    }
+
+    /**
+     * Determines the image resource to be used for the logo
+     * that display if the user has chosen the movie as one of
+     * the "Favorites"
+     *
+     * @param holder The corresponding RecyclerView ViewHolder
+     * @param movie The selected Movie object
+     */
+    private void determineMainPosterFavoriteLogo(MovieRecyclerViewAdapter.MovieViewHolder holder, Movie movie) {
+        if (FavoritesUtils.checkIfMovieIsFavorite(mContext, Integer.toString(movie.getMovieId()))) {
+            holder.mMovieIsFavoriteView.setImageResource(R.drawable.heart_pressed_white);
+        } else {
+            holder.mMovieIsFavoriteView.setImageResource(R.drawable.heart_not_pressed_thin);
+        }
+    }
+
+    /**
+     * Determines the image resources to display if the movie is
+     * appropriate for children or not.
+     *
+     * @param holder The RecyclerView's ViewHolder
+     * @param isForAdults A boolean. Whether or not the movie is appropriate for children
+     */
+    private void determineForAdultsLogo(MovieRecyclerViewAdapter.MovieViewHolder holder, boolean isForAdults) {
+        if (isForAdults) {
+            holder.mMovieIsForAdultsView.setImageResource(R.drawable.for_adults);
+        } else {
+            holder.mMovieIsForAdultsView.setImageResource(R.drawable.for_children);
+        }
+
     }
 
     @Override
@@ -129,7 +153,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
          * the actions to be performed on click
          *
          * @param movieView The view on which to set the listener
-         * @param movie The data that will be sent to the onClick method
+         * @param movie     The data that will be sent to the onClick method
          */
         private void setOnClickListener(RectangularImageView movieView, Movie movie) {
             final Movie movieFinal = movie;
@@ -157,7 +181,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
      * @param movieView  The view that will hold the image
      */
     private void loadMoviePoster(String posterPath, RectangularImageView movieView) {
-        if(posterPath != null) {
+        if (posterPath != null) {
             Picasso.with(mContext)
                     .load(posterPath)
                     .placeholder(R.drawable.placeholder)
@@ -169,6 +193,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
 
     /**
      * Calculates the number of columns to autofit the movie poster layout
+     *
      * @param context The Main Activity context
      * @return The number of columns to be displayed by a RecyclerView (spanSize)
      */

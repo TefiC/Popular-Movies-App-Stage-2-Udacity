@@ -2,14 +2,16 @@ package com.example.android.popularmoviesstage2;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,8 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 
-import com.example.android.popularmoviesstage2.DataUtils.DatabaseUtils;
-import com.example.android.popularmoviesstage2.DataUtils.MoviesDBHelper;
+import com.example.android.popularmoviesstage2.DataUtils.MoviesDBContract;
 import com.example.android.popularmoviesstage2.utils.LoaderUtils;
 import com.example.android.popularmoviesstage2.utils.NetworkUtils;
 
@@ -31,11 +32,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 
+import static com.example.android.popularmoviesstage2.utils.LoaderUtils.FAVORITE_MOVIES_LOADER;
 import static com.example.android.popularmoviesstage2.utils.LoaderUtils.MAIN_SEARCH_LOADER;
 
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener,
-        LoaderManager.LoaderCallbacks<String>, MovieRecyclerViewAdapter.MovieAdapterOnClickHandler {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener
+        , MovieRecyclerViewAdapter.MovieAdapterOnClickHandler {
 
     /*
      * Fields
@@ -57,9 +59,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private static final String TAG = MainActivity.class.getSimpleName();
 
     // RecyclerView
-    private static final int NUM_GRID_ITEMS = 12;
-
-
+    private int NUM_GRID_ITEMS = 12;
 
 
     /*
@@ -72,11 +72,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_recycler);
-
-        MoviesDBHelper dbHelper = new MoviesDBHelper(this);
-        DatabaseUtils dbUtils = new DatabaseUtils();
-        dbUtils.insertData(dbHelper);
-        dbUtils.testQuery(dbHelper);
 
         mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
@@ -154,9 +149,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             bundle.putString("searchCriteria", searchCriteria);
 
             if (searchLoader == null) {
-                loaderManager.initLoader(LoaderUtils.MAIN_SEARCH_LOADER, bundle, this);
+                loaderManager.initLoader(LoaderUtils.MAIN_SEARCH_LOADER, bundle, new InternetMoviesLoader(this));
             } else {
-                loaderManager.restartLoader(LoaderUtils.MAIN_SEARCH_LOADER, bundle, this);
+                loaderManager.restartLoader(LoaderUtils.MAIN_SEARCH_LOADER, bundle, new InternetMoviesLoader(this));
             }
 
         } else {
@@ -174,40 +169,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private void restoreScrollPosition(Bundle savedInstanceState) {
         int position = savedInstanceState.getInt("gridScroll");
         mList.smoothScrollToPosition(position);
-    }
-
-    /**
-     * An AsyncTask to handle network requests to MovieDB API
-     * and updates the data received to update the UI
-     */
-    private class QueryTask extends AsyncTask<URL, Void, String> {
-
-        @Override
-        protected void onPreExecute() {
-            mProgressBar.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected String doInBackground(URL... urls) {
-            URL searchUrl = urls[0];
-            String generalSearchResults = null;
-
-            try {
-                // Make query and store the results
-                generalSearchResults = NetworkUtils.getResponseFromHttpUrl(searchUrl);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return generalSearchResults;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            mProgressBar.setVisibility(View.INVISIBLE);
-            createMovieObjects(s);
-            setAdapter();
-        }
     }
 
 
@@ -286,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             String releaseDate = movie.getString("release_date");
             Double voteAverage = movie.getDouble("vote_average");
 
-            return new Movie(id, title, releaseDate, posterPath, voteAverage, plot, null, 0.0, null, null, false, null);
+            return new Movie(id, title, releaseDate, posterPath, voteAverage, plot, null, 0.0, null, null, false, null, null);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -308,9 +269,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mGridLayoutManager = new GridLayoutManager(this, numberOfColumns);
         mList.setLayoutManager(mGridLayoutManager);
 
-        mAdapter = new MovieRecyclerViewAdapter(mMoviesArray, NUM_GRID_ITEMS, this, this);
+        mAdapter = new MovieRecyclerViewAdapter(mMoviesArray, mMoviesArray.size(), this, this);
         mList.setAdapter(mAdapter);
-
     }
 
     // Listeners =======================================================================
@@ -374,6 +334,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 case "Most Popular":
                     makeSearchQuery(searchCriteria);
                     break;
+                // TODO: HANDLE WHEN USER CLICKS ON "FAVORITES"
+//                case "Favorites":
+//                    makeDatabaseQuery();
                 default:
                     break;
             }
@@ -432,55 +395,129 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     // ASYNCTASK LOADER ===================================================================
 
-    @Override
-    public Loader<String> onCreateLoader(final int id, final Bundle args) {
-        return new AsyncTaskLoader<String>(this) {
+    private class InternetMoviesLoader implements LoaderManager.LoaderCallbacks<String> {
 
-            @Override
-            protected void onStartLoading() {
-                super.onStartLoading();
+        private Context mContext;
 
-                if (mProgressBar != null) {
-                    mProgressBar.setVisibility(View.VISIBLE);
-                }
+        public InternetMoviesLoader(Context context) {
+            mContext = context;
+        }
 
-                if (id == MAIN_SEARCH_LOADER) {
-                    forceLoad();
-                }
-            }
+        @Override
+        public Loader<String> onCreateLoader(final int id, final Bundle args) {
+            return new AsyncTaskLoader<String>(mContext) {
 
-            @Override
-            public String loadInBackground() {
-                String searchResults = null;
+                @Override
+                protected void onStartLoading() {
+                    super.onStartLoading();
 
-                if(id == MAIN_SEARCH_LOADER) {
-                    URL searchURL = NetworkUtils.buildGeneralUrl(mSearchCriteria);
+                    if (mProgressBar != null) {
+                        mProgressBar.setVisibility(View.VISIBLE);
+                    }
 
-                    try {
-                        searchResults = NetworkUtils.getResponseFromHttpUrl(searchURL);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if (id == MAIN_SEARCH_LOADER) {
+                        forceLoad();
                     }
                 }
 
-                return searchResults;
+                @Override
+                public String loadInBackground() {
+                    String searchResults = null;
+
+                    if (id == MAIN_SEARCH_LOADER) {
+                        URL searchURL = NetworkUtils.buildGeneralUrl(mSearchCriteria);
+
+                        try {
+                            searchResults = NetworkUtils.getResponseFromHttpUrl(searchURL);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    return searchResults;
+                }
+            };
+        }
+
+        @Override
+        public void onLoadFinished(Loader<String> loader, String data) {
+
+            if (loader.getId() == MAIN_SEARCH_LOADER) {
+                mProgressBar.setVisibility(View.INVISIBLE);
+                createMovieObjects(data);
+                setAdapter();
             }
-        };
+        }
+
+        @Override
+        public void onLoaderReset(Loader<String> loader) {
+            mProgressBar.setVisibility(View.INVISIBLE);
+        }
+
     }
 
-    @Override
-    public void onLoadFinished(Loader<String> loader, String data) {
+    private void makeDatabaseQuery() {
+        LoaderManager loaderManager = getSupportLoaderManager();
+        Loader<String> searchLoader = loaderManager.getLoader(LoaderUtils.FAVORITE_MOVIES_LOADER);
 
-        if(loader.getId() == MAIN_SEARCH_LOADER) {
-            mProgressBar.setVisibility(View.INVISIBLE);
-            createMovieObjects(data);
-            setAdapter();
+        Bundle bundle = new Bundle();
+        bundle.putString("searchCriteria", "Favorites");
+
+        if (searchLoader == null) {
+            loaderManager.initLoader(LoaderUtils.FAVORITE_MOVIES_LOADER, bundle, new DatabaseMoviesLoader(this));
+        } else {
+            loaderManager.restartLoader(LoaderUtils.FAVORITE_MOVIES_LOADER, bundle, new DatabaseMoviesLoader(this));
         }
     }
 
-    @Override
-    public void onLoaderReset(Loader<String> loader) {
-        //
+    // Cursor loader ==========================================================================
+
+    private class DatabaseMoviesLoader implements LoaderManager.LoaderCallbacks<Cursor> {
+
+        private Context mContext;
+
+        public DatabaseMoviesLoader(Context context) {
+            mContext = context;
+        }
+
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            switch (id) {
+                case FAVORITE_MOVIES_LOADER:
+                    return new CursorLoader(mContext,
+                            MoviesDBContract.FavoriteMoviesEntry.CONTENT_URI,
+                            null,
+                            null,
+                            null,
+                            MoviesDBContract.FavoriteMoviesEntry._ID);
+                default:
+                    throw new RuntimeException("Loader not implemented: " + id);
+            }
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            Log.v(TAG, data.toString());
+            if(data.getCount() > 0) {
+                convertCursorIntoMoviesArray(data);
+                setAdapter();
+            } else if (data.getCount() == 0) {
+                Log.v(TAG, "NO FAVORITE RESULTS FOUND");
+            }
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+            //
+        }
+    }
+
+    private void convertCursorIntoMoviesArray(Cursor cursor) {
+
+        Log.v(TAG, cursor.toString());
+
+        // TODO: IMPLEMENT THIS METHOD
+
     }
 }
 

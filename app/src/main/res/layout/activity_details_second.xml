@@ -408,7 +408,7 @@
         android:layout_gravity="bottom|right"
         android:layout_margin="16dp"
         android:clickable="true"
-        android:src="@drawable/favorite"
+        android:src="@drawable/heart_not_pressed"
         app:backgroundTint="#FF0000"
         app:layout_anchor="@+id/appBarLayout"
         app:layout_anchorGravity="top|left" />
