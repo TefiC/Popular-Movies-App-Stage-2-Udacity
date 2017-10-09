@@ -81,9 +81,11 @@ public class Movie implements Parcelable {
 
         movieReviews = in.createTypedArray(MovieReview.CREATOR);
 
-        isMoviewForAdults = (in.readInt() == 1);
+        isMoviewForAdults = in.readInt() == 1;
         movieBackdropPath = in.readString();
         movieTrailersThumbnails = in.readString();
+
+        isFavorite = in.readInt() == 1;
     }
 
     /*
@@ -100,19 +102,22 @@ public class Movie implements Parcelable {
         parcel.writeInt(movieId);
         parcel.writeString(movieTitle);
         parcel.writeString(movieReleaseDate);
-        parcel.writeString(moviePosterPath);
 
+        parcel.writeString(moviePosterPath);
         parcel.writeDouble(movieVoteAverage);
         parcel.writeString(moviePlot);
+
         parcel.writeString(movieLanguage);
         parcel.writeDouble(movieRuntime);
-
         parcel.writeStringArray(movieCast);
+
         parcel.writeTypedArray(movieReviews, i);
 
         parcel.writeValue(isMoviewForAdults ? 1 : 0);
         parcel.writeString(movieBackdropPath);
         parcel.writeString(movieTrailersThumbnails);
+
+        parcel.writeValue(isFavorite ? 1 : 0);
     }
 
     public static Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>() {

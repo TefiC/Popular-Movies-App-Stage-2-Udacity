@@ -70,8 +70,8 @@
         <!--Favorite?-->
         <ImageView
             android:id="@+id/movie_item_favorite"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_below="@id/movie_item_title"

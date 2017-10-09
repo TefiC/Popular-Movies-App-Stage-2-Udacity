@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.CursorLoader;
@@ -11,7 +12,6 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 
+import com.example.android.popularmoviesstage2.DataUtils.FavoritesUtils;
 import com.example.android.popularmoviesstage2.DataUtils.MoviesDBContract;
 import com.example.android.popularmoviesstage2.utils.LoaderUtils;
 import com.example.android.popularmoviesstage2.utils.NetworkUtils;
@@ -45,11 +46,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private String mSearchCriteria = "Most Popular"; // Default sort criteria
     private ArrayList<Movie> mMoviesArray = null;
+
+    private String mMoviesArrayString = null;
+
     private ProgressBar mProgressBar;
     private GridLayoutManager mGridLayoutManager;
 
     MovieRecyclerViewAdapter mAdapter;
     RecyclerView mList;
+    Parcelable mListState;
+
+    private Spinner mSpinnerView;
 
     /*
      * Constants
@@ -66,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
      * Methods
      */
 
-    // Methods that request data and update ========================================================
+    // Methods that request data and update data ========================================================
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             makeSearchQuery(mSearchCriteria);
 
         } else {
+
             //Retrieve data
             mMoviesArray = savedInstanceState.getParcelableArrayList("movies");
             mSearchCriteria = savedInstanceState.getString("criteria");
@@ -114,25 +122,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     /**
-     * Saves the current moviesArray, searchCriteria and scroll position
-     * to avoid fetching data from API when the device is rotated
-     *
-     * @param outState The state that will be passed to onCreate
-     */
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList("movies", mMoviesArray);
-        outState.putString("criteria", mSearchCriteria);
-
-        // If the view was loaded correctly
-        if (mList != null) {
-            outState.putInt("gridScroll", mGridLayoutManager.findFirstVisibleItemPosition());
-        }
-
-        super.onSaveInstanceState(outState);
-    }
-
-    /**
      * Makes a query to the MoviesDB API if there is internet connection.
      * Otherwise, it shows an dialog to alert the user and sets
      * the movie array to null
@@ -157,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else {
             NetworkUtils.createNoConnectionDialog(this);
             mMoviesArray = null;
+            mSpinnerView.setSelection(2);
         }
     }
 
@@ -290,6 +280,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // Intent
         Intent intent = new Intent(context, destinationActivity);
         intent.putExtra("movieObject", movie);
+
         startActivity(intent);
     }
 
@@ -334,9 +325,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 case "Most Popular":
                     makeSearchQuery(searchCriteria);
                     break;
-                // TODO: HANDLE WHEN USER CLICKS ON "FAVORITES"
-//                case "Favorites":
-//                    makeDatabaseQuery();
+                case "Favorites":
+                    makeDatabaseQuery();
                 default:
                     break;
             }
@@ -358,10 +348,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         // Get spinner and spinner view
         MenuItem spinner = menu.findItem(R.id.sort_spinner);
-        Spinner spinnerView = (Spinner) spinner.getActionView();
+        mSpinnerView = (Spinner) spinner.getActionView();
 
         // Set listener
-        spinnerView.setOnItemSelectedListener(this);
+        mSpinnerView.setOnItemSelectedListener(this);
 
         // Create spinner adapter
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this,
@@ -370,10 +360,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // Custom dropdown layout
         spinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 
-        spinnerView.setAdapter(spinnerAdapter);
+        mSpinnerView.setAdapter(spinnerAdapter);
 
         // To make sure that the previous selection is kept on device rotation
-        spinnerView.setSelection(spinnerAdapter.getPosition(mSearchCriteria));
+        mSpinnerView.setSelection(spinnerAdapter.getPosition(mSearchCriteria));
     }
 
     // Activity lifecycle methods ========================================================
@@ -387,13 +377,37 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onRestart() {
         super.onRestart();
+
         if (mMoviesArray == null) {
-            makeSearchQuery(mSearchCriteria);
+
+            if(mSearchCriteria.equals("Favorites")) {
+                makeDatabaseQuery();
+            } else {
+                makeSearchQuery(mSearchCriteria);
+            }
         }
     }
 
+    /**
+     * Saves the current moviesArray, searchCriteria and scroll position
+     * to avoid fetching data from API when the device is rotated
+     *
+     * @param outState The state that will be passed to onCreate
+     */
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList("movies", mMoviesArray);
+        outState.putString("criteria", mSearchCriteria);
 
-    // ASYNCTASK LOADER ===================================================================
+        // If the view was loaded correctly
+        if (mList != null) {
+            outState.putInt("gridScroll", mGridLayoutManager.findFirstVisibleItemPosition());
+        }
+
+        super.onSaveInstanceState(outState);
+    }
+
+    // AsyncTaskLoaders ===================================================================
 
     private class InternetMoviesLoader implements LoaderManager.LoaderCallbacks<String> {
 
@@ -411,20 +425,29 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 protected void onStartLoading() {
                     super.onStartLoading();
 
-                    if (mProgressBar != null) {
-                        mProgressBar.setVisibility(View.VISIBLE);
-                    }
-
                     if (id == MAIN_SEARCH_LOADER) {
+                        if (mProgressBar != null) {
+                            mProgressBar.setVisibility(View.VISIBLE);
+                        }
                         forceLoad();
+                    } else {
+                        deliverResult(mMoviesArrayString);
                     }
+                }
+
+                @Override
+                public void deliverResult(String data) {
+                    mMoviesArrayString = data;
+                    mProgressBar.setVisibility(View.INVISIBLE);
+
+                    super.deliverResult(data);
                 }
 
                 @Override
                 public String loadInBackground() {
                     String searchResults = null;
 
-                    if (id == MAIN_SEARCH_LOADER) {
+                    if (id == MAIN_SEARCH_LOADER && !mSearchCriteria.equals("Favorites")) {
                         URL searchURL = NetworkUtils.buildGeneralUrl(mSearchCriteria);
 
                         try {
@@ -442,9 +465,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         @Override
         public void onLoadFinished(Loader<String> loader, String data) {
 
-            if (loader.getId() == MAIN_SEARCH_LOADER) {
+            if (loader.getId() == MAIN_SEARCH_LOADER && data != null) {
                 mProgressBar.setVisibility(View.INVISIBLE);
                 createMovieObjects(data);
+                setAdapter();
+            } else {
+                // Handle if "Favorites" was selected
                 setAdapter();
             }
         }
@@ -452,10 +478,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         @Override
         public void onLoaderReset(Loader<String> loader) {
             mProgressBar.setVisibility(View.INVISIBLE);
+            setAdapter();
         }
 
     }
 
+    // Database methods ===================================================================
+
+    /**
+     * Initiates an AsyncTaskLoader to load favorite movies data from the database
+     */
     private void makeDatabaseQuery() {
         LoaderManager loaderManager = getSupportLoaderManager();
         Loader<String> searchLoader = loaderManager.getLoader(LoaderUtils.FAVORITE_MOVIES_LOADER);
@@ -470,7 +502,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
     }
 
-    // Cursor loader ==========================================================================
+    // Database loader ============
 
     private class DatabaseMoviesLoader implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -482,6 +514,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
             switch (id) {
                 case FAVORITE_MOVIES_LOADER:
                     return new CursorLoader(mContext,
@@ -497,12 +530,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            Log.v(TAG, data.toString());
-            if(data.getCount() > 0) {
+            if (data.getCount() >= 0) {
                 convertCursorIntoMoviesArray(data);
                 setAdapter();
-            } else if (data.getCount() == 0) {
-                Log.v(TAG, "NO FAVORITE RESULTS FOUND");
             }
         }
 
@@ -512,12 +542,59 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
     }
 
+    /**
+     * Replaces the existing movies array with an array of favorite Movies
+     * @param cursor The data received from the query to the database
+     */
     private void convertCursorIntoMoviesArray(Cursor cursor) {
 
-        Log.v(TAG, cursor.toString());
+        ArrayList<Movie> moviesDBArray = new ArrayList<Movie>();
 
-        // TODO: IMPLEMENT THIS METHOD
+        if(cursor.getCount() == 0) {
+            mMoviesArray = new ArrayList<>();
+            FavoritesUtils.createNoFavoritesDialog(this);
+            mSpinnerView.setSelection(0);
+        }
 
+        while(cursor.moveToNext()) {
+
+            // Get movie data from cursor
+            String movieDBId = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_MOVIEDB_ID);
+            String movieTitle = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TITLE);
+            String movieReleaseDate = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_RELEASE_DATE);
+            String moviePosterPath = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH);
+            String movieVoteAverage = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_VOTE_AVERAGE);
+            String moviePlot = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_PLOT);
+            String movieIsForAdults = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_IS_FOR_ADULTS);
+
+            Movie movie = new Movie(
+                    Integer.parseInt(movieDBId),
+                    movieTitle,
+                    movieReleaseDate,
+                    moviePosterPath,
+                    Double.parseDouble(movieVoteAverage),
+                    moviePlot,
+                    null,
+                    0.0,
+                    null,
+                    null,
+                    Boolean.parseBoolean(movieIsForAdults),
+                    null,
+                    null);
+
+            movie.setIsMovieFavorite(true);
+
+            // Add the movie to an ArrayList
+            moviesDBArray.add(movie);
+
+        }
+
+        mMoviesArray = moviesDBArray;
     }
+
+    public static String getStringFromCursor(Cursor cursor, String colName) {
+        return cursor.getString(cursor.getColumnIndex(colName));
+    }
+
 }
 

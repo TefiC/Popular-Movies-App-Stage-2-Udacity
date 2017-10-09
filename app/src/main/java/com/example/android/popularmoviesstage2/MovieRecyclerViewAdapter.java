@@ -1,8 +1,6 @@
 package com.example.android.popularmoviesstage2;
 
 import android.content.Context;
-import android.media.Image;
-import android.support.annotation.BoolRes;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -17,6 +15,8 @@ import com.example.android.popularmoviesstage2.DataUtils.FavoritesUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * RecyclerView for a grid of movies
@@ -98,8 +98,10 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
     private void determineMainPosterFavoriteLogo(MovieRecyclerViewAdapter.MovieViewHolder holder, Movie movie) {
         if (FavoritesUtils.checkIfMovieIsFavorite(mContext, Integer.toString(movie.getMovieId()))) {
             holder.mMovieIsFavoriteView.setImageResource(R.drawable.heart_pressed_white);
+            movie.setIsMovieFavorite(true);
         } else {
             holder.mMovieIsFavoriteView.setImageResource(R.drawable.heart_not_pressed_thin);
+            movie.setIsMovieFavorite(false);
         }
     }
 
@@ -116,7 +118,6 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
         } else {
             holder.mMovieIsForAdultsView.setImageResource(R.drawable.for_children);
         }
-
     }
 
     @Override
@@ -137,13 +138,13 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
         private MovieViewHolder(View itemView) {
             super(itemView);
 
-            mMoviePoster = (RectangularImageView) itemView.findViewById(mMoviePosterViewId);
+            mMoviePoster = itemView.findViewById(mMoviePosterViewId);
 
-            mMovieTitleView = (TextView) itemView.findViewById(R.id.movie_item_title);
-            mMovieRatingStarView = (ImageView) itemView.findViewById(R.id.movie_item_star);
-            mMovieRatingView = (TextView) itemView.findViewById(R.id.movie_item_rating);
-            mMovieIsForAdultsView = (ImageView) itemView.findViewById(R.id.movie_item_adults);
-            mMovieIsFavoriteView = (ImageView) itemView.findViewById(R.id.movie_item_favorite);
+            mMovieTitleView = itemView.findViewById(R.id.movie_item_title);
+            mMovieRatingStarView = itemView.findViewById(R.id.movie_item_star);
+            mMovieRatingView = itemView.findViewById(R.id.movie_item_rating);
+            mMovieIsForAdultsView = itemView.findViewById(R.id.movie_item_adults);
+            mMovieIsFavoriteView = itemView.findViewById(R.id.movie_item_favorite);
 
         }
 

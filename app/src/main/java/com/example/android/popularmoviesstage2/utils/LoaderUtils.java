@@ -24,13 +24,15 @@ public class LoaderUtils {
             MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH,
             MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_VOTE_AVERAGE,
             MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_PLOT,
+    };
+
+    public static final String[] INDIVIDUAL_MOVIE_DETAILS_PROJECTION = {
             MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_LANGUAGE,
             MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_RUNTIME,
             MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_CAST,
             MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS,
             MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_IS_FOR_ADULTS,
             MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP,
-            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS
-
+            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS,
     };
 }

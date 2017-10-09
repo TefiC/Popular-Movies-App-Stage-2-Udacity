@@ -10,10 +10,15 @@
 
     <string name="spinner_title">Sorting</string>
 
-    <!--Dialog-->
+    <!--Internet Dialog-->
     <string name="connection_dialog_title">WARNING</string>
     <string name="connection_dialog_message">No Internet connection available. Please reconnect and try again.</string>
     <string name="ok">OK</string>
+
+    <!--Favorites dialog-->
+    <string name="favorites_dialog_title">No Favorite Movies Selected</string>
+    <string name="favorites_dialog_message">You can select as many as you like : )</string>
+
 
     <!--Details activity-->
     <string name="vote_average">Rating</string>
