@@ -427,6 +427,7 @@
         android:src="@drawable/heart_not_pressed"
         app:backgroundTint="#FF0000"
         app:layout_anchor="@+id/appBarLayout"
-        app:layout_anchorGravity="top|left" />
+        app:layout_anchorGravity="top|left"
+        android:visibility="invisible"/>
 
 </android.support.design.widget.CoordinatorLayout>

@@ -11,7 +11,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 /**
  * A Content Provider for Favorite movies and Watchlist movies
@@ -129,8 +128,6 @@ public class MoviesProvider extends ContentProvider {
         Uri returnUri;
         long _id;
 
-        Log.v(TAG, "INSERTING!");
-
         switch (match) {
             case CODE_FAVORITE_MOVIES:
                 _id = db.insert(MoviesDBContract.FavoriteMoviesEntry.TABLE_NAME,
@@ -158,7 +155,6 @@ public class MoviesProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown Uri " + uri);
         }
         getContext().getContentResolver().notifyChange(uri, null);
-        Log.v(TAG, returnUri.toString());
         return returnUri;
     }
 

@@ -402,9 +402,35 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             outState.putInt("gridScroll", mGridLayoutManager.findFirstVisibleItemPosition());
         }
 
+        // To restore scroll position of recycler view on back button pressed
+        //TODO: RESTORE SCROLL STATE AFTER PRESSING BACK BUTTON
+//        outState.putParcelable("recyclerViewScroll", mGridLayoutManager.onSaveInstanceState());
 
         super.onSaveInstanceState(outState);
     }
+
+    //TODO: RESTORE SCROLL STATE AFTER PRESSING BACK BUTTON
+//
+//    @Override
+//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//
+//        Log.v(TAG, "RESTORING STATE");
+//
+//        mListState = savedInstanceState.getParcelable("recyclerViewScroll");
+//    }
+//
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//
+//        if (mListState != null) {
+//            Log.v(TAG, "UPDATING LAYOUT MANAGER");
+//            mGridLayoutManager.onRestoreInstanceState(mListState);
+//        } else {
+//            Log.v(TAG, "STATE EMPTY");
+//        }
+//    }
 
     // AsyncTaskLoaders ===================================================================
 
@@ -561,7 +587,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             String movieDBId = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_MOVIEDB_ID);
             String movieTitle = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TITLE);
             String movieReleaseDate = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_RELEASE_DATE);
-            String moviePosterPath = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH);
+            String moviePosterPath = DetailsActivity.MOVIEDB_POSTER_BASE_URL +
+                    DetailsActivity.IMAGE_SIZE +
+                    getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH);
             String movieVoteAverage = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_VOTE_AVERAGE);
             String moviePlot = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_PLOT);
             String movieIsForAdults = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_IS_FOR_ADULTS);

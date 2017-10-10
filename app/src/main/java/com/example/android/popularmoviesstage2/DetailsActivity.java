@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
@@ -42,9 +43,10 @@ import java.net.URL;
 
 import static com.example.android.popularmoviesstage2.R.id.favorite_floating_button;
 import static com.example.android.popularmoviesstage2.utils.LoaderUtils.FAVORITE_MOVIES_LOADER_BY_ID;
+import static com.example.android.popularmoviesstage2.utils.LoaderUtils.TRAILERS_SEARCH_LOADER;
 import static com.squareup.picasso.Picasso.with;
 
-public class DetailsActivity extends AppCompatActivity  {
+public class DetailsActivity extends AppCompatActivity {
 
     /*
      * Fields
@@ -117,14 +119,16 @@ public class DetailsActivity extends AppCompatActivity  {
             // Set activity title
             setTitle(movie.getMovieTitle());
 
-            if(FavoritesUtils.checkIfMovieIsFavorite(this, Integer.toString(movie.getMovieId()))) {
+            movieSelected.setIsMovieFavorite(FavoritesUtils.checkIfMovieIsFavorite(this, Integer.toString(movie.getMovieId())));
+
+            if (movieSelected.getIsMovieFavorite()) {
                 movie.setIsMovieFavorite(true);
                 loadDataFromDatabase(LoaderUtils.FAVORITE_MOVIES_LOADER_BY_ID);
 
             } else {
                 //Start AsyncTaskLoader
                 loadDataFromInternet(LoaderUtils.DETAILS_SEARCH_LOADER);
-                loadDataFromInternet(LoaderUtils.TRAILERS_SEARCH_LOADER);
+//                loadDataFromInternet(LoaderUtils.TRAILERS_SEARCH_LOADER);
             }
         }
     }
@@ -260,9 +264,12 @@ public class DetailsActivity extends AppCompatActivity  {
 
                     mDetailsProgressBar.setVisibility(View.GONE);
                     mDetailsLayout.setVisibility(View.VISIBLE);
+                    loadDataFromInternet(TRAILERS_SEARCH_LOADER);
                     break;
                 case LoaderUtils.TRAILERS_SEARCH_LOADER:
                     createMovieTrailers(data, movieSelected);
+                    floatingActionButtonFavorite.setVisibility(View.VISIBLE);
+                    addOnClickListenerToFloatingActionButtons();
                     break;
             }
         }
@@ -327,10 +334,13 @@ public class DetailsActivity extends AppCompatActivity  {
         String movieBackdropPath = createFullBackdropPath(movie.getMovieBackdropPath());
 
         // Update views
-        loadMoviePoster(posterPath);
-        loadMovieBackdrop(movieBackdropPath);
+        if (movieSelected.getIsMovieFavorite()) {
+            fillMoviePosterDetailsFromDB(loadPosterFromDatabase(this, movieSelected));
+        } else {
+            loadMoviePoster(posterPath);
+        }
 
-        addOnClickListenerToFloatingActionButtons();
+        loadMovieBackdrop(movieBackdropPath);
 
         //Determine if it is favorite or not and update button
         movieSelected.setIsMovieFavorite(FavoritesUtils.checkIfMovieIsFavorite(this, Integer.toString(movieSelected.getMovieId())));
@@ -352,7 +362,7 @@ public class DetailsActivity extends AppCompatActivity  {
      * the movie is one of the user's favorite or not
      */
     private void setFloatingButtonImage() {
-        if(movieSelected.getIsMovieFavorite()) {
+        if (movieSelected.getIsMovieFavorite()) {
             floatingActionButtonFavorite.setImageResource(R.drawable.heart_pressed_white);
         } else {
             floatingActionButtonFavorite.setImageResource(R.drawable.heart_not_pressed);
@@ -517,7 +527,7 @@ public class DetailsActivity extends AppCompatActivity  {
         favoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(movieSelected.getIsMovieFavorite()) {
+                if (movieSelected.getIsMovieFavorite()) {
                     removeMovieFromFavoritesDB();
                 } else {
                     insertMovieToFavoritesDB();
@@ -602,7 +612,6 @@ public class DetailsActivity extends AppCompatActivity  {
     // Movie data methods ===================================================================
 
 
-
     /**
      * Adds movie details (language, runtime, isForAdults, backdrop path)
      * to the movie object reference stored in memory.
@@ -658,6 +667,9 @@ public class DetailsActivity extends AppCompatActivity  {
         }
     }
 
+    /**
+     * Insert the movie selected to the "Favorites" table in the database
+     */
     private void insertMovieToFavoritesDB() {
 
         ContentValues cv = new ContentValues();
@@ -686,19 +698,25 @@ public class DetailsActivity extends AppCompatActivity  {
 
         cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS, trailers);
 
+        // Save image to internal storage and insert the poster to the database
+        FavoritesUtils.addPosterToDatabase(this, movieSelected);
+
         Uri uri = MoviesDBContract.FavoriteMoviesEntry.CONTENT_URI.buildUpon()
                 .appendPath(Integer.toString(movieSelected.getMovieId()))
                 .build();
 
         Uri insertResult = getContentResolver().insert(uri, cv);
 
-        if(insertResult != null) {
+        if (insertResult != null) {
             movieSelected.setIsMovieFavorite(true);
             setFloatingButtonImage();
             Toast.makeText(this, '"' + movieSelected.getMovieTitle() + '"' + " added to Favorites!", Toast.LENGTH_SHORT).show();
         }
     }
 
+    /**
+     * Removes the movie selected from the "Favorites" table in the database
+     */
     private void removeMovieFromFavoritesDB() {
 
         Uri uri = MoviesDBContract.FavoriteMoviesEntry.CONTENT_URI.buildUpon()
@@ -706,13 +724,16 @@ public class DetailsActivity extends AppCompatActivity  {
 
         int numDeleted = getContentResolver().delete(uri, "movieDBId=?", new String[]{"id"});
 
-        if(numDeleted == 1) {
+        if (numDeleted == 1) {
             movieSelected.setIsMovieFavorite(false);
             setFloatingButtonImage();
             Toast.makeText(this, '"' + movieSelected.getMovieTitle() + '"' + " removed from Favorites : (", Toast.LENGTH_SHORT).show();
         }
     }
 
+    /**
+     * Loader cursor to load from the database
+     */
     private class DatabaseMovieDetailsLoader implements LoaderManager.LoaderCallbacks<Cursor> {
 
         private Context mContext;
@@ -757,9 +778,14 @@ public class DetailsActivity extends AppCompatActivity  {
         }
     }
 
+    /**
+     * Loads movie details from the database
+     *
+     * @param movieDetailsCursor A cursor containing the movie's data retrieved from the database
+     */
     private void loadMovieDetailsFromDB(Cursor movieDetailsCursor) {
 
-        while(movieDetailsCursor.moveToNext()) {
+        while (movieDetailsCursor.moveToNext()) {
 
             String movieLanguage = MainActivity.getStringFromCursor(movieDetailsCursor,
                     MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_LANGUAGE);
@@ -779,11 +805,56 @@ public class DetailsActivity extends AppCompatActivity  {
             movieSelected.setMovieLanguage(movieLanguage);
             movieSelected.setMovieRuntime(Double.parseDouble(movieRuntime));
 
-            // TODO: ADD CAST, REVIEWS AND IMAGES WHEN IMPLEMENTED
+            // TODO: ADD CAST, REVIEWS AND IMAGES
 
             movieSelected.setIsMovieForAdults(Boolean.parseBoolean(movieIsForAdults));
             movieSelected.setMovieBackdropPath(movieBackdropPath);
 
         }
+    }
+
+
+    /**
+     * Loads a movie poster from the database
+     * @param context The context of the activity that called this method
+     * @param movieSelected The movie object selected
+     *
+     * @return A Bitmap representing the corresponding poster
+     */
+    public static Bitmap loadPosterFromDatabase(Context context, Movie movieSelected) {
+
+        Uri uri = MoviesDBContract.FavoriteMoviesEntry.CONTENT_URI.buildUpon()
+                .appendPath(Integer.toString(movieSelected.getMovieId()))
+                .build();
+
+        String[] posterProjection = {
+                MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH
+        };
+
+        Cursor posterPathCursor = context.getContentResolver().query(
+                uri,
+                posterProjection,
+                null,
+                null,
+                MoviesDBContract.FavoriteMoviesEntry._ID);
+
+        posterPathCursor.moveToFirst();
+        String posterPath = posterPathCursor.getString(posterPathCursor
+                .getColumnIndex(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH));
+
+        return FavoritesUtils.loadImageFromStorage(posterPath, Integer.toString(movieSelected.getMovieId()));
+
+    }
+
+    /**
+     * Sets the ImageView resource in the Details Activity to be
+     * the corresponding poster
+     *
+     * @param posterImage A Bitmap representing the poster
+     */
+    private void fillMoviePosterDetailsFromDB(Bitmap posterImage) {
+        moviePosterView.setImageBitmap(posterImage);
+        floatingActionButtonFavorite.setVisibility(View.VISIBLE);
+        addOnClickListenerToFloatingActionButtons();
     }
 }

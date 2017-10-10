@@ -1,6 +1,7 @@
 package com.example.android.popularmoviesstage2;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -72,8 +73,16 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
 
         if (movie != null) {
             String posterPath = movie.getMoviePosterPath();
-            // Set data on the corresponding view
-            loadMoviePoster(posterPath, holder.mMoviePoster);
+
+
+            if(FavoritesUtils.checkIfMovieIsFavorite(mContext, Integer.toString(movie.getMovieId()))) {
+                Bitmap poster = DetailsActivity.loadPosterFromDatabase(mContext, movie);
+                holder.mMoviePoster.setImageBitmap(poster);
+            } else {
+                // Set data on the corresponding view
+                loadMoviePoster(posterPath, holder.mMoviePoster);
+            }
+
             // Listener
             holder.setOnClickListener(holder.mMoviePoster, movie);
 
@@ -83,7 +92,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
 
             // Determine logos
             determineForAdultsLogo(holder, movie.getIsMovieForAdults());
-            determineMainPosterFavoriteLogo(holder, movie);
+            determineMainPosterFavoriteLogo(holder, movie, FavoritesUtils.checkIfMovieIsFavorite(mContext, Integer.toString(movie.getMovieId())));
         }
     }
 
@@ -95,8 +104,8 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
      * @param holder The corresponding RecyclerView ViewHolder
      * @param movie The selected Movie object
      */
-    private void determineMainPosterFavoriteLogo(MovieRecyclerViewAdapter.MovieViewHolder holder, Movie movie) {
-        if (FavoritesUtils.checkIfMovieIsFavorite(mContext, Integer.toString(movie.getMovieId()))) {
+    private void determineMainPosterFavoriteLogo(MovieRecyclerViewAdapter.MovieViewHolder holder, Movie movie, boolean isFavorite) {
+        if (isFavorite) {
             holder.mMovieIsFavoriteView.setImageResource(R.drawable.heart_pressed_white);
             movie.setIsMovieFavorite(true);
         } else {
