@@ -65,9 +65,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     // Tag for logging
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    // RecyclerView
-    private int NUM_GRID_ITEMS = 12;
-
 
     /*
      * Methods
@@ -145,7 +142,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         } else {
             NetworkUtils.createNoConnectionDialog(this);
-            mMoviesArray = null;
             mSpinnerView.setSelection(2);
         }
     }
@@ -385,6 +381,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             } else {
                 makeSearchQuery(mSearchCriteria);
             }
+        } else {
+            setAdapter();
         }
     }
 
@@ -403,6 +401,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if (mList != null) {
             outState.putInt("gridScroll", mGridLayoutManager.findFirstVisibleItemPosition());
         }
+
 
         super.onSaveInstanceState(outState);
     }
