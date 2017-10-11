@@ -19,18 +19,26 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".DetailsActivity"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".DetailsActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="singleTop"/>
 
-        <!--Register content provider-->
+        <!--// TODO: CHECK COMPATIBILITY-->
+        <activity android:name=".ReviewsActivity"
+            android:parentActivityName=".DetailsActivity">
+        </activity>
+
+        <!-- Register content provider -->
         <provider
+            android:name=".DataUtils.MoviesProvider"
             android:authorities="com.example.android.popularmoviesstage2"
-            android:name="com.example.android.popularmoviesstage2.DataUtils.MoviesProvider"
-            android:exported="false"/>
+            android:exported="false" />
 
         <service
             android:name=".utils.FavoritesDataIntentService"
-            android:exported="false"/>
+            android:exported="false" />
+
     </application>
 
 </manifest>

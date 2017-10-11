@@ -66,7 +66,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:paddingBottom="20dp">
 
             <ProgressBar
                 android:id="@+id/details_progress_bar"
@@ -397,7 +398,8 @@
                     android:layout_centerHorizontal="true"
                     android:text="Read Reviews"
                     android:textColor="#147dfc"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    android:padding="10dp"/>
 
             </RelativeLayout>
 
@@ -406,28 +408,16 @@
     </android.support.v4.widget.NestedScrollView>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/add_floating_button"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center_vertical|right"
-        android:layout_margin="16dp"
-        android:clickable="true"
-        android:src="@drawable/add"
-        app:backgroundTint="#44cb85"
-        app:layout_anchor="@+id/appBarLayout"
-        app:layout_anchorGravity="bottom|left" />
-
-    <android.support.design.widget.FloatingActionButton
         android:id="@+id/favorite_floating_button"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_gravity="bottom|right"
+        android:layout_gravity="center_vertical|left"
         android:layout_margin="16dp"
         android:clickable="true"
         android:src="@drawable/heart_not_pressed"
+        android:visibility="invisible"
         app:backgroundTint="#FF0000"
         app:layout_anchor="@+id/appBarLayout"
-        app:layout_anchorGravity="top|left"
-        android:visibility="invisible"/>
+        app:layout_anchorGravity="bottom|right" />
 
 </android.support.design.widget.CoordinatorLayout>

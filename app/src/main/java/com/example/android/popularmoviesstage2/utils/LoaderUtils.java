@@ -16,6 +16,7 @@ public class LoaderUtils {
     public static final int TRAILERS_SEARCH_LOADER = 30;
     public static final int FAVORITE_MOVIES_LOADER = 60;
     public static final int FAVORITE_MOVIES_LOADER_BY_ID = 35;
+    public static final int FAVORITE_REVIEWS_LOADER = 100;
 
     public static final String[] MAIN_FAVORITE_MOVIES_PROJECTION = {
 

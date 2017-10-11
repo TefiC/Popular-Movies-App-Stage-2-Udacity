@@ -38,8 +38,8 @@ import static com.example.android.popularmoviesstage2.utils.LoaderUtils.FAVORITE
 import static com.example.android.popularmoviesstage2.utils.LoaderUtils.MAIN_SEARCH_LOADER;
 
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener
-        , MovieRecyclerViewAdapter.MovieAdapterOnClickHandler {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener,
+        MovieRecyclerViewAdapter.MovieAdapterOnClickHandler {
 
     /*
      * Fields

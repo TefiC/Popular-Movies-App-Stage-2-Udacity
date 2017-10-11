@@ -5,4 +5,6 @@
     <color name="colorSecondary">#81c784</color>
 
     <color name="text_color">#ffffff</color>
+
+    <color name="items_background">#282828</color>
 </resources>

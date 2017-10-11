@@ -17,7 +17,6 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
@@ -66,6 +65,7 @@ public class DetailsActivity extends AppCompatActivity {
     private TextView movieRuntimeView;
     private TextView movieCastView;
     private ImageView movieBackdropView;
+    private TextView reviewsReadMoreView;
     private LinearLayout movieDetailsTrailerLinearContainer;
     private FloatingActionButton floatingActionButtonFavorite;
 
@@ -94,6 +94,8 @@ public class DetailsActivity extends AppCompatActivity {
 
     //Launch trailer
     private static final String YOUTUBE_BASE_PATH = "https://www.youtube.com/watch?v=";
+
+    private static final int NUMBER_OF_ACTORS_TO_INCLUDE = 5;
 
 
     private static final String TAG = DetailsActivity.class.getSimpleName();
@@ -168,6 +170,8 @@ public class DetailsActivity extends AppCompatActivity {
         mDetailsLayout = (RelativeLayout) findViewById(R.id.details_relative_layout);
 
         mDetailsProgressBar = (ProgressBar) findViewById(R.id.details_progress_bar);
+
+        reviewsReadMoreView = (TextView) findViewById(R.id.movie_details_reviews_read_more);
     }
 
     /**
@@ -380,12 +384,28 @@ public class DetailsActivity extends AppCompatActivity {
         setViewData(movieLanguageView, movieLanguage);
         setViewData(movieRuntimeView, movieRuntime);
 
+        ArrayList<String> movieCast = movieSelected.getMovieCast();
+
 
         // Add cast
-        for(String actor : movieSelected.getMovieCast()){
-            movieCastView.append(actor + "\n");
+        int i;
+        for(i = 0; i < NUMBER_OF_ACTORS_TO_INCLUDE; i++){
+            movieCastView.append(movieCast.get(i) + "\n");
         }
 
+        reviewsReadMoreView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Context context = mContext;
+                Class destinationActivity = ReviewsActivity.class;
+
+                // Intent
+                Intent intent = new Intent(context, destinationActivity);
+                intent.putExtra("movieObject", movieSelected);
+
+                startActivity(intent);
+            }
+        });
     }
 
     /**
@@ -555,7 +575,6 @@ public class DetailsActivity extends AppCompatActivity {
 
 
         FloatingActionButton favoriteButton = (FloatingActionButton) findViewById(favorite_floating_button);
-        final FloatingActionButton addToWatchlistButton = (FloatingActionButton) findViewById(R.id.add_floating_button);
 
         favoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -567,14 +586,6 @@ public class DetailsActivity extends AppCompatActivity {
                     addMovieToFavorites(mContext, movieSelected);
                     updateAddedToFavoritesUI();
                 }
-            }
-        });
-
-        addToWatchlistButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //TODO: COMPLETE THE ON CLICK LISTENER
-                Log.v(TAG, "ADD CLICKED");
             }
         });
     }
@@ -812,6 +823,8 @@ public class DetailsActivity extends AppCompatActivity {
             movieSelected.setIsMovieForAdults(Boolean.parseBoolean(movieIsForAdults));
             movieSelected.setMovieBackdropPath(movieBackdropPath);
 
+
+
         }
     }
 
@@ -894,7 +907,7 @@ public class DetailsActivity extends AppCompatActivity {
             JSONArray arrayJSONCast = jsonCast.getJSONArray("cast");
 
             int i;
-            for(i = 0; i < 10; i++ ) {
+            for(i = 0; i < NUMBER_OF_ACTORS_TO_INCLUDE; i++ ) {
                 castArray.add(arrayJSONCast.getJSONObject(i).getString("name"));
             }
 

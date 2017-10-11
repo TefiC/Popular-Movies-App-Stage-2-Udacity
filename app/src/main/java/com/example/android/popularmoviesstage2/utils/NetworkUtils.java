@@ -44,6 +44,7 @@ public class NetworkUtils {
     // TODO: Uncomment this variable and initialize it by adding your "The Movie Database" API key
     // private final static String API_KEY = "YOUR API KEY"
 
+
     /*
      * Methods
      */
