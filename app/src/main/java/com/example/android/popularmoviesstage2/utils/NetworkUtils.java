@@ -138,6 +138,23 @@ public class NetworkUtils {
         return url;
     }
 
+    public static URL buildMovieCastUrl(int movieId) {
+
+        URL url = null;
+
+        Uri buildUri = Uri.parse(MOVIEDB_URL + movieId + "/credits").buildUpon()
+                .appendQueryParameter(PARAM_KEY, API_KEY)
+                .build();
+
+        try {
+            url = new URL(buildUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return url;
+    }
+
     /**
      * Fetches data from the URL passed as argument and returns it as a String
      *

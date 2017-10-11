@@ -12,6 +12,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -255,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mGridLayoutManager = new GridLayoutManager(this, numberOfColumns);
         mList.setLayoutManager(mGridLayoutManager);
 
-        mAdapter = new MovieRecyclerViewAdapter(mMoviesArray, mMoviesArray.size(), this, this);
+        mAdapter = new MovieRecyclerViewAdapter(mMoviesArray, mMoviesArray.size(), this, this, mSearchCriteria);
         mList.setAdapter(mAdapter);
     }
 
@@ -587,12 +588,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             String movieDBId = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_MOVIEDB_ID);
             String movieTitle = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TITLE);
             String movieReleaseDate = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_RELEASE_DATE);
-            String moviePosterPath = DetailsActivity.MOVIEDB_POSTER_BASE_URL +
-                    DetailsActivity.IMAGE_SIZE +
-                    getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH);
+            String moviePosterPath = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH);
             String movieVoteAverage = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_VOTE_AVERAGE);
             String moviePlot = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_PLOT);
             String movieIsForAdults = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_IS_FOR_ADULTS);
+
+            Log.v(TAG, moviePosterPath);
+
 
             Movie movie = new Movie(
                     Integer.parseInt(movieDBId),

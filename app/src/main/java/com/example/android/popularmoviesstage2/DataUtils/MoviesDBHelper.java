@@ -25,7 +25,7 @@ public class MoviesDBHelper extends SQLiteOpenHelper {
                               MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_MOVIEDB_ID           + " INT NOT NULL, "  +
                               MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TITLE                + " TEXT NOT NULL, " +
                               MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_RELEASE_DATE         + " TEXT NOT NULL, " +
-                              MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH          + " TEXT NOT NULL, " +
+                              MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH          + " TEXT, "          +
                               MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_VOTE_AVERAGE         + " TEXT NOT NULL, " +
                               MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_PLOT                 + " TEXT NOT NULL, " +
                               MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_LANGUAGE             + " TEXT NOT NULL, " +

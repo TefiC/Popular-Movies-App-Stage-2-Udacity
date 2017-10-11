@@ -4,6 +4,8 @@ package com.example.android.popularmoviesstage2;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+
 /**
  * Represents a Movie which contains a title, release date,
  * a reference to a poster path, a user vote average and plot.
@@ -26,7 +28,7 @@ public class Movie implements Parcelable {
     private String movieLanguage;
 
     private double movieRuntime;
-    private String[] movieCast;
+    private ArrayList<String> movieCast;
 
     private MovieReview[] movieReviews;
     private boolean isMoviewForAdults;
@@ -43,7 +45,7 @@ public class Movie implements Parcelable {
 
     public Movie(int movieId, String movieTitle, String movieReleaseDate, String moviePoster,
                  double movieVoteAverage, String moviePlot,String movieLanguage, double movieRuntime,
-                 String[] movieCast, MovieReview[] movieReviews, boolean isMoviewForAdults,
+                 ArrayList<String> movieCast, MovieReview[] movieReviews, boolean isMoviewForAdults,
                  String movieBackdropPath, String movieTrailersThumbnails) {
         this.movieId = movieId;
         this.movieTitle = movieTitle;
@@ -77,7 +79,7 @@ public class Movie implements Parcelable {
 
         movieLanguage = in.readString();
         movieRuntime = in.readDouble();
-        movieCast = in.createStringArray();
+        movieCast = in.createStringArrayList();
 
         movieReviews = in.createTypedArray(MovieReview.CREATOR);
 
@@ -109,7 +111,7 @@ public class Movie implements Parcelable {
 
         parcel.writeString(movieLanguage);
         parcel.writeDouble(movieRuntime);
-        parcel.writeStringArray(movieCast);
+        parcel.writeStringList(movieCast);
 
         parcel.writeTypedArray(movieReviews, i);
 
@@ -163,7 +165,7 @@ public class Movie implements Parcelable {
 
     public double getMovieRuntime() { return this.movieRuntime; }
 
-    public String[] getMovieCast() { return this.movieCast; }
+    public ArrayList<String> getMovieCast() { return this.movieCast; }
 
     public MovieReview[] getMovieReviews() { return this.movieReviews; }
 
@@ -205,7 +207,7 @@ public class Movie implements Parcelable {
 
     public void setMovieRuntime(double runtime) { this.movieRuntime = runtime; }
 
-    public void setMovieCast(String[] cast) { this.movieCast = cast; }
+    public void setMovieCast(ArrayList<String> cast) { this.movieCast = cast; }
 
     public void setMovieReviews(MovieReview[] movieReviews) { this.movieReviews = movieReviews; }
 

@@ -17,8 +17,6 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-import static android.content.ContentValues.TAG;
-
 /**
  * RecyclerView for a grid of movies
  */
@@ -29,6 +27,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
     private Context mContext;
     private final MovieAdapterOnClickHandler mClickHandler;
     private ArrayList<Movie> mMoviesArray;
+    private String mSearchCriteria;
 
     private int mMoviePosterViewId;
 
@@ -36,11 +35,13 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
     private static int gridItemWidth = 170;
 
     public MovieRecyclerViewAdapter(ArrayList<Movie> moviesArray, int numberOfItems,
-                                    MovieAdapterOnClickHandler movieAdapterOnClickHandler, Context context) {
+                                    MovieAdapterOnClickHandler movieAdapterOnClickHandler, Context context,
+                                    String searchCriteria) {
         mNumberOfItems = numberOfItems;
         mClickHandler = movieAdapterOnClickHandler;
         mContext = context;
         mMoviesArray = moviesArray;
+        mSearchCriteria = searchCriteria;
     }
 
     @Override
@@ -74,13 +75,12 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
         if (movie != null) {
             String posterPath = movie.getMoviePosterPath();
 
-
-            if(FavoritesUtils.checkIfMovieIsFavorite(mContext, Integer.toString(movie.getMovieId()))) {
-                Bitmap poster = DetailsActivity.loadPosterFromDatabase(mContext, movie);
-                holder.mMoviePoster.setImageBitmap(poster);
-            } else {
+            if(!mSearchCriteria.equals("Favorites")) {
                 // Set data on the corresponding view
                 loadMoviePoster(posterPath, holder.mMoviePoster);
+            } else {
+                Bitmap poster = FavoritesUtils.loadImageFromStorage(posterPath, Integer.toString(movie.getMovieId()));
+                holder.mMoviePoster.setImageBitmap(poster);
             }
 
             // Listener

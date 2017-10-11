@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 /**
  * A Content Provider for Favorite movies and Watchlist movies
@@ -199,10 +200,12 @@ public class MoviesProvider extends ContentProvider {
 
         switch (match) {
             case CODE_FAVORITE_MOVIE_WITH_ID:
+                Log.v("DB", "FAVORITE MOVIE WITH ID ");
                 String id = uri.getPathSegments().get(1);
+                Log.v("DB", "FAVORITE MOVIE WITH ID " + id);
                 moviesUpdated = db.update(MoviesDBContract.FavoriteMoviesEntry.TABLE_NAME,
                         contentValues,
-                        "movieDBId" + " = ? ",
+                        "movieDBId=?",
                         new String[]{id});
                 break;
             default:
@@ -212,6 +215,9 @@ public class MoviesProvider extends ContentProvider {
         if(moviesUpdated != 0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }
+
+        Log.v("DB", "PATH UPDATED: " + moviesUpdated);
+
         return moviesUpdated;
     }
 

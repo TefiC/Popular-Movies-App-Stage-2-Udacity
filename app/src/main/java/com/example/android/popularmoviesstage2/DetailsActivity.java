@@ -1,6 +1,5 @@
 package com.example.android.popularmoviesstage2;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -28,8 +27,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.popularmoviesstage2.DataUtils.DataInsertionTasks;
 import com.example.android.popularmoviesstage2.DataUtils.FavoritesUtils;
 import com.example.android.popularmoviesstage2.DataUtils.MoviesDBContract;
+import com.example.android.popularmoviesstage2.utils.FavoritesDataIntentService;
 import com.example.android.popularmoviesstage2.utils.LoaderUtils;
 import com.example.android.popularmoviesstage2.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
@@ -40,8 +41,10 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 
 import static com.example.android.popularmoviesstage2.R.id.favorite_floating_button;
+import static com.example.android.popularmoviesstage2.utils.LoaderUtils.CAST_SEARCH_LOADER;
 import static com.example.android.popularmoviesstage2.utils.LoaderUtils.FAVORITE_MOVIES_LOADER_BY_ID;
 import static com.example.android.popularmoviesstage2.utils.LoaderUtils.TRAILERS_SEARCH_LOADER;
 import static com.squareup.picasso.Picasso.with;
@@ -52,7 +55,7 @@ public class DetailsActivity extends AppCompatActivity {
      * Fields
      */
 
-    private Movie movieSelected;
+    public Movie movieSelected;
 
     private ImageView moviePosterView;
     private TextView movieVoteAverageView;
@@ -61,6 +64,7 @@ public class DetailsActivity extends AppCompatActivity {
     private TextView movieTitleView;
     private TextView movieLanguageView;
     private TextView movieRuntimeView;
+    private TextView movieCastView;
     private ImageView movieBackdropView;
     private LinearLayout movieDetailsTrailerLinearContainer;
     private FloatingActionButton floatingActionButtonFavorite;
@@ -69,6 +73,8 @@ public class DetailsActivity extends AppCompatActivity {
     private ProgressBar mDetailsProgressBar;
 
     private GradientDrawable mGradient;
+
+    private Context mContext;
 
     /*
      * Constants
@@ -100,6 +106,8 @@ public class DetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details_second);
+
+        mContext = this;
 
         setupToolbar();
 
@@ -151,6 +159,8 @@ public class DetailsActivity extends AppCompatActivity {
         movieRuntimeView = (TextView) findViewById(R.id.movie_details_runtime);
         movieBackdropView = (ImageView) findViewById(R.id.movie_details_backdrop);
 
+        movieCastView = (TextView) findViewById(R.id.details_cast_text);
+
         movieDetailsTrailerLinearContainer = (LinearLayout) findViewById(R.id.movie_details_trailers_container);
 
         floatingActionButtonFavorite = (FloatingActionButton) findViewById(R.id.favorite_floating_button);
@@ -173,6 +183,7 @@ public class DetailsActivity extends AppCompatActivity {
     // AsyncTaskLoader ==========================
     private String cachedDetails;
     private String cachedTrailers;
+    private String cachedCast;
 
 
     private class InternetLoader implements LoaderManager.LoaderCallbacks<String> {
@@ -209,6 +220,12 @@ public class DetailsActivity extends AppCompatActivity {
                                 deliverResult(cachedTrailers);
                             }
                             break;
+                        case LoaderUtils.CAST_SEARCH_LOADER:
+                            if(cachedCast == null) {
+                                forceLoad();
+                            } else {
+                                deliverResult(cachedCast);
+                            }
                     }
                 }
 
@@ -228,28 +245,29 @@ public class DetailsActivity extends AppCompatActivity {
                 @Override
                 public String loadInBackground() {
                     String searchResults = null;
-                    URL searchQueryURL;
+                    URL searchQueryURL = null;
                     Movie movie = args.getParcelable("movieObject");
 
                     switch (id) {
                         case LoaderUtils.DETAILS_SEARCH_LOADER:
                             searchQueryURL = NetworkUtils.buildMovieDetailsUrl(movie.getMovieId());
-
-                            try {
-                                searchResults = NetworkUtils.getResponseFromHttpUrl(searchQueryURL);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
                             break;
                         case LoaderUtils.TRAILERS_SEARCH_LOADER:
                             searchQueryURL = NetworkUtils.buildMovieTrailersUrl(movie.getMovieId());
-
-                            try {
-                                searchResults = NetworkUtils.getResponseFromHttpUrl(searchQueryURL);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                            break;
+                        case LoaderUtils.CAST_SEARCH_LOADER:
+                            searchQueryURL = NetworkUtils.buildMovieCastUrl(movie.getMovieId());
+                            break;
                     }
+
+                    if(searchQueryURL != null) {
+                        try {
+                            searchResults = NetworkUtils.getResponseFromHttpUrl(searchQueryURL);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
                     return searchResults;
                 }
             };
@@ -259,12 +277,18 @@ public class DetailsActivity extends AppCompatActivity {
         public void onLoadFinished(Loader<String> loader, String data) {
             switch (loader.getId()) {
                 case LoaderUtils.DETAILS_SEARCH_LOADER:
+//                    Log.v("DB", "LOADING DATA FROM INTERNET");
                     addMovieDetails(data, movieSelected);
+                    loadDataFromInternet(CAST_SEARCH_LOADER);
+                    break;
+                case LoaderUtils.CAST_SEARCH_LOADER:
+//                    Log.v("CAST", "LOADING CAST");
+//                    Log.v("CAST", data);
+                    loadDataFromInternet(TRAILERS_SEARCH_LOADER);
+                    extractMovieCastArrayFromJSON(data);
                     fillMovieData(movieSelected);
-
                     mDetailsProgressBar.setVisibility(View.GONE);
                     mDetailsLayout.setVisibility(View.VISIBLE);
-                    loadDataFromInternet(TRAILERS_SEARCH_LOADER);
                     break;
                 case LoaderUtils.TRAILERS_SEARCH_LOADER:
                     createMovieTrailers(data, movieSelected);
@@ -334,7 +358,8 @@ public class DetailsActivity extends AppCompatActivity {
         String movieBackdropPath = createFullBackdropPath(movie.getMovieBackdropPath());
 
         // Update views
-        if (movieSelected.getIsMovieFavorite()) {
+        if (movieSelected.getIsMovieFavorite() && movieSelected.getMoviePosterPath() != null) {
+//            Log.v("DB", "LOADING POSTER IN DETAILS");
             fillMoviePosterDetailsFromDB(loadPosterFromDatabase(this, movieSelected));
         } else {
             loadMoviePoster(posterPath);
@@ -354,6 +379,12 @@ public class DetailsActivity extends AppCompatActivity {
 
         setViewData(movieLanguageView, movieLanguage);
         setViewData(movieRuntimeView, movieRuntime);
+
+
+        // Add cast
+        for(String actor : movieSelected.getMovieCast()){
+            movieCastView.append(actor + "\n");
+        }
 
     }
 
@@ -521,6 +552,8 @@ public class DetailsActivity extends AppCompatActivity {
      */
     private void addOnClickListenerToFloatingActionButtons() {
 
+
+
         FloatingActionButton favoriteButton = (FloatingActionButton) findViewById(favorite_floating_button);
         final FloatingActionButton addToWatchlistButton = (FloatingActionButton) findViewById(R.id.add_floating_button);
 
@@ -528,9 +561,11 @@ public class DetailsActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (movieSelected.getIsMovieFavorite()) {
-                    removeMovieFromFavoritesDB();
+                    removeMovieFromFavorites(mContext, movieSelected);
+                    updateRemovedFromFavoritesUI();
                 } else {
-                    insertMovieToFavoritesDB();
+                    addMovieToFavorites(mContext, movieSelected);
+                    updateAddedToFavoritesUI();
                 }
             }
         });
@@ -543,6 +578,34 @@ public class DetailsActivity extends AppCompatActivity {
             }
         });
     }
+
+    public static void removeMovieFromFavorites(Context context, Movie movieSelected) {
+//        Log.v("DB", "REMOVING POSTER FROM DATABASE");
+        movieSelected.setIsMovieFavorite(false);
+
+        Intent intent = new Intent(context, FavoritesDataIntentService.class);
+        intent.setAction(DataInsertionTasks.ACTION_REMOVE_FAVORITE);
+        intent.putExtra("movieObject", movieSelected);
+        context.startService(intent);
+    }
+
+    public void updateRemovedFromFavoritesUI() {
+        setFloatingButtonImage();
+        Toast.makeText(mContext, '"' + movieSelected.getMovieTitle() + '"' + " removed from Favorites :-(", Toast.LENGTH_SHORT).show();
+    }
+
+    public static void addMovieToFavorites(Context context, Movie movieSelected) {
+//        Log.v("DB", "ADDING POSTER TO DATABASE");
+        movieSelected.setIsMovieFavorite(true);
+
+        FavoritesUtils.addPosterToDatabase(context, movieSelected);
+    }
+
+    public void updateAddedToFavoritesUI() {
+        setFloatingButtonImage();
+        Toast.makeText(mContext, '"' + movieSelected.getMovieTitle() + '"' + " added to Favorites!", Toast.LENGTH_SHORT).show();
+    }
+
 
     // Methods for UI properties ===================================================================
 
@@ -668,70 +731,6 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     /**
-     * Insert the movie selected to the "Favorites" table in the database
-     */
-    private void insertMovieToFavoritesDB() {
-
-        ContentValues cv = new ContentValues();
-
-        //TODO: FAKE VALUES, PLACEHOLDERS WHILE IN THE PROCESS OF BUILDING METHODS TO FETCH DATA FROM DIFFERENT URLs
-        String cast = "Kate winslet";
-        String trailers = "wjfiwoejfwofj";
-        String reviews = "sodkoadkasp";
-
-        // Set movie data in the database
-        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_MOVIEDB_ID, Integer.toString(movieSelected.getMovieId()));
-        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TITLE, movieSelected.getMovieTitle());
-
-        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_RELEASE_DATE, movieSelected.getMovieReleaseDate());
-        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH, movieSelected.getMoviePosterPath());
-        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_VOTE_AVERAGE, movieSelected.getMovieVoteAverage());
-
-        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_PLOT, movieSelected.getMoviePlot());
-        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_LANGUAGE, movieSelected.getMovieLanguage());
-        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_RUNTIME, movieSelected.getMovieRuntime());
-
-        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_CAST, cast);
-        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS, reviews);
-        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_IS_FOR_ADULTS, movieSelected.getIsMovieFavorite());
-        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP, movieSelected.getMovieBackdropPath());
-
-        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS, trailers);
-
-        // Save image to internal storage and insert the poster to the database
-        FavoritesUtils.addPosterToDatabase(this, movieSelected);
-
-        Uri uri = MoviesDBContract.FavoriteMoviesEntry.CONTENT_URI.buildUpon()
-                .appendPath(Integer.toString(movieSelected.getMovieId()))
-                .build();
-
-        Uri insertResult = getContentResolver().insert(uri, cv);
-
-        if (insertResult != null) {
-            movieSelected.setIsMovieFavorite(true);
-            setFloatingButtonImage();
-            Toast.makeText(this, '"' + movieSelected.getMovieTitle() + '"' + " added to Favorites!", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * Removes the movie selected from the "Favorites" table in the database
-     */
-    private void removeMovieFromFavoritesDB() {
-
-        Uri uri = MoviesDBContract.FavoriteMoviesEntry.CONTENT_URI.buildUpon()
-                .appendPath(Integer.toString(movieSelected.getMovieId())).build();
-
-        int numDeleted = getContentResolver().delete(uri, "movieDBId=?", new String[]{"id"});
-
-        if (numDeleted == 1) {
-            movieSelected.setIsMovieFavorite(false);
-            setFloatingButtonImage();
-            Toast.makeText(this, '"' + movieSelected.getMovieTitle() + '"' + " removed from Favorites : (", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
      * Loader cursor to load from the database
      */
     private class DatabaseMovieDetailsLoader implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -744,6 +743,8 @@ public class DetailsActivity extends AppCompatActivity {
 
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+//            Log.v("DB", "STARTING LOADER");
 
             switch (id) {
                 case FAVORITE_MOVIES_LOADER_BY_ID:
@@ -805,7 +806,8 @@ public class DetailsActivity extends AppCompatActivity {
             movieSelected.setMovieLanguage(movieLanguage);
             movieSelected.setMovieRuntime(Double.parseDouble(movieRuntime));
 
-            // TODO: ADD CAST, REVIEWS AND IMAGES
+            // Cast
+            fillMovieCastFromDB(movieCast);
 
             movieSelected.setIsMovieForAdults(Boolean.parseBoolean(movieIsForAdults));
             movieSelected.setMovieBackdropPath(movieBackdropPath);
@@ -813,15 +815,33 @@ public class DetailsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Format the cast string retrieved from the database into
+     * an ArrayList and set it as the cast attribute of the movie selected
+     *
+     * @param movieCast A String containing the cast names separated by ", "
+     */
+    private void fillMovieCastFromDB(String movieCast) {
+
+        ArrayList<String> castArray = new ArrayList<>();
+
+        for(String actor : movieCast.substring(1, movieCast.length() - 1).split(", ")) {
+            castArray.add(actor);
+        }
+
+        movieSelected.setMovieCast(castArray);
+    }
 
     /**
      * Loads a movie poster from the database
-     * @param context The context of the activity that called this method
-     * @param movieSelected The movie object selected
      *
+     * @param context       The context of the activity that called this method
+     * @param movieSelected The movie object selected
      * @return A Bitmap representing the corresponding poster
      */
     public static Bitmap loadPosterFromDatabase(Context context, Movie movieSelected) {
+
+//        Log.v("DB", "LOADING POSTER FROM DATABASE");
 
         Uri uri = MoviesDBContract.FavoriteMoviesEntry.CONTENT_URI.buildUpon()
                 .appendPath(Integer.toString(movieSelected.getMovieId()))
@@ -839,11 +859,11 @@ public class DetailsActivity extends AppCompatActivity {
                 MoviesDBContract.FavoriteMoviesEntry._ID);
 
         posterPathCursor.moveToFirst();
+
         String posterPath = posterPathCursor.getString(posterPathCursor
                 .getColumnIndex(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH));
 
         return FavoritesUtils.loadImageFromStorage(posterPath, Integer.toString(movieSelected.getMovieId()));
-
     }
 
     /**
@@ -856,5 +876,33 @@ public class DetailsActivity extends AppCompatActivity {
         moviePosterView.setImageBitmap(posterImage);
         floatingActionButtonFavorite.setVisibility(View.VISIBLE);
         addOnClickListenerToFloatingActionButtons();
+    }
+
+    /**
+     * Creates an ArrayList of strings from a JSON in string format
+     *
+     * @param stringCast JSON in String format containing the results
+     *                   of requesting the movie's cast to MovieDB API
+     */
+    private void extractMovieCastArrayFromJSON(String stringCast) {
+
+        JSONObject jsonCast = null;
+        ArrayList<String> castArray = new ArrayList<String>();
+
+        try {
+            jsonCast = new JSONObject(stringCast);
+            JSONArray arrayJSONCast = jsonCast.getJSONArray("cast");
+
+            int i;
+            for(i = 0; i < 10; i++ ) {
+                castArray.add(arrayJSONCast.getJSONObject(i).getString("name"));
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        movieSelected.setMovieCast(castArray);
+
     }
 }
