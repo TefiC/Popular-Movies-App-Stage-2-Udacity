@@ -16,7 +16,7 @@ public class LoaderUtils {
     public static final int TRAILERS_SEARCH_LOADER = 30;
     public static final int FAVORITE_MOVIES_LOADER = 60;
     public static final int FAVORITE_MOVIES_LOADER_BY_ID = 35;
-    public static final int FAVORITE_REVIEWS_LOADER = 100;
+    public static final int REVIEWS_LOADER = 100;
 
     public static final String[] MAIN_FAVORITE_MOVIES_PROJECTION = {
 
@@ -32,7 +32,8 @@ public class LoaderUtils {
             MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_LANGUAGE,
             MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_RUNTIME,
             MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_CAST,
-            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS,
+            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS_AUTHOR,
+            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS_TEXT,
             MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_IS_FOR_ADULTS,
             MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP,
             MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS,

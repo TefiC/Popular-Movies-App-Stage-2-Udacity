@@ -31,7 +31,8 @@ public class MoviesDBHelper extends SQLiteOpenHelper {
                               MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_LANGUAGE             + " TEXT NOT NULL, " +
                               MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_RUNTIME              + " TEXT NOT NULL, " +
                               MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_CAST                 + " TEXT NOT NULL, " +
-                              MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS              + " TEXT NOT NULL, " +
+                              MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS_AUTHOR       + " TEXT, "          +
+                              MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS_TEXT         + " TEXT, "          +
                               MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_IS_FOR_ADULTS        + " TEXT NOT NULL, " +
                               MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP             + " TEXT NOT NULL, " +
                               MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS  + " TEXT NOT NULL, " +

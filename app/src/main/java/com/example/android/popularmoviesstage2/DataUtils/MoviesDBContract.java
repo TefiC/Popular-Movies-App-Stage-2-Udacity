@@ -41,7 +41,9 @@ public final class MoviesDBContract {
         public static final String COLUMN_NAME_RUNTIME = "runtime";
 
         public static final String COLUMN_NAME_CAST = "cast";
-        public static final String COLUMN_NAME_REVIEWS = "reviews";
+        public static final String COLUMN_NAME_REVIEWS_AUTHOR = "reviewsAuthor";
+        public static final String COLUMN_NAME_REVIEWS_TEXT = "reviewsText";
+
         public static final String COLUMN_NAME_IS_FOR_ADULTS = "isForAdults";
         public static final String COLUMN_NAME_BACKDROP = "backdrop";
 

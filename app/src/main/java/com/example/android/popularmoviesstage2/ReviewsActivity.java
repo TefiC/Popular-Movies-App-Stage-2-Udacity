@@ -1,35 +1,26 @@
 package com.example.android.popularmoviesstage2;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
-import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 
-import com.example.android.popularmoviesstage2.utils.LoaderUtils;
-import com.example.android.popularmoviesstage2.utils.NetworkUtils;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.LongAccumulator;
 
 public class ReviewsActivity extends AppCompatActivity {
 
     private static final int NUM_LIST_ITEMS = 5;
 
     private Movie mMovieSelected;
+    private String mReviewsString;
     private ArrayList<MovieReview> mMovieReviewsArray;
     private RecyclerView mReviewsRecyclerView;
     private ReviewsRecyclerViewAdapter mReviewsAdapter;
@@ -52,17 +43,11 @@ public class ReviewsActivity extends AppCompatActivity {
         if(intentThatStartedThisActivity.hasExtra("movieObject")) {
             mMovieSelected = intentThatStartedThisActivity.getExtras().getParcelable("movieObject");
 
-            LoaderManager loaderManager = getSupportLoaderManager();
-            Loader<String> reviewsSearchLoader = loaderManager.getLoader(LoaderUtils.FAVORITE_REVIEWS_LOADER);
+            mMovieReviewsArray = mMovieSelected.getMovieReviews();
 
-            Bundle queryBundle = new Bundle();
-            queryBundle.putParcelable("movieObject", mMovieSelected);
+//            Log.v("HI", "REVIEWS: " + mMovieReviewsArray);
 
-            if(reviewsSearchLoader == null) {
-                loaderManager.initLoader(LoaderUtils.FAVORITE_REVIEWS_LOADER, queryBundle, new ReviewsLoader(this));
-            } else {
-                loaderManager.restartLoader(LoaderUtils.FAVORITE_REVIEWS_LOADER, queryBundle, new ReviewsLoader(this));
-            }
+            setReviewsAdapter();
         }
 
     }
@@ -79,75 +64,21 @@ public class ReviewsActivity extends AppCompatActivity {
     }
 
 
-    // LOADER METHODS ================================================================
-
-    private String mCachedReviews;
-
-    private class ReviewsLoader implements LoaderManager.LoaderCallbacks<String> {
-
-        private Context mContext;
-
-        public ReviewsLoader(Context context) {
-            mContext = context;
-        }
-
-        @Override
-        public Loader<String> onCreateLoader(final int id, final Bundle args) {
-            return new AsyncTaskLoader<String>(mContext) {
-
-                @Override
-                protected void onStartLoading() {
-                    super.onStartLoading();
-
-                    if(args == null) {
-                        return;
-                    }
-
-                    switch(id) {
-                        case LoaderUtils.FAVORITE_REVIEWS_LOADER:
-                            if(mCachedReviews != null) {
-                                deliverResult(mCachedReviews);
-                            } else {
-                                forceLoad();
-                            }
-                    }
-                }
-
-                @Override
-                public String loadInBackground() {
-                    URL searchQueryUrl;
-                    String searchResults = null;
-
-                    searchQueryUrl = NetworkUtils.buildMovieReviewsUrl(mMovieSelected.getMovieId());
-
-                    try {
-                        searchResults = NetworkUtils.getResponseFromHttpUrl(searchQueryUrl);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    return searchResults;
-                }
-            };
-        }
-
-        @Override
-        public void onLoadFinished(Loader<String> loader, String data) {
-            formatJSONfromReviewsString(data);
-            setReviewsAdapter();
-        }
-
-        @Override
-        public void onLoaderReset(Loader<String> loader) {
-
-        }
-    }
-
     /*
      * Helper methods
      */
 
-    private ArrayList<MovieReview> formatJSONfromReviewsString(String reviewsString) {
+    /**
+     * Formats the reviews String fetched from the internet into JSON and
+     * converts it into an ArrayList of movie reviews
+     *
+     * @param reviewsString A JSON in String format with the reviews data
+     * @param movieSelected The movie selected by the user
+     * @return An ArrayList of MovieReviews
+     */
+    public static ArrayList<MovieReview> formatJSONfromReviewsString(String reviewsString, Movie movieSelected) {
+
+//        Log.v("HI", reviewsString);
 
         ArrayList<MovieReview> movieReviewsArray = new ArrayList<>();
 
@@ -168,13 +99,16 @@ public class ReviewsActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        mMovieReviewsArray = movieReviewsArray;
+        movieSelected.setMovieReviews(movieReviewsArray);
 
         return movieReviewsArray;
     }
 
     // SET ADAPTER ==========================================================================
 
+    /**
+     * Sets the ReviewsActivity RecyclerView adapter
+     */
     private void setReviewsAdapter() {
 
         mReviewsRecyclerView = (RecyclerView) findViewById(R.id.reviews_recycler_view);

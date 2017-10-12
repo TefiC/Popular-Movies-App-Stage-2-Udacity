@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import static com.example.android.popularmoviesstage2.R.id.favorite_floating_button;
 import static com.example.android.popularmoviesstage2.utils.LoaderUtils.CAST_SEARCH_LOADER;
 import static com.example.android.popularmoviesstage2.utils.LoaderUtils.FAVORITE_MOVIES_LOADER_BY_ID;
+import static com.example.android.popularmoviesstage2.utils.LoaderUtils.REVIEWS_LOADER;
 import static com.example.android.popularmoviesstage2.utils.LoaderUtils.TRAILERS_SEARCH_LOADER;
 import static com.squareup.picasso.Picasso.with;
 
@@ -188,6 +189,7 @@ public class DetailsActivity extends AppCompatActivity {
     private String cachedDetails;
     private String cachedTrailers;
     private String cachedCast;
+    private String cachedReviews;
 
 
     private class InternetLoader implements LoaderManager.LoaderCallbacks<String> {
@@ -225,11 +227,19 @@ public class DetailsActivity extends AppCompatActivity {
                             }
                             break;
                         case LoaderUtils.CAST_SEARCH_LOADER:
-                            if(cachedCast == null) {
+                            if (cachedCast == null) {
                                 forceLoad();
                             } else {
                                 deliverResult(cachedCast);
                             }
+                            break;
+                        case LoaderUtils.REVIEWS_LOADER:
+                            if (cachedReviews == null) {
+                                forceLoad();
+                            } else {
+                                deliverResult(cachedReviews);
+                            }
+                            break;
                     }
                 }
 
@@ -241,6 +251,12 @@ public class DetailsActivity extends AppCompatActivity {
                             break;
                         case LoaderUtils.TRAILERS_SEARCH_LOADER:
                             cachedTrailers = data;
+                            break;
+                        case LoaderUtils.CAST_SEARCH_LOADER:
+                            cachedCast = data;
+                            break;
+                        case LoaderUtils.REVIEWS_LOADER:
+                            cachedReviews = data;
                             break;
                     }
                     super.deliverResult(data);
@@ -262,9 +278,12 @@ public class DetailsActivity extends AppCompatActivity {
                         case LoaderUtils.CAST_SEARCH_LOADER:
                             searchQueryURL = NetworkUtils.buildMovieCastUrl(movie.getMovieId());
                             break;
+                        case LoaderUtils.REVIEWS_LOADER:
+                            searchQueryURL = NetworkUtils.buildMovieReviewsUrl(movie.getMovieId());
+                            break;
                     }
 
-                    if(searchQueryURL != null) {
+                    if (searchQueryURL != null) {
                         try {
                             searchResults = NetworkUtils.getResponseFromHttpUrl(searchQueryURL);
                         } catch (IOException e) {
@@ -296,8 +315,15 @@ public class DetailsActivity extends AppCompatActivity {
                     break;
                 case LoaderUtils.TRAILERS_SEARCH_LOADER:
                     createMovieTrailers(data, movieSelected);
-                    floatingActionButtonFavorite.setVisibility(View.VISIBLE);
+
+                    loadDataFromInternet(REVIEWS_LOADER);
+                    break;
+                case LoaderUtils.REVIEWS_LOADER:
+
+                    movieSelected.setMovieReviews(ReviewsActivity.formatJSONfromReviewsString(data, movieSelected));
+
                     addOnClickListenerToFloatingActionButtons();
+                    floatingActionButtonFavorite.setVisibility(View.VISIBLE);
                     break;
             }
         }
@@ -314,10 +340,12 @@ public class DetailsActivity extends AppCompatActivity {
      * @param loaderID The Loader's ID
      */
     private void loadDataFromInternet(int loaderID) {
+//        Log.v("DB", "LOADING FROM INTERNET");
         Bundle detailsBundle = createDetailsBundle();
 
         LoaderManager loaderManager = getSupportLoaderManager();
         Loader<String> detailsLoader = loaderManager.getLoader(loaderID);
+
         if (detailsLoader == null) {
             loaderManager.initLoader(loaderID, detailsBundle, new InternetLoader(this));
         } else {
@@ -389,7 +417,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         // Add cast
         int i;
-        for(i = 0; i < NUMBER_OF_ACTORS_TO_INCLUDE; i++){
+        for (i = 0; i < NUMBER_OF_ACTORS_TO_INCLUDE; i++) {
             movieCastView.append(movieCast.get(i) + "\n");
         }
 
@@ -573,12 +601,14 @@ public class DetailsActivity extends AppCompatActivity {
     private void addOnClickListenerToFloatingActionButtons() {
 
 
-
         FloatingActionButton favoriteButton = (FloatingActionButton) findViewById(favorite_floating_button);
 
         favoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+//                Log.v(TAG, "FAVORITE CLICKED");
+//                Log.v(TAG, "IS FAVORITE: " + movieSelected.getIsMovieFavorite());
                 if (movieSelected.getIsMovieFavorite()) {
                     removeMovieFromFavorites(mContext, movieSelected);
                     updateRemovedFromFavoritesUI();
@@ -779,6 +809,7 @@ public class DetailsActivity extends AppCompatActivity {
                 loadMovieDetailsFromDB(data);
                 fillMovieData(movieSelected);
 
+                addOnClickListenerToFloatingActionButtons();
                 mDetailsProgressBar.setVisibility(View.GONE);
                 mDetailsLayout.setVisibility(View.VISIBLE);
             }
@@ -805,8 +836,10 @@ public class DetailsActivity extends AppCompatActivity {
                     MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_RUNTIME);
             String movieCast = MainActivity.getStringFromCursor(movieDetailsCursor,
                     MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_CAST);
-            String movieReviews = MainActivity.getStringFromCursor(movieDetailsCursor,
-                    MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS);
+            String movieReviewsAuthor = MainActivity.getStringFromCursor(movieDetailsCursor,
+                    MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS_AUTHOR);
+            String movieReviewsText = MainActivity.getStringFromCursor(movieDetailsCursor,
+                    MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS_TEXT);
             String movieIsForAdults = MainActivity.getStringFromCursor(movieDetailsCursor,
                     MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_IS_FOR_ADULTS);
             String movieBackdropPath = MainActivity.getStringFromCursor(movieDetailsCursor,
@@ -820,12 +853,36 @@ public class DetailsActivity extends AppCompatActivity {
             // Cast
             fillMovieCastFromDB(movieCast);
 
+            // Reviews
+            fillMovieReviewsFromDB(movieReviewsAuthor, movieReviewsText);
+
             movieSelected.setIsMovieForAdults(Boolean.parseBoolean(movieIsForAdults));
             movieSelected.setMovieBackdropPath(movieBackdropPath);
 
 
-
         }
+    }
+
+    /**
+     * Formats the movie reviews from the data retrieved from the database and assigns
+     * this new ArrayList to the movie selected
+     *
+     * @param movieReviewsAuthor A String containing reviews authors
+     * @param movieReviewsText A String containing reviews text
+     */
+    private void fillMovieReviewsFromDB(String movieReviewsAuthor, String movieReviewsText) {
+
+        ArrayList<MovieReview> movieReviewsArrayList = new ArrayList<MovieReview>();
+
+        String[] reviewAuthorsArray = movieReviewsAuthor.split(", ");
+        String[] reviewTextArray = movieReviewsText.split("===>");
+
+        int i;
+        for(i =0; i<reviewAuthorsArray.length; i++) {
+            movieReviewsArrayList.add(new MovieReview(reviewAuthorsArray[i], reviewTextArray[i]));
+        }
+
+        movieSelected.setMovieReviews(movieReviewsArrayList);
     }
 
     /**
@@ -838,7 +895,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         ArrayList<String> castArray = new ArrayList<>();
 
-        for(String actor : movieCast.substring(1, movieCast.length() - 1).split(", ")) {
+        for (String actor : movieCast.substring(1, movieCast.length() - 1).split(", ")) {
             castArray.add(actor);
         }
 
@@ -888,7 +945,6 @@ public class DetailsActivity extends AppCompatActivity {
     private void fillMoviePosterDetailsFromDB(Bitmap posterImage) {
         moviePosterView.setImageBitmap(posterImage);
         floatingActionButtonFavorite.setVisibility(View.VISIBLE);
-        addOnClickListenerToFloatingActionButtons();
     }
 
     /**
@@ -907,7 +963,7 @@ public class DetailsActivity extends AppCompatActivity {
             JSONArray arrayJSONCast = jsonCast.getJSONArray("cast");
 
             int i;
-            for(i = 0; i < NUMBER_OF_ACTORS_TO_INCLUDE; i++ ) {
+            for (i = 0; i < NUMBER_OF_ACTORS_TO_INCLUDE; i++) {
                 castArray.add(arrayJSONCast.getJSONObject(i).getString("name"));
             }
 

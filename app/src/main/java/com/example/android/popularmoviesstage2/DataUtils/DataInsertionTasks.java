@@ -4,8 +4,14 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.util.Log;
 
 import com.example.android.popularmoviesstage2.Movie;
+import com.example.android.popularmoviesstage2.MovieReview;
+
+import java.util.ArrayList;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Tasks to insert data into the database using a service
@@ -16,6 +22,14 @@ public class DataInsertionTasks {
     public static final String ACTION_INSERT_FAVORITE = "insert-favorite-movie";
     public static final String ACTION_REMOVE_FAVORITE = "remove-favorite-movie";
 
+    /**
+     * Executes the Service's corresponding task
+     *
+     * @param context The context of the activity that called this method
+     * @param action The action that the Service was called to perform
+     * @param movieSelected The movie selected by the user
+     * @param bitmap A bitmap of the image to be saved to the database (Could be null)
+     */
     public static void executeTask(Context context, String action, Movie movieSelected, Bitmap bitmap) {
 
 //        Log.v("DB", "INSIDE TASK");
@@ -39,7 +53,6 @@ public class DataInsertionTasks {
 
         //TODO: FAKE VALUES, PLACEHOLDERS WHILE IN THE PROCESS OF BUILDING METHODS TO FETCH DATA FROM DIFFERENT URLs
         String trailers = "wjfiwoejfwofj";
-        String reviews = "sodkoadkasp";
 
         // Set movie data in the database
         cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_MOVIEDB_ID, Integer.toString(movieSelected.getMovieId()));
@@ -53,11 +66,20 @@ public class DataInsertionTasks {
         cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_RUNTIME, movieSelected.getMovieRuntime());
 
         cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_CAST, movieSelected.getMovieCast().toString());
-        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS, reviews);
         cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_IS_FOR_ADULTS, movieSelected.getIsMovieFavorite());
-        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP, movieSelected.getMovieBackdropPath());
 
+        // Reviews
+        String[] formattedReviews = formatReviewsForDB(movieSelected.getMovieReviews());
+        String formattedAuthors = formattedReviews[0];
+        String formattedReviewsText = formattedReviews[1];
+
+        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS_AUTHOR, formattedAuthors);
+        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS_TEXT, formattedReviewsText);
+
+        //Images
+        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP, movieSelected.getMovieBackdropPath());
         cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS, trailers);
+
 
         Uri uri = MoviesDBContract.FavoriteMoviesEntry.CONTENT_URI.buildUpon()
                 .appendPath(Integer.toString(movieSelected.getMovieId()))
@@ -67,16 +89,39 @@ public class DataInsertionTasks {
 
         if (insertResult != null) {
             movieSelected.setIsMovieFavorite(true);
-            //TODO: HANDLE USER INTERFACE IN DETAILS ACTIVITY
-//            Log.v("DB", "MOVIE INSERTED");
             // Save image to internal storage and insert the poster to the database
             FavoritesUtils.saveImageToInternalStorage(bitmap, Integer.toString(movieSelected.getMovieId()),
                     FavoritesUtils.IMAGE_TYPE_POSTER, context);
         } else {
-//            Log.v("DB", "MOVIE NOT INSERTED");
+            Log.v(TAG, "Movie couldn't be inserted");
+        }
+    }
+
+    /**
+     * Format reviews to insert them to the database by converting them into
+     * Strings and separating each one of the elements with a special character
+     * to distinguish where they must be split.
+     *
+     * @param movieReviews An ArrayList of MovieReview objects
+     * @return An array of two elements. The first one is the String that
+     *         contains the authors and the second elements in the String that
+     *         contains the reviews text.
+     */
+    private static String[] formatReviewsForDB(ArrayList<MovieReview> movieReviews) {
+
+        String reviewsAuthor = "";
+        String reviewsText = "";
+
+        for(MovieReview review: movieReviews) {
+            reviewsAuthor += review.getReviewAuthor() + ", ";
+            reviewsText += review.getReviewText() + "===>";
         }
 
+        String[] reviewsData = new String[2];
+        reviewsData[0] = reviewsAuthor;
+        reviewsData[1] = reviewsText;
 
+        return reviewsData;
     }
 
     /**

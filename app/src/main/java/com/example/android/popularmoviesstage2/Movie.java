@@ -30,7 +30,7 @@ public class Movie implements Parcelable {
     private double movieRuntime;
     private ArrayList<String> movieCast;
 
-    private MovieReview[] movieReviews;
+    private ArrayList<MovieReview> movieReviews;
     private boolean isMoviewForAdults;
 
     private String movieBackdropPath;
@@ -45,7 +45,7 @@ public class Movie implements Parcelable {
 
     public Movie(int movieId, String movieTitle, String movieReleaseDate, String moviePoster,
                  double movieVoteAverage, String moviePlot,String movieLanguage, double movieRuntime,
-                 ArrayList<String> movieCast, MovieReview[] movieReviews, boolean isMoviewForAdults,
+                 ArrayList<String> movieCast, ArrayList<MovieReview> movieReviews, boolean isMoviewForAdults,
                  String movieBackdropPath, String movieTrailersThumbnails) {
         this.movieId = movieId;
         this.movieTitle = movieTitle;
@@ -81,7 +81,7 @@ public class Movie implements Parcelable {
         movieRuntime = in.readDouble();
         movieCast = in.createStringArrayList();
 
-        movieReviews = in.createTypedArray(MovieReview.CREATOR);
+        movieReviews = in.createTypedArrayList(MovieReview.CREATOR);
 
         isMoviewForAdults = in.readInt() == 1;
         movieBackdropPath = in.readString();
@@ -113,7 +113,7 @@ public class Movie implements Parcelable {
         parcel.writeDouble(movieRuntime);
         parcel.writeStringList(movieCast);
 
-        parcel.writeTypedArray(movieReviews, i);
+        parcel.writeTypedList(movieReviews);
 
         parcel.writeValue(isMoviewForAdults ? 1 : 0);
         parcel.writeString(movieBackdropPath);
@@ -167,7 +167,7 @@ public class Movie implements Parcelable {
 
     public ArrayList<String> getMovieCast() { return this.movieCast; }
 
-    public MovieReview[] getMovieReviews() { return this.movieReviews; }
+    public ArrayList<MovieReview> getMovieReviews() { return this.movieReviews; }
 
     public boolean getIsMovieForAdults() { return this.isMoviewForAdults; }
 
@@ -209,7 +209,7 @@ public class Movie implements Parcelable {
 
     public void setMovieCast(ArrayList<String> cast) { this.movieCast = cast; }
 
-    public void setMovieReviews(MovieReview[] movieReviews) { this.movieReviews = movieReviews; }
+    public void setMovieReviews(ArrayList<MovieReview> movieReviews) { this.movieReviews = movieReviews; }
 
     public void setIsMovieForAdults(boolean isMovieForAdults) { this.isMoviewForAdults = isMovieForAdults; }
 
