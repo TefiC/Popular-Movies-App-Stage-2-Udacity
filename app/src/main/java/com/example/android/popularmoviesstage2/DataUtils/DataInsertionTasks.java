@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 
+import com.example.android.popularmoviesstage2.DetailsActivity;
 import com.example.android.popularmoviesstage2.Movie;
 import com.example.android.popularmoviesstage2.MovieReview;
 import com.squareup.picasso.NetworkPolicy;
@@ -51,9 +52,6 @@ public class DataInsertionTasks {
 
         ContentValues cv = new ContentValues();
 
-        //TODO: FAKE VALUES, PLACEHOLDERS WHILE IN THE PROCESS OF BUILDING METHODS TO FETCH DATA FROM DIFFERENT URLs
-        String trailers = "wjfiwoejfwofj";
-
         // Set movie data in the database
         cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_MOVIEDB_ID, Integer.toString(movieSelected.getMovieId()));
         cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TITLE, movieSelected.getMovieTitle());
@@ -78,7 +76,7 @@ public class DataInsertionTasks {
 
         //Images
         cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP, movieSelected.getMovieBackdropPath());
-        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS, trailers);
+        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS, "");
 
 
         Uri uri = MoviesDBContract.FavoriteMoviesEntry.CONTENT_URI.buildUpon()
@@ -91,20 +89,37 @@ public class DataInsertionTasks {
 
 
             try {
+
+                //Save poster
                 Bitmap bitmapPoster = Picasso.with(context)
                         .load(movieSelected.getMoviePosterPath())
                         .networkPolicy(NetworkPolicy.OFFLINE)
                         .get();
 
-                // TODO: LOAD BACKDROP WITH PICASSO AND SAVE IT TO LOCAL STORAGE
-
-                if(bitmapPoster != null) {
-//                    movieSelected.setIsMovieFavorite(true);
-                }
-
                 FavoritesUtils.saveImageToInternalStorage(bitmapPoster, Integer.toString(movieSelected.getMovieId()),
                         FavoritesUtils.IMAGE_TYPE_POSTER, context);
 
+                //Save backdrop
+                Bitmap bitmapBackdrop = Picasso.with(context)
+                        .load(DetailsActivity.MOVIEDB_POSTER_BASE_URL + DetailsActivity.BACKDROP_SIZE + movieSelected.getMovieBackdropPath())
+                        .networkPolicy(NetworkPolicy.OFFLINE)
+                        .get();
+
+                FavoritesUtils.saveImageToInternalStorage(bitmapBackdrop, Integer.toString(movieSelected.getMovieId()),
+                        FavoritesUtils.IMAGE_TYPE_BACKDROP, context);
+
+                //Save trailer thumbnails
+                int i;
+                for(i = 0; i < movieSelected.getMovieTrailersThumbnails().size(); i++) {
+                    Log.v("INSERTING ", "INSERTING THUMBNAIL");
+                    Bitmap bitmapTrailer = Picasso.with(context)
+                            .load(movieSelected.getMovieTrailersThumbnails().get(i))
+                            .networkPolicy(NetworkPolicy.OFFLINE)
+                            .get();
+                    //Save thumbnails
+                    FavoritesUtils.saveImageToInternalStorage(bitmapTrailer, Integer.toString(movieSelected.getMovieId()),
+                            FavoritesUtils.IMAGE_TYPE_TRAILER_THUMBNAIL, context);
+                }
 
             } catch (IOException e) {
                 e.printStackTrace();

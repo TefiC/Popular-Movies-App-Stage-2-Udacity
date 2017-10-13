@@ -2,12 +2,14 @@ package com.example.android.popularmoviesstage2;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -42,6 +44,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.example.android.popularmoviesstage2.R.id.favorite_floating_button;
 import static com.example.android.popularmoviesstage2.utils.LoaderUtils.CAST_SEARCH_LOADER;
@@ -92,7 +96,7 @@ public class DetailsActivity extends AppCompatActivity {
     public static final String BACKDROP_SIZE = "w300";
 
     //Get movie trailer thumbnail
-    private static final String TRAILER_THUMBNAIL_BASE_PATH = "https://img.youtube.com/vi/";
+    public static final String TRAILER_THUMBNAIL_BASE_PATH = "https://img.youtube.com/vi/";
 
     //Launch trailer
     private static final String YOUTUBE_BASE_PATH = "https://www.youtube.com/watch?v=";
@@ -127,6 +131,8 @@ public class DetailsActivity extends AppCompatActivity {
         if (intentThatStartedThisActivity.hasExtra("movieObject")) {
             Movie movie = intentThatStartedThisActivity.getExtras().getParcelable("movieObject");
             movieSelected = movie;
+
+            Log.v("DB", Boolean.toString(movie.getIsMovieFavorite()));
 
             // Set activity title
             setTitle(movie.getMovieTitle());
@@ -391,14 +397,16 @@ public class DetailsActivity extends AppCompatActivity {
         String movieBackdropPath = createFullBackdropPath(movie.getMovieBackdropPath());
 
         // Update views
-        if (movieSelected.getIsMovieFavorite() && movieSelected.getMoviePosterPath() != null) {
+        if (movieSelected.getIsMovieFavorite()) {
 //            Log.v("DB", "LOADING POSTER IN DETAILS");
             fillMoviePosterDetailsFromDB(loadPosterFromDatabase(this, movieSelected));
+            fillMovieBackdropDetailsFromDB(loadBackdropFromDatabase(this, movieSelected));
+            displayTrailersBitmapsOnUI(loadMovieTrailersFromDatabase(this, movieSelected));
         } else {
             loadMoviePoster(posterPath);
+            loadMovieBackdrop(movieBackdropPath);
         }
 
-        loadMovieBackdrop(movieBackdropPath);
 
         //Determine if it is favorite or not and update button
         movieSelected.setIsMovieFavorite(FavoritesUtils.checkIfMovieIsFavorite(this, Integer.toString(movieSelected.getMovieId())));
@@ -635,6 +643,10 @@ public class DetailsActivity extends AppCompatActivity {
 //        Log.v("DB", "REMOVING POSTER FROM DATABASE");
         movieSelected.setIsMovieFavorite(false);
 
+        boolean results = removeFavoriteFromSharedPreferences(context, movieSelected);
+
+        Log.v("FAVORITES", "REMOVED " + results);
+
         Intent intent = new Intent(context, FavoritesDataIntentService.class);
         intent.setAction(DataInsertionTasks.ACTION_REMOVE_FAVORITE);
         intent.putExtra("movieObject", movieSelected);
@@ -649,7 +661,41 @@ public class DetailsActivity extends AppCompatActivity {
     public static void addMovieToFavorites(Context context, Movie movieSelected) {
         movieSelected.setIsMovieFavorite(true);
 
+        boolean results = addFavoriteToSharedPreferences(context, movieSelected);
+
+        Log.v("FAVORITES", "ADDED " + results);
+
         FavoritesUtils.addFavoriteToDatabase(context, movieSelected);
+    }
+
+    private static boolean addFavoriteToSharedPreferences(Context context, Movie movieSelected) {
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+        if(sharedPreferences.contains("favoriteMoviesPreferences")) {
+
+            return sharedPreferences.getStringSet("favoriteMoviesPreferences", null).add(Integer.toString(movieSelected.getMovieId()));
+
+        } else {
+
+            // Add movie to String set
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            Set<String> stringSet = new HashSet<String>();
+            stringSet.add(Integer.toString(movieSelected.getMovieId()));
+
+            editor.putStringSet("favoriteMoviesPreferences", stringSet);
+
+            editor.apply();
+
+            Log.v("FAVORITES ", "CONTAINS " + sharedPreferences.contains("favoriteMoviesPreferences"));
+
+            return sharedPreferences.contains("favoriteMoviesPreferences");
+        }
+    }
+
+    private static boolean removeFavoriteFromSharedPreferences(Context context, Movie movieSelected) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getStringSet("favoriteMoviesPreferences", null).remove(Integer.toString(movieSelected.getMovieId()));
     }
 
     public void updateAddedToFavoritesUI() {
@@ -942,6 +988,7 @@ public class DetailsActivity extends AppCompatActivity {
         return FavoritesUtils.loadImageFromStorage(posterPath, Integer.toString(movieSelected.getMovieId()));
     }
 
+
     /**
      * Sets the ImageView resource in the Details Activity to be
      * the corresponding poster
@@ -952,6 +999,110 @@ public class DetailsActivity extends AppCompatActivity {
         moviePosterView.setImageBitmap(posterImage);
         floatingActionButtonFavorite.setVisibility(View.VISIBLE);
     }
+
+
+    public static Bitmap loadBackdropFromDatabase(Context context, Movie movieSelected) {
+
+        Uri uri = MoviesDBContract.FavoriteMoviesEntry.CONTENT_URI.buildUpon()
+                .appendPath(Integer.toString(movieSelected.getMovieId()))
+                .build();
+
+        String[] posterProjection = {
+                MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP
+        };
+
+        Cursor posterPathCursor = context.getContentResolver().query(
+                uri,
+                posterProjection,
+                null,
+                null,
+                MoviesDBContract.FavoriteMoviesEntry._ID);
+
+        posterPathCursor.moveToFirst();
+
+        String backdropPath = posterPathCursor.getString(posterPathCursor
+                .getColumnIndex(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP));
+
+        return FavoritesUtils.loadImageFromStorage(backdropPath, Integer.toString(movieSelected.getMovieId()));
+    }
+
+    private void fillMovieBackdropDetailsFromDB(Bitmap backdropImage) {
+        movieBackdropView.setImageBitmap(backdropImage);
+    }
+
+
+
+    private ArrayList<Bitmap> loadMovieTrailersFromDatabase(Context context, Movie movieSelected) {
+
+        ArrayList<Bitmap> trailersBitmapArray = new ArrayList<>();
+
+        Uri uri = MoviesDBContract.FavoriteMoviesEntry.CONTENT_URI.buildUpon()
+                .appendPath(Integer.toString(movieSelected.getMovieId()))
+                .build();
+
+        String[] posterProjection = {
+                MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS
+        };
+
+        Cursor trailersPathsCursor = context.getContentResolver().query(
+                uri,
+                posterProjection,
+                null,
+                null,
+                MoviesDBContract.FavoriteMoviesEntry._ID);
+
+        trailersPathsCursor.moveToFirst();
+
+        String trailersPathsString = MainActivity.getStringFromCursor(trailersPathsCursor,
+                MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS);
+
+        String[] trailersPathArray  =  trailersPathsString.split("==>");
+
+        for(String trailerPath: trailersPathArray) {
+            trailersBitmapArray.add(FavoritesUtils.loadImageFromStorage(trailerPath, Integer.toString(movieSelected.getMovieId())));
+        }
+
+        return trailersBitmapArray;
+    }
+
+
+    private void displayTrailersBitmapsOnUI(ArrayList<Bitmap> trailersThumbnails) {
+
+        int i;
+        for(i = 0; i < trailersThumbnails.size(); i++) {
+            //Create ImageView, set its properties and add it to the layout
+            ImageView trailerView = new ImageView(this);
+            movieDetailsTrailerLinearContainer.addView(trailerView, i);
+            trailerView.setImageBitmap(trailersThumbnails.get(i));
+
+
+            // TODO: SET PROPERTIES IN A SEPARATE METHOD
+            // Set dimensions
+            int height = convertDpToPixels(120);
+            int width = convertDpToPixels(150);
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(width, height);
+
+            // Set margin
+            int marginEnd = convertDpToPixels(10);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                params.setMarginEnd(marginEnd);
+            } else {
+                params.setMargins(marginEnd, marginEnd, marginEnd, marginEnd);
+            }
+
+            //Set tag
+            //TODO: ADD TAG TO THE TRAILER THUMBNAIL
+            trailerView.setTag(5);
+
+            // Include parameters
+            trailerView.setLayoutParams(params);
+
+            //Image scale type
+            trailerView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        }
+    }
+
 
     /**
      * Creates an ArrayList of strings from a JSON in string format

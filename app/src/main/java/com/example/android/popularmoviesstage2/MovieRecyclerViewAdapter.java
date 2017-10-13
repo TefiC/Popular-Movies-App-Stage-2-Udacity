@@ -1,7 +1,9 @@
 package com.example.android.popularmoviesstage2;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -16,6 +18,8 @@ import com.example.android.popularmoviesstage2.DataUtils.FavoritesUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+
+import static com.example.android.popularmoviesstage2.R.drawable.movie;
 
 /**
  * RecyclerView for a grid of movies
@@ -92,9 +96,22 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
 
             // Determine logos
             determineForAdultsLogo(holder, movie.getIsMovieForAdults());
-            determineMainPosterFavoriteLogo(holder, movie, FavoritesUtils.checkIfMovieIsFavorite(mContext, Integer.toString(movie.getMovieId())));
+//            determineMainPosterFavoriteLogo(holder, movie, FavoritesUtils.checkIfMovieIsFavorite(mContext, Integer.toString(movie.getMovieId())));
+            determineMainPosterFavoriteLogo(holder, movie, determineIfMovieIsFavorite(movie));
         }
     }
+
+    private boolean determineIfMovieIsFavorite(Movie movie) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+
+        if(sharedPreferences.contains("favoriteMoviesPreferences")) {
+            Log.v("FAVORITES ", "FROM SHARED PREFERENCES");
+            return sharedPreferences.getStringSet("favoriteMoviesPreferences", null).contains(Integer.toString(movie.getMovieId()));
+        } else {
+            return false;
+        }
+    }
+
 
     /**
      * Determines the image resource to be used for the logo

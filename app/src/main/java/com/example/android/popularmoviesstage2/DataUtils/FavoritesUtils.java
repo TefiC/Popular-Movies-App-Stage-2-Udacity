@@ -10,7 +10,9 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.util.Log;
 
+import com.example.android.popularmoviesstage2.MainActivity;
 import com.example.android.popularmoviesstage2.Movie;
 import com.example.android.popularmoviesstage2.R;
 import com.example.android.popularmoviesstage2.utils.FavoritesDataIntentService;
@@ -20,6 +22,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import static com.example.android.popularmoviesstage2.MainActivity.getStringFromCursor;
 
 /**
  * Utility method to handle everything related to adding, maintaining and retrieving
@@ -119,7 +123,7 @@ public class FavoritesUtils {
                 fos = new FileOutputStream(posterPath);
                 // Use the compress method on the BitMap object to write image to the OutputStream
                 bitmapPoster.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                saveImagePathToDatabase(context, directory.getAbsolutePath(), movieDBId);
+                saveImagePathToDatabase(context, directory.getAbsolutePath(), movieDBId, imageType);
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -144,18 +148,47 @@ public class FavoritesUtils {
      * @param imageInternalPath Absolute path for the image without its ID
      * @param movieDBId The Movie's MovieDB Id
      */
-    private static void saveImagePathToDatabase(Context context, String imageInternalPath, String movieDBId) {
+    private static void saveImagePathToDatabase(Context context, String imageInternalPath, String movieDBId, String imageType) {
 
         ContentValues cv = new ContentValues();
-
-        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH, imageInternalPath);
 
         Uri uri = MoviesDBContract.FavoriteMoviesEntry.CONTENT_URI.buildUpon()
                 .appendPath(movieDBId)
                 .build();
 
+        switch (imageType) {
+            case FavoritesUtils.IMAGE_TYPE_POSTER:
+                cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH, imageInternalPath);
+                break;
+            case FavoritesUtils.IMAGE_TYPE_BACKDROP:
+                cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP, imageInternalPath);
+                break;
+            case FavoritesUtils.IMAGE_TYPE_TRAILER_THUMBNAIL:
+                Cursor previousThumbnails = context.getContentResolver().query(uri,
+                        new String[] {MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS},
+                        null,
+                        null);
+
+                previousThumbnails.moveToFirst();
+
+                String previousString = MainActivity.getStringFromCursor(previousThumbnails,
+                        MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS);
+
+                String newThumbnails = "";
+
+                newThumbnails += previousString + imageInternalPath + "==>";
+
+                cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS,
+                        newThumbnails);
+
+                Log.v("FavoriteUtils ", "UPDATING THUMBNAILS");
+
+                break;
+        }
+
         int updateResult = context.getContentResolver().update(uri, cv, null, null);
 
+        Log.v("UPDATED ", "NUMBER " + updateResult);
     }
 
     /**

@@ -104,6 +104,9 @@ public class ReviewsActivity extends AppCompatActivity {
         return movieReviewsArray;
     }
 
+
+
+
     // SET ADAPTER ==========================================================================
 
     /**

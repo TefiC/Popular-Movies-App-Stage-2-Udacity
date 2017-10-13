@@ -115,11 +115,11 @@ public class Movie implements Parcelable {
 
         parcel.writeTypedList(movieReviews);
 
-        parcel.writeValue(isMoviewForAdults ? 1 : 0);
+        parcel.writeInt(isMoviewForAdults ? 1 : 0);
         parcel.writeString(movieBackdropPath);
         parcel.writeStringList(movieTrailersThumbnails);
 
-        parcel.writeValue(isFavorite ? 1 : 0);
+        parcel.writeInt(isFavorite ? 1 : 0);
     }
 
     public static Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>() {
