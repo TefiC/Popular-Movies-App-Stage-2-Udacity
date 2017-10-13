@@ -266,6 +266,8 @@ public class DetailsActivity extends AppCompatActivity {
                             cachedReviews = data;
                             break;
                     }
+
+                    mDetailsProgressBar.setVisibility(View.GONE);
                     super.deliverResult(data);
                 }
 
@@ -309,6 +311,7 @@ public class DetailsActivity extends AppCompatActivity {
                 case LoaderUtils.DETAILS_SEARCH_LOADER:
 //                    Log.v("DB", "LOADING DATA FROM INTERNET");
                     addMovieDetails(data, movieSelected);
+                    mDetailsProgressBar.setVisibility(View.GONE);
                     loadDataFromInternet(CAST_SEARCH_LOADER);
                     break;
                 case LoaderUtils.CAST_SEARCH_LOADER:
@@ -401,7 +404,7 @@ public class DetailsActivity extends AppCompatActivity {
 //            Log.v("DB", "LOADING POSTER IN DETAILS");
             fillMoviePosterDetailsFromDB(loadPosterFromDatabase(this, movieSelected));
             fillMovieBackdropDetailsFromDB(loadBackdropFromDatabase(this, movieSelected));
-            displayTrailersBitmapsOnUI(loadMovieTrailersFromDatabase(this, movieSelected));
+            displayTrailersBitmapsOnUI(loadMovieTrailersFromDatabase(this, movieSelected), loadTrailerTagsFromDatabase(this, movieSelected));
         } else {
             loadMoviePoster(posterPath);
             loadMovieBackdrop(movieBackdropPath);
@@ -545,7 +548,7 @@ public class DetailsActivity extends AppCompatActivity {
                     loadMovieTrailerThumbnail(trailerView, trailerKey);
 
                     // Set onClick listener
-                    setTrailerOnClickListener(trailerView, trailerKey);
+                    setTrailerOnClickListener(this, trailerView, trailerKey);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -569,9 +572,8 @@ public class DetailsActivity extends AppCompatActivity {
 
         // Update in reference
         if(searchURL != null) {
-            movieSelected.getMovieTrailersThumbnails().add(searchURL);
+            movieSelected.getMovieTrailersThumbnails().add(new MovieTrailerThumbnail(searchURL, trailerKey));
         }
-
 
         Log.v(TAG, "MOVIE THUMBNAILS: " + movieSelected.getMovieTrailersThumbnails().toString());
 
@@ -589,12 +591,12 @@ public class DetailsActivity extends AppCompatActivity {
      *
      * @param trailerKey The trailer's key to add to Youtube's base path
      */
-    private void launchTrailer(String trailerKey) {
+    private static void launchTrailer(Context context, String trailerKey) {
         Uri youtubeLink = Uri.parse(YOUTUBE_BASE_PATH + trailerKey);
         Intent intent = new Intent(Intent.ACTION_VIEW, youtubeLink);
 
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
+        if (intent.resolveActivity(context.getPackageManager()) != null) {
+            context.startActivity(intent);
         }
     }
 
@@ -605,11 +607,11 @@ public class DetailsActivity extends AppCompatActivity {
      * @param trailerView The trailer's ImageView
      * @param trailerKey  The trailer's key to append to Youtube's URL
      */
-    private void setTrailerOnClickListener(ImageView trailerView, final String trailerKey) {
+    private static void setTrailerOnClickListener(final Context context, ImageView trailerView, final String trailerKey) {
         trailerView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                launchTrailer(trailerKey);
+                launchTrailer(context, trailerKey);
             }
         });
     }
@@ -871,7 +873,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
-            //
+            mDetailsProgressBar.setVisibility(View.GONE);
         }
     }
 
@@ -985,7 +987,7 @@ public class DetailsActivity extends AppCompatActivity {
         String posterPath = posterPathCursor.getString(posterPathCursor
                 .getColumnIndex(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH));
 
-        return FavoritesUtils.loadImageFromStorage(posterPath, Integer.toString(movieSelected.getMovieId()));
+        return FavoritesUtils.loadImageFromStorage(posterPath, Integer.toString(movieSelected.getMovieId()), FavoritesUtils.IMAGE_TYPE_POSTER, 0);
     }
 
 
@@ -1023,7 +1025,8 @@ public class DetailsActivity extends AppCompatActivity {
         String backdropPath = posterPathCursor.getString(posterPathCursor
                 .getColumnIndex(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP));
 
-        return FavoritesUtils.loadImageFromStorage(backdropPath, Integer.toString(movieSelected.getMovieId()));
+        return FavoritesUtils.loadImageFromStorage(backdropPath, Integer.toString(movieSelected.getMovieId()),
+                FavoritesUtils.IMAGE_TYPE_BACKDROP, 0);
     }
 
     private void fillMovieBackdropDetailsFromDB(Bitmap backdropImage) {
@@ -1035,6 +1038,7 @@ public class DetailsActivity extends AppCompatActivity {
     private ArrayList<Bitmap> loadMovieTrailersFromDatabase(Context context, Movie movieSelected) {
 
         ArrayList<Bitmap> trailersBitmapArray = new ArrayList<>();
+
 
         Uri uri = MoviesDBContract.FavoriteMoviesEntry.CONTENT_URI.buildUpon()
                 .appendPath(Integer.toString(movieSelected.getMovieId()))
@@ -1053,20 +1057,64 @@ public class DetailsActivity extends AppCompatActivity {
 
         trailersPathsCursor.moveToFirst();
 
-        String trailersPathsString = MainActivity.getStringFromCursor(trailersPathsCursor,
+        String trailersDataString = MainActivity.getStringFromCursor(trailersPathsCursor,
                 MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS);
 
-        String[] trailersPathArray  =  trailersPathsString.split("==>");
+        String[] trailersArray  =  trailersDataString.split("==>");
 
-        for(String trailerPath: trailersPathArray) {
-            trailersBitmapArray.add(FavoritesUtils.loadImageFromStorage(trailerPath, Integer.toString(movieSelected.getMovieId())));
+        int i = 0;
+        for(String trailer: trailersArray) {
+            String[] trailerData = trailer.split(FavoritesUtils.CHARACTER_TO_SEPARATE_THUMBNAIL_TAG);
+            String trailerPath = trailerData[0];
+
+            trailersBitmapArray.add(FavoritesUtils.loadImageFromStorage(trailerPath, Integer.toString(movieSelected.getMovieId()),
+                    FavoritesUtils.IMAGE_TYPE_TRAILER_THUMBNAIL, i));
+            i++;
         }
 
         return trailersBitmapArray;
     }
 
+    private ArrayList<String> loadTrailerTagsFromDatabase(Context context, Movie movieSelected) {
 
-    private void displayTrailersBitmapsOnUI(ArrayList<Bitmap> trailersThumbnails) {
+        ArrayList<String> trailerTagArray = new ArrayList<String>();
+
+
+        Uri uri = MoviesDBContract.FavoriteMoviesEntry.CONTENT_URI.buildUpon()
+                .appendPath(Integer.toString(movieSelected.getMovieId()))
+                .build();
+
+        String[] posterProjection = {
+                MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS
+        };
+
+        Cursor trailersPathsCursor = context.getContentResolver().query(
+                uri,
+                posterProjection,
+                null,
+                null,
+                MoviesDBContract.FavoriteMoviesEntry._ID);
+
+        trailersPathsCursor.moveToFirst();
+
+        String trailersDataString = MainActivity.getStringFromCursor(trailersPathsCursor,
+                MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS);
+
+        String[] trailersArray  =  trailersDataString.split("==>");
+
+
+        for(String trailer: trailersArray) {
+            String[] trailerData = trailer.split(FavoritesUtils.CHARACTER_TO_SEPARATE_THUMBNAIL_TAG);
+            String trailerTag = trailerData[1];
+
+            trailerTagArray.add(trailerTag);
+        }
+
+        return trailerTagArray;
+    }
+
+
+    private void displayTrailersBitmapsOnUI(ArrayList<Bitmap> trailersThumbnails, ArrayList<String> trailersTags) {
 
         int i;
         for(i = 0; i < trailersThumbnails.size(); i++) {
@@ -1100,6 +1148,8 @@ public class DetailsActivity extends AppCompatActivity {
 
             //Image scale type
             trailerView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+            setTrailerOnClickListener(this, trailerView, trailersTags.get(i));
         }
     }
 

@@ -94,7 +94,8 @@ public class FavoritesUtils {
      * @return The directory's absolute path
      */
     public static String saveImageToInternalStorage(Bitmap bitmapPoster, String movieDBId,
-                                                     String imageType, Context context) {
+                                                     String imageType, Context context, Movie movieSelected,
+                                                    int thumbnailIndex) {
 
         ContextWrapper cw = new ContextWrapper(context);
 
@@ -115,15 +116,22 @@ public class FavoritesUtils {
         }
 
         if (directory != null) {
-            // Create imageDir
-            File posterPath = new File(directory, movieDBId + ".jpg");
+
+            File posterPath = null;
+
+            if(imageType.equals(FavoritesUtils.IMAGE_TYPE_TRAILER_THUMBNAIL)) {
+                posterPath = new File(directory, movieDBId + thumbnailIndex + ".jpg");
+            } else {
+                // Create imageDir
+                posterPath = new File(directory, movieDBId + ".jpg");
+            }
 
             FileOutputStream fos = null;
             try {
                 fos = new FileOutputStream(posterPath);
                 // Use the compress method on the BitMap object to write image to the OutputStream
                 bitmapPoster.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                saveImagePathToDatabase(context, directory.getAbsolutePath(), movieDBId, imageType);
+                saveImagePathToDatabase(context, directory.getAbsolutePath(), movieDBId, imageType, movieSelected, thumbnailIndex);
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -140,6 +148,8 @@ public class FavoritesUtils {
         return directory.getAbsolutePath();
     }
 
+    public static final String CHARACTER_TO_SEPARATE_THUMBNAIL_TAG = ">";
+    public static final String CHARACTER_TO_SEPARATE_THUMBNAILS = "==>";
 
     /**
      * Saves the image path to the database
@@ -148,7 +158,9 @@ public class FavoritesUtils {
      * @param imageInternalPath Absolute path for the image without its ID
      * @param movieDBId The Movie's MovieDB Id
      */
-    private static void saveImagePathToDatabase(Context context, String imageInternalPath, String movieDBId, String imageType) {
+    private static void saveImagePathToDatabase(Context context, String imageInternalPath,
+                                                String movieDBId, String imageType, Movie movieSelected,
+                                                int thumbnailIndex) {
 
         ContentValues cv = new ContentValues();
 
@@ -176,7 +188,11 @@ public class FavoritesUtils {
 
                 String newThumbnails = "";
 
-                newThumbnails += previousString + imageInternalPath + "==>";
+                newThumbnails += previousString +
+                        imageInternalPath +
+                        CHARACTER_TO_SEPARATE_THUMBNAIL_TAG +
+                        movieSelected.getMovieTrailersThumbnails().get(thumbnailIndex).getThumbnailTag() +
+                        CHARACTER_TO_SEPARATE_THUMBNAILS;
 
                 cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS,
                         newThumbnails);
@@ -199,12 +215,20 @@ public class FavoritesUtils {
      *
      * @return A Bitmap of the corresponding image
      */
-    public static Bitmap loadImageFromStorage(String path, String movieDBId) {
+    public static Bitmap loadImageFromStorage(String path, String movieDBId, String imageType, int thumbnailIndex) {
 
         Bitmap bitmap = null;
 
         try {
-            File f = new File(path, movieDBId + ".jpg");
+
+            File f;
+
+            if(imageType.equals(FavoritesUtils.IMAGE_TYPE_TRAILER_THUMBNAIL)) {
+                f = new File(path, movieDBId + thumbnailIndex + ".jpg");
+            } else {
+                f = new File(path, movieDBId + ".jpg");
+            }
+
             bitmap = BitmapFactory.decodeStream(new FileInputStream(f));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -238,4 +262,6 @@ public class FavoritesUtils {
         AlertDialog dialog = builder.create();
         dialog.show();
     }
+
+
 }

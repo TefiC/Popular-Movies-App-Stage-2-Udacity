@@ -34,7 +34,8 @@ public class Movie implements Parcelable {
     private boolean isMoviewForAdults;
 
     private String movieBackdropPath;
-    private ArrayList<String> movieTrailersThumbnails;
+//    private ArrayList<String> movieTrailersThumbnails;
+    private ArrayList<MovieTrailerThumbnail> movieTrailersThumbnails;
 
     private boolean isFavorite = false;
 
@@ -46,7 +47,7 @@ public class Movie implements Parcelable {
     public Movie(int movieId, String movieTitle, String movieReleaseDate, String moviePoster,
                  double movieVoteAverage, String moviePlot,String movieLanguage, double movieRuntime,
                  ArrayList<String> movieCast, ArrayList<MovieReview> movieReviews, boolean isMoviewForAdults,
-                 String movieBackdropPath, ArrayList<String> movieTrailersThumbnails) {
+                 String movieBackdropPath, ArrayList<MovieTrailerThumbnail> movieTrailersThumbnails) {
         this.movieId = movieId;
         this.movieTitle = movieTitle;
 
@@ -85,7 +86,7 @@ public class Movie implements Parcelable {
 
         isMoviewForAdults = in.readInt() == 1;
         movieBackdropPath = in.readString();
-        movieTrailersThumbnails = in.createStringArrayList();
+        movieTrailersThumbnails = in.createTypedArrayList(MovieTrailerThumbnail.CREATOR);
 
         isFavorite = in.readInt() == 1;
     }
@@ -117,7 +118,7 @@ public class Movie implements Parcelable {
 
         parcel.writeInt(isMoviewForAdults ? 1 : 0);
         parcel.writeString(movieBackdropPath);
-        parcel.writeStringList(movieTrailersThumbnails);
+        parcel.writeTypedList(movieTrailersThumbnails);
 
         parcel.writeInt(isFavorite ? 1 : 0);
     }
@@ -175,7 +176,7 @@ public class Movie implements Parcelable {
 
     public boolean getIsMovieFavorite() { return this.isFavorite; }
 
-    public ArrayList<String> getMovieTrailersThumbnails() { return this.movieTrailersThumbnails; }
+    public ArrayList<MovieTrailerThumbnail> getMovieTrailersThumbnails() { return this.movieTrailersThumbnails; }
 
     /*
      * Setters
@@ -217,6 +218,6 @@ public class Movie implements Parcelable {
 
     public void setIsMovieFavorite(boolean isFavorite) { this.isFavorite = isFavorite; }
 
-    public void setMovieTrailersThumbnails(ArrayList<String> trailersThumbnails) { this.movieTrailersThumbnails = trailersThumbnails; }
+    public void setMovieTrailersThumbnails(ArrayList<MovieTrailerThumbnail> trailersThumbnails) { this.movieTrailersThumbnails = trailersThumbnails; }
 
 }

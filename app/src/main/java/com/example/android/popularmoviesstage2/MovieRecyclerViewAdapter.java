@@ -83,7 +83,9 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
                 // Set data on the corresponding view
                 loadMoviePoster(posterPath, holder.mMoviePoster);
             } else {
-                Bitmap poster = FavoritesUtils.loadImageFromStorage(posterPath, Integer.toString(movie.getMovieId()));
+                Bitmap poster = FavoritesUtils.loadImageFromStorage(posterPath, Integer.toString(movie.getMovieId()),
+                        FavoritesUtils.IMAGE_TYPE_POSTER,
+                        0);
                 holder.mMoviePoster.setImageBitmap(poster);
             }
 

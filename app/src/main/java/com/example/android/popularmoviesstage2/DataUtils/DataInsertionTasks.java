@@ -97,7 +97,7 @@ public class DataInsertionTasks {
                         .get();
 
                 FavoritesUtils.saveImageToInternalStorage(bitmapPoster, Integer.toString(movieSelected.getMovieId()),
-                        FavoritesUtils.IMAGE_TYPE_POSTER, context);
+                        FavoritesUtils.IMAGE_TYPE_POSTER, context, movieSelected, 0);
 
                 //Save backdrop
                 Bitmap bitmapBackdrop = Picasso.with(context)
@@ -106,19 +106,19 @@ public class DataInsertionTasks {
                         .get();
 
                 FavoritesUtils.saveImageToInternalStorage(bitmapBackdrop, Integer.toString(movieSelected.getMovieId()),
-                        FavoritesUtils.IMAGE_TYPE_BACKDROP, context);
+                        FavoritesUtils.IMAGE_TYPE_BACKDROP, context, movieSelected, 0);
 
                 //Save trailer thumbnails
                 int i;
                 for(i = 0; i < movieSelected.getMovieTrailersThumbnails().size(); i++) {
                     Log.v("INSERTING ", "INSERTING THUMBNAIL");
                     Bitmap bitmapTrailer = Picasso.with(context)
-                            .load(movieSelected.getMovieTrailersThumbnails().get(i))
+                            .load(movieSelected.getMovieTrailersThumbnails().get(i).getThumbnailPath())
                             .networkPolicy(NetworkPolicy.OFFLINE)
                             .get();
                     //Save thumbnails
                     FavoritesUtils.saveImageToInternalStorage(bitmapTrailer, Integer.toString(movieSelected.getMovieId()),
-                            FavoritesUtils.IMAGE_TYPE_TRAILER_THUMBNAIL, context);
+                            FavoritesUtils.IMAGE_TYPE_TRAILER_THUMBNAIL, context, movieSelected, i);
                 }
 
             } catch (IOException e) {
@@ -156,7 +156,6 @@ public class DataInsertionTasks {
 
         return reviewsData;
     }
-
     /**
      * Removes the movie selected from the "Favorites" table in the database
      */

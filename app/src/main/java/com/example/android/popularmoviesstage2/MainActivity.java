@@ -140,10 +140,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             } else {
                 loaderManager.restartLoader(LoaderUtils.MAIN_SEARCH_LOADER, bundle, new InternetMoviesLoader(this));
             }
-
         } else {
             NetworkUtils.createNoConnectionDialog(this);
-            mSpinnerView.setSelection(2);
         }
     }
 
@@ -234,7 +232,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             String releaseDate = movie.getString("release_date");
             Double voteAverage = movie.getDouble("vote_average");
 
-            return new Movie(id, title, releaseDate, posterPath, voteAverage, plot, null, 0.0, null, null, false, null, new ArrayList<String>());
+            return new Movie(id, title, releaseDate, posterPath, voteAverage, plot, null, 0.0, null, null, false, null, new ArrayList<MovieTrailerThumbnail>());
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -359,8 +357,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         mSpinnerView.setAdapter(spinnerAdapter);
 
-        // To make sure that the previous selection is kept on device rotation
-        mSpinnerView.setSelection(spinnerAdapter.getPosition(mSearchCriteria));
+
+        if (NetworkUtils.isNetworkAvailable(this)) {
+            // To make sure that the previous selection is kept on device rotation
+            mSpinnerView.setSelection(spinnerAdapter.getPosition(mSearchCriteria));
+        } else {
+            mSpinnerView.setSelection(spinnerAdapter.getPosition("Favorites"));
+        }
     }
 
     // Activity lifecycle methods ========================================================
@@ -377,7 +380,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         if (mMoviesArray == null) {
 
-            if(mSearchCriteria.equals("Favorites")) {
+            if (mSearchCriteria.equals("Favorites")) {
                 makeDatabaseQuery();
             } else {
                 makeSearchQuery(mSearchCriteria);
@@ -451,14 +454,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 protected void onStartLoading() {
                     super.onStartLoading();
 
-                    if (id == MAIN_SEARCH_LOADER) {
-                        if (mProgressBar != null) {
-                            mProgressBar.setVisibility(View.VISIBLE);
+                    if (NetworkUtils.isNetworkAvailable(mContext)) {
+
+                        if (id == MAIN_SEARCH_LOADER) {
+                            if (mProgressBar != null) {
+                                mProgressBar.setVisibility(View.VISIBLE);
+                            }
+                            forceLoad();
+                        } else {
+                            deliverResult(mMoviesArrayString);
                         }
-                        forceLoad();
-                    } else {
-                        deliverResult(mMoviesArrayString);
+                    } else if (!mSearchCriteria.equals("Favorites")) {
+                        NetworkUtils.createNoConnectionDialog(mContext);
+                        mSpinnerView.setSelection(2);
                     }
+
                 }
 
                 @Override
@@ -570,19 +580,22 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     /**
      * Replaces the existing movies array with an array of favorite Movies
+     *
      * @param cursor The data received from the query to the database
      */
     private void convertCursorIntoMoviesArray(Cursor cursor) {
 
         ArrayList<Movie> moviesDBArray = new ArrayList<Movie>();
 
-        if(cursor.getCount() == 0) {
+        if (cursor.getCount() == 0) {
             mMoviesArray = new ArrayList<>();
             FavoritesUtils.createNoFavoritesDialog(this);
-            mSpinnerView.setSelection(0);
+            if (NetworkUtils.isNetworkAvailable(this)) {
+                mSpinnerView.setSelection(0);
+            }
         }
 
-        while(cursor.moveToNext()) {
+        while (cursor.moveToNext()) {
 
             // Get movie data from cursor
             String movieDBId = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_MOVIEDB_ID);
