@@ -2,8 +2,8 @@ package com.example.android.popularmoviesstage2.utils;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.example.android.popularmoviesstage2.DataUtils.DataInsertionTasks;
 import com.example.android.popularmoviesstage2.Movie;
@@ -23,20 +23,25 @@ public class FavoritesDataIntentService extends IntentService {
     protected void onHandleIntent(@Nullable Intent intent) {
         String action = intent.getAction();
 
-//        Log.v("DB", "HANDLING INTENT");
-
         Movie movieObject = null;
 
         if(intent.hasExtra("movieObject")) {
-            movieObject = intent.getExtras().getParcelable("movieObject");
+            movieObject = intent.getParcelableExtra("movieObject");
+
+            Log.v("Service", "BACKDROP " + movieObject.getMovieBackdropPath());
+            Log.v("Service", "TITLE " + movieObject.getMovieTitle());
+            Log.v("Service", "CAST " + movieObject.getMovieCast());
+            Log.v("Service", "ID " + movieObject.getMovieId());
+            Log.v("Service", "TRAILERS " + movieObject.getMovieTrailersThumbnails());
         }
 
         if(action.equals(DataInsertionTasks.ACTION_INSERT_FAVORITE)) {
-//            Log.v("DB", "INSERT FAVORITE");
-            Bitmap bitmap = (Bitmap) intent.getExtras().getParcelable("bitmap");
-            DataInsertionTasks.executeTask(this, action, movieObject, bitmap);
+
+            DataInsertionTasks.executeTask(this, action, movieObject);
+
         } else if (action.equals(DataInsertionTasks.ACTION_REMOVE_FAVORITE)) {
-            DataInsertionTasks.executeTask(this, action, movieObject, null);
+
+            DataInsertionTasks.executeTask(this, action, movieObject);
         }
     }
 

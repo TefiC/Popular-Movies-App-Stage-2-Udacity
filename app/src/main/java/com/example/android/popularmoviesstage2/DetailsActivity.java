@@ -17,6 +17,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
@@ -88,7 +89,7 @@ public class DetailsActivity extends AppCompatActivity {
     public static final String IMAGE_SIZE = "w185";
 
     // Backdrop parameters
-    private static final String BACKDROP_SIZE = "w300";
+    public static final String BACKDROP_SIZE = "w300";
 
     //Get movie trailer thumbnail
     private static final String TRAILER_THUMBNAIL_BASE_PATH = "https://img.youtube.com/vi/";
@@ -556,6 +557,16 @@ public class DetailsActivity extends AppCompatActivity {
     private void loadMovieTrailerThumbnail(ImageView trailerView, String trailerKey) {
         String searchURL = TRAILER_THUMBNAIL_BASE_PATH + trailerKey + "/0.jpg";
 
+        Log.v("Service details", movieSelected.getMovieTrailersThumbnails().toString());
+
+        // Update in reference
+        if(searchURL != null) {
+            movieSelected.getMovieTrailersThumbnails().add(searchURL);
+        }
+
+
+        Log.v(TAG, "MOVIE THUMBNAILS: " + movieSelected.getMovieTrailersThumbnails().toString());
+
         Picasso.with(this)
                 .load(searchURL)
                 .placeholder(generateGradientDrawable())
@@ -636,10 +647,9 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     public static void addMovieToFavorites(Context context, Movie movieSelected) {
-//        Log.v("DB", "ADDING POSTER TO DATABASE");
         movieSelected.setIsMovieFavorite(true);
 
-        FavoritesUtils.addPosterToDatabase(context, movieSelected);
+        FavoritesUtils.addFavoriteToDatabase(context, movieSelected);
     }
 
     public void updateAddedToFavoritesUI() {
@@ -746,7 +756,7 @@ public class DetailsActivity extends AppCompatActivity {
      * @param backdropPath The final piece of the path to the movie's backdrop image
      * @return A full URL to request the image
      */
-    public String createFullBackdropPath(String backdropPath) {
+    public static String createFullBackdropPath(String backdropPath) {
         return MOVIEDB_POSTER_BASE_URL + BACKDROP_SIZE + backdropPath;
     }
 
@@ -784,8 +794,6 @@ public class DetailsActivity extends AppCompatActivity {
 
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-
-//            Log.v("DB", "STARTING LOADER");
 
             switch (id) {
                 case FAVORITE_MOVIES_LOADER_BY_ID:
@@ -910,8 +918,6 @@ public class DetailsActivity extends AppCompatActivity {
      * @return A Bitmap representing the corresponding poster
      */
     public static Bitmap loadPosterFromDatabase(Context context, Movie movieSelected) {
-
-//        Log.v("DB", "LOADING POSTER FROM DATABASE");
 
         Uri uri = MoviesDBContract.FavoriteMoviesEntry.CONTENT_URI.buildUpon()
                 .appendPath(Integer.toString(movieSelected.getMovieId()))

@@ -8,7 +8,10 @@ import android.util.Log;
 
 import com.example.android.popularmoviesstage2.Movie;
 import com.example.android.popularmoviesstage2.MovieReview;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import static android.content.ContentValues.TAG;
@@ -25,18 +28,15 @@ public class DataInsertionTasks {
     /**
      * Executes the Service's corresponding task
      *
-     * @param context The context of the activity that called this method
-     * @param action The action that the Service was called to perform
+     * @param context       The context of the activity that called this method
+     * @param action        The action that the Service was called to perform
      * @param movieSelected The movie selected by the user
-     * @param bitmap A bitmap of the image to be saved to the database (Could be null)
      */
-    public static void executeTask(Context context, String action, Movie movieSelected, Bitmap bitmap) {
-
-//        Log.v("DB", "INSIDE TASK");
+    public static void executeTask(Context context, String action, Movie movieSelected) {
 
         switch (action) {
             case ACTION_INSERT_FAVORITE:
-                insertMovieToFavoritesDB(context, movieSelected, bitmap);
+                insertMovieToFavoritesDB(context, movieSelected);
                 break;
             case ACTION_REMOVE_FAVORITE:
                 removeMovieFromFavoritesDB(context, movieSelected);
@@ -47,7 +47,7 @@ public class DataInsertionTasks {
     /**
      * Insert the movie selected to the "Favorites" table in the database
      */
-    public static void insertMovieToFavoritesDB(Context context, Movie movieSelected, Bitmap bitmap) {
+    public static void insertMovieToFavoritesDB(Context context, Movie movieSelected) {
 
         ContentValues cv = new ContentValues();
 
@@ -88,10 +88,28 @@ public class DataInsertionTasks {
         Uri insertResult = context.getContentResolver().insert(uri, cv);
 
         if (insertResult != null) {
-            movieSelected.setIsMovieFavorite(true);
-            // Save image to internal storage and insert the poster to the database
-            FavoritesUtils.saveImageToInternalStorage(bitmap, Integer.toString(movieSelected.getMovieId()),
-                    FavoritesUtils.IMAGE_TYPE_POSTER, context);
+
+
+            try {
+                Bitmap bitmapPoster = Picasso.with(context)
+                        .load(movieSelected.getMoviePosterPath())
+                        .networkPolicy(NetworkPolicy.OFFLINE)
+                        .get();
+
+                // TODO: LOAD BACKDROP WITH PICASSO AND SAVE IT TO LOCAL STORAGE
+
+                if(bitmapPoster != null) {
+//                    movieSelected.setIsMovieFavorite(true);
+                }
+
+                FavoritesUtils.saveImageToInternalStorage(bitmapPoster, Integer.toString(movieSelected.getMovieId()),
+                        FavoritesUtils.IMAGE_TYPE_POSTER, context);
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         } else {
             Log.v(TAG, "Movie couldn't be inserted");
         }
@@ -104,15 +122,15 @@ public class DataInsertionTasks {
      *
      * @param movieReviews An ArrayList of MovieReview objects
      * @return An array of two elements. The first one is the String that
-     *         contains the authors and the second elements in the String that
-     *         contains the reviews text.
+     * contains the authors and the second elements in the String that
+     * contains the reviews text.
      */
     private static String[] formatReviewsForDB(ArrayList<MovieReview> movieReviews) {
 
         String reviewsAuthor = "";
         String reviewsText = "";
 
-        for(MovieReview review: movieReviews) {
+        for (MovieReview review : movieReviews) {
             reviewsAuthor += review.getReviewAuthor() + ", ";
             reviewsText += review.getReviewText() + "===>";
         }
@@ -136,8 +154,6 @@ public class DataInsertionTasks {
 
         if (numDeleted == 1) {
             movieSelected.setIsMovieFavorite(false);
-            //TODO: HANDLE USER INTERFACE IN DETAILS ACTIVITY
-//            Log.v("DB", "MOVIE REMOVED");}
         }
     }
 }

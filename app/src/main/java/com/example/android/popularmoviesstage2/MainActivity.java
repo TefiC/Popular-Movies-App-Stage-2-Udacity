@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             String releaseDate = movie.getString("release_date");
             Double voteAverage = movie.getDouble("vote_average");
 
-            return new Movie(id, title, releaseDate, posterPath, voteAverage, plot, null, 0.0, null, null, false, null, null);
+            return new Movie(id, title, releaseDate, posterPath, voteAverage, plot, null, 0.0, null, null, false, null, new ArrayList<String>());
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -592,6 +592,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             String movieVoteAverage = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_VOTE_AVERAGE);
             String moviePlot = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_PLOT);
             String movieIsForAdults = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_IS_FOR_ADULTS);
+            String backdropPath = getStringFromCursor(cursor, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP);
 
             Log.v(TAG, moviePosterPath);
 
@@ -608,7 +609,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     null,
                     null,
                     Boolean.parseBoolean(movieIsForAdults),
-                    null,
+                    backdropPath,
                     null);
 
             movie.setIsMovieFavorite(true);

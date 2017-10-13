@@ -34,7 +34,7 @@ public class Movie implements Parcelable {
     private boolean isMoviewForAdults;
 
     private String movieBackdropPath;
-    private String movieTrailersThumbnails;
+    private ArrayList<String> movieTrailersThumbnails;
 
     private boolean isFavorite = false;
 
@@ -46,7 +46,7 @@ public class Movie implements Parcelable {
     public Movie(int movieId, String movieTitle, String movieReleaseDate, String moviePoster,
                  double movieVoteAverage, String moviePlot,String movieLanguage, double movieRuntime,
                  ArrayList<String> movieCast, ArrayList<MovieReview> movieReviews, boolean isMoviewForAdults,
-                 String movieBackdropPath, String movieTrailersThumbnails) {
+                 String movieBackdropPath, ArrayList<String> movieTrailersThumbnails) {
         this.movieId = movieId;
         this.movieTitle = movieTitle;
 
@@ -85,7 +85,7 @@ public class Movie implements Parcelable {
 
         isMoviewForAdults = in.readInt() == 1;
         movieBackdropPath = in.readString();
-        movieTrailersThumbnails = in.readString();
+        movieTrailersThumbnails = in.createStringArrayList();
 
         isFavorite = in.readInt() == 1;
     }
@@ -117,7 +117,7 @@ public class Movie implements Parcelable {
 
         parcel.writeValue(isMoviewForAdults ? 1 : 0);
         parcel.writeString(movieBackdropPath);
-        parcel.writeString(movieTrailersThumbnails);
+        parcel.writeStringList(movieTrailersThumbnails);
 
         parcel.writeValue(isFavorite ? 1 : 0);
     }
@@ -175,7 +175,7 @@ public class Movie implements Parcelable {
 
     public boolean getIsMovieFavorite() { return this.isFavorite; }
 
-    public String getMovieTrailersThumbnails() { return this.movieTrailersThumbnails; }
+    public ArrayList<String> getMovieTrailersThumbnails() { return this.movieTrailersThumbnails; }
 
     /*
      * Setters
@@ -217,6 +217,6 @@ public class Movie implements Parcelable {
 
     public void setIsMovieFavorite(boolean isFavorite) { this.isFavorite = isFavorite; }
 
-    public void setMovieTrailersThumbnails(String trailersThumbnails) { this.movieTrailersThumbnails = trailersThumbnails; }
+    public void setMovieTrailersThumbnails(ArrayList<String> trailersThumbnails) { this.movieTrailersThumbnails = trailersThumbnails; }
 
 }

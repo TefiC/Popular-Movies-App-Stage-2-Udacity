@@ -9,15 +9,11 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.util.Log;
 
 import com.example.android.popularmoviesstage2.Movie;
 import com.example.android.popularmoviesstage2.R;
 import com.example.android.popularmoviesstage2.utils.FavoritesDataIntentService;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,12 +31,6 @@ public class FavoritesUtils {
     public static final String IMAGE_TYPE_POSTER = "poster";
     public static final String IMAGE_TYPE_BACKDROP = "backdrop";
     public static final String IMAGE_TYPE_TRAILER_THUMBNAIL = "trailerThumbnail";
-
-    public static final String lastImageInsertedPath = null;
-
-    public static Context mContext;
-    public static Movie mMovieSelected;
-
 
     // Database methods ==================================================================
 
@@ -77,60 +67,12 @@ public class FavoritesUtils {
      * @param context Context of the activity that called this method
      * @param movieSelected Movie selected by the user as a favorite
      */
-    public static void addPosterToDatabase(Context context, Movie movieSelected) {
-        mContext = context;
-        mMovieSelected = movieSelected;
-
-        saveBitmapFromPicasso(context,
-                movieSelected.getMoviePosterPath(),
-                Integer.toString(movieSelected.getMovieId()),
-                movieSelected);
+    public static void addFavoriteToDatabase(Context context, Movie movieSelected) {
+        Intent intent = new Intent(context, FavoritesDataIntentService.class);
+        intent.setAction(DataInsertionTasks.ACTION_INSERT_FAVORITE);
+        intent.putExtra("movieObject", movieSelected);
+        context.startService(intent);
     }
-
-
-    /**
-     * Loads a movie poster with Picasso into a Target that starts a helper function to
-     * save the poster to the device internal storage and the file path to the database
-     *
-     * @param context Context of the activity that invoked this method
-     * @param imageUrl The poster URL to download the image with Picasso
-     * @param movieDBId The MovieDB ID for the movie selected.
-     */
-    private static void saveBitmapFromPicasso(final Context context, String imageUrl, final String movieDBId, final Movie movieSelected) {
-
-        Target target = new Target() {
-            @Override
-            public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
-
-                Log.v("DB", "BITMAP LOADED");
-
-                Intent intent = new Intent(context, FavoritesDataIntentService.class);
-                intent.setAction(DataInsertionTasks.ACTION_INSERT_FAVORITE);
-
-                intent.putExtra("movieObject", movieSelected);
-                intent.putExtra("bitmap", bitmap);
-
-                context.startService(intent);
-            }
-
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) {
-            }
-
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-            }
-        };
-
-        Picasso.with(context).setLoggingEnabled(true);
-
-        Picasso.with(context).load(imageUrl).into(target);
-
-
-        Picasso.with(context).setLoggingEnabled(false);
-    }
-
-
 
     //    Based on https://stackoverflow.com/questions/17674634/saving-and-reading-bitmaps-images-from-internal-memory-in-android
 
@@ -212,9 +154,6 @@ public class FavoritesUtils {
                 .appendPath(movieDBId)
                 .build();
 
-//        Log.v("DB", "SAVING IMAGE");
-//        Log.v("DB", imageInternalPath);
-
         int updateResult = context.getContentResolver().update(uri, cv, null, null);
 
     }
@@ -230,9 +169,6 @@ public class FavoritesUtils {
     public static Bitmap loadImageFromStorage(String path, String movieDBId) {
 
         Bitmap bitmap = null;
-//
-//        Log.v("DB", "LOADING IMAGE");
-//        Log.v("DB", "PATH " + path);
 
         try {
             File f = new File(path, movieDBId + ".jpg");
