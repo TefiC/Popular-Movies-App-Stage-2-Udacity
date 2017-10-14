@@ -1,4 +1,4 @@
-package com.example.android.popularmoviesstage2;
+package com.example.android.popularmoviesstage2.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,6 +8,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
+
+import com.example.android.popularmoviesstage2.Adapters.ReviewsRecyclerViewAdapter;
+import com.example.android.popularmoviesstage2.MovieData.Movie;
+import com.example.android.popularmoviesstage2.MovieData.MovieReview;
+import com.example.android.popularmoviesstage2.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;

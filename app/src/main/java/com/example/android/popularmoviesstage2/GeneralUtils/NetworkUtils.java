@@ -1,4 +1,4 @@
-package com.example.android.popularmoviesstage2.utils;
+package com.example.android.popularmoviesstage2.GeneralUtils;
 
 
 import android.app.AlertDialog;

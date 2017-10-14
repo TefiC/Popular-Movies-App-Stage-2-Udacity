@@ -1,4 +1,4 @@
-package com.example.android.popularmoviesstage2;
+package com.example.android.popularmoviesstage2.Activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -21,10 +21,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 
+import com.example.android.popularmoviesstage2.Adapters.MovieRecyclerViewAdapter;
 import com.example.android.popularmoviesstage2.DataUtils.FavoritesUtils;
 import com.example.android.popularmoviesstage2.DataUtils.MoviesDBContract;
-import com.example.android.popularmoviesstage2.utils.LoaderUtils;
-import com.example.android.popularmoviesstage2.utils.NetworkUtils;
+import com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils;
+import com.example.android.popularmoviesstage2.GeneralUtils.NetworkUtils;
+import com.example.android.popularmoviesstage2.MovieData.Movie;
+import com.example.android.popularmoviesstage2.MovieData.MovieTrailerThumbnail;
+import com.example.android.popularmoviesstage2.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,8 +38,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 
-import static com.example.android.popularmoviesstage2.utils.LoaderUtils.FAVORITE_MOVIES_LOADER;
-import static com.example.android.popularmoviesstage2.utils.LoaderUtils.MAIN_SEARCH_LOADER;
+import static com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils.FAVORITE_MOVIES_LOADER;
+import static com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils.MAIN_SEARCH_LOADER;
 
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener,

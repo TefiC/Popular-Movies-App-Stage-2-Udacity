@@ -12,18 +12,16 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Log;
 
-import com.example.android.popularmoviesstage2.MainActivity;
-import com.example.android.popularmoviesstage2.Movie;
+import com.example.android.popularmoviesstage2.Activities.MainActivity;
+import com.example.android.popularmoviesstage2.MovieData.Movie;
 import com.example.android.popularmoviesstage2.R;
-import com.example.android.popularmoviesstage2.utils.FavoritesDataIntentService;
+import com.example.android.popularmoviesstage2.GeneralUtils.FavoritesDataIntentService;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import static com.example.android.popularmoviesstage2.MainActivity.getStringFromCursor;
 
 /**
  * Utility method to handle everything related to adding, maintaining and retrieving
@@ -73,7 +71,7 @@ public class FavoritesUtils {
      */
     public static void addFavoriteToDatabase(Context context, Movie movieSelected) {
         Intent intent = new Intent(context, FavoritesDataIntentService.class);
-        intent.setAction(DataInsertionTasks.ACTION_INSERT_FAVORITE);
+        intent.setAction(DataTasks.ACTION_INSERT_FAVORITE);
         intent.putExtra("movieObject", movieSelected);
         context.startService(intent);
     }

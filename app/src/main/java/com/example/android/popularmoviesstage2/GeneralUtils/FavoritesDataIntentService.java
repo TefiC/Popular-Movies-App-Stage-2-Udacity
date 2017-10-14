@@ -1,11 +1,11 @@
-package com.example.android.popularmoviesstage2.utils;
+package com.example.android.popularmoviesstage2.GeneralUtils;
 
 import android.app.IntentService;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 
-import com.example.android.popularmoviesstage2.DataUtils.DataInsertionTasks;
-import com.example.android.popularmoviesstage2.Movie;
+import com.example.android.popularmoviesstage2.DataUtils.DataTasks;
+import com.example.android.popularmoviesstage2.MovieData.Movie;
 
 /**
  * Service to either add or remove a movie from the "Favorites" database
@@ -28,13 +28,13 @@ public class FavoritesDataIntentService extends IntentService {
             movieObject = intent.getParcelableExtra("movieObject");
         }
 
-        if(action.equals(DataInsertionTasks.ACTION_INSERT_FAVORITE)) {
+        if(action.equals(DataTasks.ACTION_INSERT_FAVORITE)) {
 
-            DataInsertionTasks.executeTask(this, action, movieObject);
+            DataTasks.executeTask(this, action, movieObject);
 
-        } else if (action.equals(DataInsertionTasks.ACTION_REMOVE_FAVORITE)) {
+        } else if (action.equals(DataTasks.ACTION_REMOVE_FAVORITE)) {
 
-            DataInsertionTasks.executeTask(this, action, movieObject);
+            DataTasks.executeTask(this, action, movieObject);
         }
     }
 

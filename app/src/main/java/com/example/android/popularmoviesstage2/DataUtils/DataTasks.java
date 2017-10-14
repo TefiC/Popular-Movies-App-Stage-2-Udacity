@@ -6,9 +6,9 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 
-import com.example.android.popularmoviesstage2.DetailsActivity;
-import com.example.android.popularmoviesstage2.Movie;
-import com.example.android.popularmoviesstage2.MovieReview;
+import com.example.android.popularmoviesstage2.Activities.DetailsActivity;
+import com.example.android.popularmoviesstage2.MovieData.Movie;
+import com.example.android.popularmoviesstage2.MovieData.MovieReview;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
@@ -21,10 +21,17 @@ import static android.content.ContentValues.TAG;
  * Tasks to insert data into the database using a service
  */
 
-public class DataInsertionTasks {
+public class DataTasks {
 
     public static final String ACTION_INSERT_FAVORITE = "insert-favorite-movie";
     public static final String ACTION_REMOVE_FAVORITE = "remove-favorite-movie";
+
+    // Reviews
+    public static final String CHARACTER_SEPARATING_REVIEWS_AUTHORS = ", ";
+    public static final String CHARACTER_SEPARATING_REVIEWS_TEXT = "===>";
+
+    // Cast
+    public static final String CHARACTER_SEPARATING_CAST_MEMBERS = ", ";
 
     /**
      * Executes the Service's corresponding task
@@ -146,8 +153,8 @@ public class DataInsertionTasks {
         String reviewsText = "";
 
         for (MovieReview review : movieReviews) {
-            reviewsAuthor += review.getReviewAuthor() + ", ";
-            reviewsText += review.getReviewText() + "===>";
+            reviewsAuthor += review.getReviewAuthor() + CHARACTER_SEPARATING_REVIEWS_AUTHORS;
+            reviewsText += review.getReviewText() + CHARACTER_SEPARATING_REVIEWS_TEXT;
         }
 
         String[] reviewsData = new String[2];

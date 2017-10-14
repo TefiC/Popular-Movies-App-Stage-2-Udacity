@@ -12,7 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".Activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,13 +20,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".DetailsActivity"
+            android:name=".Activities.DetailsActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:launchMode="singleTop"/>
 
         <!--// TODO: CHECK COMPATIBILITY-->
-        <activity android:name=".ReviewsActivity"
-            android:parentActivityName=".DetailsActivity">
+        <activity android:name=".Activities.ReviewsActivity"
+            android:parentActivityName=".Activities.DetailsActivity">
         </activity>
 
         <!-- Register content provider -->
@@ -36,7 +36,7 @@
             android:exported="false" />
 
         <service
-            android:name=".utils.FavoritesDataIntentService"
+            android:name=".GeneralUtils.FavoritesDataIntentService"
             android:exported="false" />
 
     </application>

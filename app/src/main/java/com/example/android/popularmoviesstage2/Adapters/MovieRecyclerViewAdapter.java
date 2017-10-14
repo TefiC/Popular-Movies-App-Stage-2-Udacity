@@ -1,4 +1,4 @@
-package com.example.android.popularmoviesstage2;
+package com.example.android.popularmoviesstage2.Adapters;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -15,11 +15,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.android.popularmoviesstage2.DataUtils.FavoritesUtils;
+import com.example.android.popularmoviesstage2.MovieData.Movie;
+import com.example.android.popularmoviesstage2.R;
+import com.example.android.popularmoviesstage2.MovieData.RectangularImageView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-
-import static com.example.android.popularmoviesstage2.R.drawable.movie;
 
 /**
  * RecyclerView for a grid of movies
@@ -76,6 +77,8 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
 
         Movie movie = mMoviesArray.get(position);
 
+        movie.setIsMovieFavorite(determineIfMovieIsFavorite(movie));
+
         if (movie != null) {
             String posterPath = movie.getMoviePosterPath();
 
@@ -99,7 +102,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
             // Determine logos
             determineForAdultsLogo(holder, movie.getIsMovieForAdults());
 //            determineMainPosterFavoriteLogo(holder, movie, FavoritesUtils.checkIfMovieIsFavorite(mContext, Integer.toString(movie.getMovieId())));
-            determineMainPosterFavoriteLogo(holder, movie, determineIfMovieIsFavorite(movie));
+            determineMainPosterFavoriteLogo(holder, movie, movie.getIsMovieFavorite());
         }
     }
 
@@ -110,7 +113,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
             Log.v("FAVORITES ", "FROM SHARED PREFERENCES");
             return sharedPreferences.getStringSet("favoriteMoviesPreferences", null).contains(Integer.toString(movie.getMovieId()));
         } else {
-            return false;
+            return FavoritesUtils.checkIfMovieIsFavorite(mContext, Integer.toString(movie.getMovieId()));
         }
     }
 

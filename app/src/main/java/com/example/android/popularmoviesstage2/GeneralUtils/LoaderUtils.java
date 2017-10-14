@@ -1,4 +1,4 @@
-package com.example.android.popularmoviesstage2.utils;
+package com.example.android.popularmoviesstage2.GeneralUtils;
 
 import com.example.android.popularmoviesstage2.DataUtils.MoviesDBContract;
 
@@ -6,7 +6,7 @@ import com.example.android.popularmoviesstage2.DataUtils.MoviesDBContract;
  * Loader utilities
  */
 
-public class LoaderUtils {
+public final class LoaderUtils {
 
     //Loader IDs
 

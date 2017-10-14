@@ -1,4 +1,4 @@
-package com.example.android.popularmoviesstage2;
+package com.example.android.popularmoviesstage2.MovieData;
 
 import android.os.Parcel;
 import android.os.Parcelable;
