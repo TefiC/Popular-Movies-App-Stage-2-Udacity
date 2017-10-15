@@ -1,15 +1,14 @@
 package com.example.android.popularmoviesstage2.GeneralUtils;
 
-import com.example.android.popularmoviesstage2.DataUtils.MoviesDBContract;
+import android.database.Cursor;
 
 /**
- * Loader utilities
+ * Loader utilities. Constants and Methods
  */
 
 public final class LoaderUtils {
 
-    //Loader IDs
-
+    // Loader IDs
     public static final int MAIN_SEARCH_LOADER = 20;
     public static final int DETAILS_SEARCH_LOADER = 58;
     public static final int CAST_SEARCH_LOADER = 90;
@@ -18,24 +17,15 @@ public final class LoaderUtils {
     public static final int FAVORITE_MOVIES_LOADER_BY_ID = 35;
     public static final int REVIEWS_LOADER = 100;
 
-    public static final String[] MAIN_FAVORITE_MOVIES_PROJECTION = {
+    /**
+     * Retrieves a String in the given column from a cursor
+     * @param cursor The Cursor with data
+     * @param colName The name of the column that contains the String
+     *
+     * @return The String in the given cursor column
+     */
+    public static String getStringFromCursor(Cursor cursor, String colName) {
+        return cursor.getString(cursor.getColumnIndex(colName));
+    }
 
-            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_MOVIEDB_ID,
-            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TITLE,
-            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_RELEASE_DATE,
-            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH,
-            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_VOTE_AVERAGE,
-            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_PLOT,
-    };
-
-    public static final String[] INDIVIDUAL_MOVIE_DETAILS_PROJECTION = {
-            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_LANGUAGE,
-            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_RUNTIME,
-            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_CAST,
-            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS_AUTHOR,
-            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS_TEXT,
-            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_IS_FOR_ADULTS,
-            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP,
-            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS,
-    };
 }

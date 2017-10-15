@@ -2,14 +2,12 @@ package com.example.android.popularmoviesstage2.Activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -28,8 +26,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.popularmoviesstage2.DataUtils.DataTasks;
+import com.example.android.popularmoviesstage2.DataUtils.DBServiceTasks;
 import com.example.android.popularmoviesstage2.DataUtils.FavoritesUtils;
+import com.example.android.popularmoviesstage2.DataUtils.ImagesDBUtils;
 import com.example.android.popularmoviesstage2.DataUtils.MoviesDBContract;
 import com.example.android.popularmoviesstage2.GeneralUtils.FavoritesDataIntentService;
 import com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils;
@@ -47,8 +46,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 import static com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils.CAST_SEARCH_LOADER;
 import static com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils.FAVORITE_MOVIES_LOADER_BY_ID;
@@ -84,8 +81,6 @@ public class DetailsActivity extends AppCompatActivity {
 
     // Determines the number of cast members to be displayed
     private static final int NUMBER_OF_ACTORS_TO_INCLUDE = 5;
-
-    private static final String SHARED_PREFERENCES_FAVORITES_STRING = "favoriteMoviesPreferences";
 
     /*
      * Fields ============================================================
@@ -332,16 +327,24 @@ public class DetailsActivity extends AppCompatActivity {
 
                     switch (id) {
                         case LoaderUtils.DETAILS_SEARCH_LOADER:
-                            searchQueryURL = NetworkUtils.buildMovieDetailsUrl(movie.getMovieId());
+                            searchQueryURL = NetworkUtils.buildSearchUrl(NetworkUtils.SEARCH_TYPE_DETAILS,
+                                                                         null,
+                                                                         movie.getMovieId());
                             break;
                         case LoaderUtils.TRAILERS_SEARCH_LOADER:
-                            searchQueryURL = NetworkUtils.buildMovieTrailersUrl(movie.getMovieId());
+                            searchQueryURL = NetworkUtils.buildSearchUrl(NetworkUtils.SEARCH_TYPE_TRAILERS,
+                                                                         null,
+                                                                         movie.getMovieId());
                             break;
                         case LoaderUtils.CAST_SEARCH_LOADER:
-                            searchQueryURL = NetworkUtils.buildMovieCastUrl(movie.getMovieId());
+                            searchQueryURL = NetworkUtils.buildSearchUrl(NetworkUtils.SEARCH_TYPE_CAST,
+                                                                         null,
+                                                                         movie.getMovieId());
                             break;
                         case LoaderUtils.REVIEWS_LOADER:
-                            searchQueryURL = NetworkUtils.buildMovieReviewsUrl(movie.getMovieId());
+                            searchQueryURL = NetworkUtils.buildSearchUrl(NetworkUtils.SEARCH_TYPE_REVIEWS,
+                                                                         null,
+                                                                         movie.getMovieId());
                             break;
                     }
 
@@ -489,8 +492,7 @@ public class DetailsActivity extends AppCompatActivity {
      */
     private void appendCastToUI(ArrayList<String> movieCast) {
         // Add cast
-        int i;
-        for (i = 0; i < NUMBER_OF_ACTORS_TO_INCLUDE; i++) {
+        for (int i = 0; i < NUMBER_OF_ACTORS_TO_INCLUDE; i++) {
             mMovieCastView.append(movieCast.get(i) + "\n");
         }
     }
@@ -621,8 +623,7 @@ public class DetailsActivity extends AppCompatActivity {
             JSONArray trailersArray = trailersJSON.getJSONArray("results");
 
             // Iterate over the trailers array
-            int i;
-            for (i = 0; i < trailersArray.length(); i++) {
+            for (int i = 0; i < trailersArray.length(); i++) {
 
                 JSONObject trailer = trailersArray.getJSONObject(i);
                 final String trailerKey = trailer.getString("key");
@@ -725,7 +726,7 @@ public class DetailsActivity extends AppCompatActivity {
 
                 // Intent
                 Intent intent = new Intent(context, destinationActivity);
-                intent.putExtra("movieObject", movieSelected);
+                intent.putExtra(MainActivity.INTENT_MOVIE_OBJECT_KEY, movieSelected);
 
                 startActivity(intent);
             }
@@ -763,19 +764,13 @@ public class DetailsActivity extends AppCompatActivity {
         // Remove the MovieDB ID from shared preferences to update UI immediately
         // in case the user returns to the Main Activity before the deletion
         // operation is completed
-        removeFavoriteFromSharedPreferences(context, movieSelected);
+        FavoritesUtils.removeFavoriteFromSharedPreferences(context, movieSelected);
 
         // Start a service that will remove the movie from the database
         Intent intent = new Intent(context, FavoritesDataIntentService.class);
-        intent.setAction(DataTasks.ACTION_REMOVE_FAVORITE);
+        intent.setAction(DBServiceTasks.ACTION_REMOVE_FAVORITE);
         intent.putExtra("movieObject", movieSelected);
         context.startService(intent);
-    }
-
-    private static boolean removeFavoriteFromSharedPreferences(Context context, Movie movieSelected) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getStringSet("favoriteMoviesPreferences", null)
-                .remove(Integer.toString(movieSelected.getMovieId()));
     }
 
     /**
@@ -803,46 +798,10 @@ public class DetailsActivity extends AppCompatActivity {
         // Add MovieDBId to Shared Preferences to update UI
         // immediately in case the user returns to the Main Activity
         // before the insertion operation is completed
-        addFavoriteToSharedPreferences(context, movieSelected);
+        FavoritesUtils.addFavoriteToSharedPreferences(context, movieSelected);
 
         // Add Movie to the database
         FavoritesUtils.addFavoriteToDatabase(context, movieSelected);
-    }
-
-    /**
-     * Adds a favorite movie's MovieDB Id to SharedPreferences by adding it to a
-     * String Set that is stored under the key "favoriteMoviesPreferences".
-     * If this key doesn't exist in SharedPreferences, it creates one and adds
-     * the movie ID.
-     *
-     * @param context       The Context of the activity that called this method
-     * @param movieSelected The Movie selected by the user
-     * @return True if the movie was added correctly. False otherwise.
-     */
-    private static boolean addFavoriteToSharedPreferences(Context context, Movie movieSelected) {
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-
-        // If there is a favorites list in SharedPreferences, add the movie's MovieDB ID
-        // Else, create a String Set under the key SHARED_PREFERENCES_FAVORITES_STRING
-        // and add the movie's ID.
-        if (sharedPreferences.contains(SHARED_PREFERENCES_FAVORITES_STRING)) {
-            return sharedPreferences.getStringSet(SHARED_PREFERENCES_FAVORITES_STRING, null)
-                    .add(Integer.toString(movieSelected.getMovieId()));
-
-        } else {
-            // Create a String Set and add the movie's ID
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-
-            Set<String> stringSet = new HashSet<String>();
-            stringSet.add(Integer.toString(movieSelected.getMovieId()));
-
-            editor.putStringSet(SHARED_PREFERENCES_FAVORITES_STRING, stringSet);
-            editor.apply();
-
-            // Return if the String Set was correctly stored in SharedPreferences
-            return sharedPreferences.contains(SHARED_PREFERENCES_FAVORITES_STRING);
-        }
     }
 
     /**
@@ -984,8 +943,7 @@ public class DetailsActivity extends AppCompatActivity {
             jsonCast = new JSONObject(stringCast);
             JSONArray arrayJSONCast = jsonCast.getJSONArray("cast");
 
-            int i;
-            for (i = 0; i < NUMBER_OF_ACTORS_TO_INCLUDE; i++) {
+            for (int i = 0; i < NUMBER_OF_ACTORS_TO_INCLUDE; i++) {
                 castArray.add(arrayJSONCast.getJSONObject(i).getString("name"));
             }
 
@@ -1090,28 +1048,28 @@ public class DetailsActivity extends AppCompatActivity {
              */
 
             // Language
-            String movieLanguage = MainActivity.getStringFromCursor(movieDetailsCursor,
+            String movieLanguage = LoaderUtils.getStringFromCursor(movieDetailsCursor,
                     MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_LANGUAGE);
             // Runtime
-            String movieRuntime = MainActivity.getStringFromCursor(movieDetailsCursor,
+            String movieRuntime = LoaderUtils.getStringFromCursor(movieDetailsCursor,
                     MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_RUNTIME);
             // Cast
-            String movieCast = MainActivity.getStringFromCursor(movieDetailsCursor,
+            String movieCast = LoaderUtils.getStringFromCursor(movieDetailsCursor,
                     MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_CAST);
             // Reviews / Author
-            String movieReviewsAuthor = MainActivity.getStringFromCursor(movieDetailsCursor,
+            String movieReviewsAuthor = LoaderUtils.getStringFromCursor(movieDetailsCursor,
                     MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS_AUTHOR);
             // Reviews / Text
-            String movieReviewsText = MainActivity.getStringFromCursor(movieDetailsCursor,
+            String movieReviewsText = LoaderUtils.getStringFromCursor(movieDetailsCursor,
                     MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS_TEXT);
             // Is the movie for Adults?
-            String movieIsForAdults = MainActivity.getStringFromCursor(movieDetailsCursor,
+            String movieIsForAdults = LoaderUtils.getStringFromCursor(movieDetailsCursor,
                     MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_IS_FOR_ADULTS);
             // Backdrop internal storage path
-            String movieBackdropPath = MainActivity.getStringFromCursor(movieDetailsCursor,
+            String movieBackdropPath = LoaderUtils.getStringFromCursor(movieDetailsCursor,
                     MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP);
             // Trailer thumbnails internal storage paths
-            String movieTrailersThumbnails = MainActivity.getStringFromCursor(movieDetailsCursor,
+            String movieTrailersThumbnails = LoaderUtils.getStringFromCursor(movieDetailsCursor,
                     MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS);
 
              /*
@@ -1140,12 +1098,11 @@ public class DetailsActivity extends AppCompatActivity {
         ArrayList<MovieReview> movieReviewsArrayList = new ArrayList<MovieReview>();
 
         // Extract movie reviews authors and text
-        String[] reviewAuthorsArray = movieReviewsAuthor.split(DataTasks.CHARACTER_SEPARATING_REVIEWS_AUTHORS);
-        String[] reviewTextArray = movieReviewsText.split(DataTasks.CHARACTER_SEPARATING_REVIEWS_TEXT);
+        String[] reviewAuthorsArray = movieReviewsAuthor.split(DBServiceTasks.CHARACTER_SEPARATING_REVIEWS_AUTHORS);
+        String[] reviewTextArray = movieReviewsText.split(DBServiceTasks.CHARACTER_SEPARATING_REVIEWS_TEXT);
 
         // Add MovieReview objects with their corresponding author and text
-        int i;
-        for (i = 0; i < reviewAuthorsArray.length; i++) {
+        for (int i = 0; i < reviewAuthorsArray.length; i++) {
             movieReviewsArrayList.add(new MovieReview(reviewAuthorsArray[i], reviewTextArray[i]));
         }
 
@@ -1157,14 +1114,14 @@ public class DetailsActivity extends AppCompatActivity {
      * Format the cast string retrieved from the database into
      * an ArrayList and set it as the cast attribute of the movie selected
      *
-     * @param movieCast A String containing the cast names separated by DataTasks.CHARACTER_SEPARATING_CAST_MEMBERS
+     * @param movieCast A String containing the cast names separated by DBServiceTasks.CHARACTER_SEPARATING_CAST_MEMBERS
      */
     private void fillMovieCastFromDB(String movieCast) {
 
         ArrayList<String> castArray = new ArrayList<>();
 
         // Add a member of the cast
-        for (String castMember : movieCast.substring(1, movieCast.length() - 1).split(DataTasks.CHARACTER_SEPARATING_CAST_MEMBERS)) {
+        for (String castMember : movieCast.substring(1, movieCast.length() - 1).split(DBServiceTasks.CHARACTER_SEPARATING_CAST_MEMBERS)) {
             castArray.add(castMember);
         }
 
@@ -1201,11 +1158,11 @@ public class DetailsActivity extends AppCompatActivity {
 
         pathCursor.close();
 
-        return FavoritesUtils.loadImageFromStorage(
+        return ImagesDBUtils.loadImageFromStorage(
                 imagePath,
                 Integer.toString(movieSelected.getMovieId()),
                 imageType,
-                0);
+                -1);
     }
 
     /**
@@ -1231,10 +1188,11 @@ public class DetailsActivity extends AppCompatActivity {
             String trailerPath = trailer.split(FavoritesUtils.CHARACTER_TO_SEPARATE_THUMBNAIL_TAG)[0];
 
             // Add the Bitmap resource to the array
-            trailersBitmapArray.add(FavoritesUtils.loadImageFromStorage(
+            trailersBitmapArray.add(ImagesDBUtils.loadImageFromStorage(
                     trailerPath,
                     Integer.toString(movieSelected.getMovieId()),
-                    FavoritesUtils.IMAGE_TYPE_TRAILER_THUMBNAIL, i));
+                    FavoritesUtils.IMAGE_TYPE_TRAILER_THUMBNAIL,
+                    i));
 
             // Increase counter
             i++;
@@ -1290,7 +1248,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         trailersPathsCursor.moveToFirst();
 
-        String trailersDataString = MainActivity.getStringFromCursor(trailersPathsCursor,
+        String trailersDataString = LoaderUtils.getStringFromCursor(trailersPathsCursor,
                 MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS);
 
         trailersPathsCursor.close();
@@ -1312,8 +1270,7 @@ public class DetailsActivity extends AppCompatActivity {
      */
     private void displayTrailersBitmapsOnUI(ArrayList<Bitmap> trailersThumbnails, ArrayList<String> trailersKeys) {
 
-        int i;
-        for (i = 0; i < trailersThumbnails.size(); i++) {
+        for (int i = 0; i < trailersThumbnails.size(); i++) {
             //Create ImageView, set its properties and add it to the layout
             ImageView trailerView = new ImageView(this);
             setTrailerViewProperties(this, trailerView, trailersKeys.get(i));

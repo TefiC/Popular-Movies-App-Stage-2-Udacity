@@ -17,31 +17,46 @@ import com.ms.square.android.expandabletextview.ExpandableTextView;
 import java.util.ArrayList;
 
 /**
- * Adapter for reviews recyclerview
+ * Adapter for reviews RecyclerView
  */
 
 public class ReviewsRecyclerViewAdapter extends RecyclerView.Adapter<ReviewsRecyclerViewAdapter.ReviewViewHolder> {
 
+    /*
+     * Fields
+     */
 
     private Context mContext;
     private ArrayList<MovieReview> mMovieReviewsArray;
     private int mNumberOfItems;
 
-
+    // Collapsed status for reviews text expandable TextViews
     private final SparseBooleanArray mCollapsedStatus;
 
+
+    /*
+     * Constructor
+     */
+
+
     public ReviewsRecyclerViewAdapter(ArrayList<MovieReview> reviewsArray, int numberOfItems, Context context) {
-        mMovieReviewsArray = reviewsArray;
-        mNumberOfItems = numberOfItems;
         mContext = context;
+        mNumberOfItems = numberOfItems;
+        mMovieReviewsArray = reviewsArray;
         mCollapsedStatus = new SparseBooleanArray();
     }
 
+
+    /*
+     * ViewHolder
+     */
+
+
     public class ReviewViewHolder extends RecyclerView.ViewHolder {
 
+        private TextView reviewTextView;
         private TextView reviewAuthorView;
         private ExpandableTextView expandTextView;
-        private TextView reviewTextView;
 
         public ReviewViewHolder(View itemView) {
             super(itemView);
@@ -49,7 +64,6 @@ public class ReviewsRecyclerViewAdapter extends RecyclerView.Adapter<ReviewsRecy
             reviewAuthorView = itemView.findViewById(R.id.review_author);
             expandTextView = itemView.findViewById(R.id.review_author_expandable_view);
             reviewTextView = itemView.findViewById(R.id.expandable_text);
-
         }
     }
 
@@ -57,30 +71,29 @@ public class ReviewsRecyclerViewAdapter extends RecyclerView.Adapter<ReviewsRecy
     @Override
     public ReviewsRecyclerViewAdapter.ReviewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
+
+        // Inflate layout
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         int layoutIdItem = R.layout.review_item;
         boolean shouldAttachToParentImmediately = false;
 
         LinearLayout view = (LinearLayout) layoutInflater.inflate(layoutIdItem, parent, shouldAttachToParentImmediately);
 
-        ReviewViewHolder viewHolder = new ReviewViewHolder(view);
-        return viewHolder;
+        // Create ViewHolder
+        return new ReviewViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(ReviewsRecyclerViewAdapter.ReviewViewHolder holder, int position) {
 
-        Log.v("DB", "POSISTION " + position);
-
+        // Get corresponding review text
         MovieReview review = mMovieReviewsArray.get(position);
 
         if(review != null) {
             holder.reviewAuthorView.setText(review.getReviewAuthor());
-
-            Log.v("ADAPTER", "SETTING TEXT IN EXPANDABLE");
+            // Set text on the expandable TextView
             holder.expandTextView.setText(review.getReviewText(), mCollapsedStatus, position);
         }
-
     }
 
     @Override

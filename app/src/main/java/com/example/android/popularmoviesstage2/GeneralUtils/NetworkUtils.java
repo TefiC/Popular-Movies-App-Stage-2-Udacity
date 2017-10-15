@@ -37,33 +37,45 @@ public class NetworkUtils {
     // Parameters to build the URL
     private static final String PARAM_KEY = "api_key";
 
-
     // Values to build the URL
     // TODO: Uncomment this variable and initialize it by adding your "The Movie Database" API key
     // private final static String API_KEY = "YOUR API KEY"
+
+
+    // Constants to build URLs
+    public static final String SEARCH_TYPE_GENERAL_DATA = "general";
+    public static final String SEARCH_TYPE_DETAILS = "details";
+    public static final String SEARCH_TYPE_REVIEWS = "reviews";
+    public static final String SEARCH_TYPE_TRAILERS = "trailers";
+    public static final String SEARCH_TYPE_CAST = "cast";
 
 
     /*
      * Methods
      */
 
+    // Methods to build URLs =======================================================================
+
     /**
-     * Build the URL used to query MovieDB API
+     * Build the search URL that corresponds to the search type passed as argument
      *
-     * @param sortBy The user's preference to display movies
-     * @return The URL to fetch movies according to user's preferences
+     * @param searchType One of the search types defined in the class constants. Either
+     *                   "general", "details", "reviews", "trailers" or "cast".
+     * @param sortBy If the search type if "general", a sort type to determine which movies to fetch.
+     *               Either "Most Popular" or "Top Rated". Pass null us the type is not "general"
+     * @param movieId The MovieDB Id of the movie selected by the user. Pass null if
+     *                the type is not "general"
+     *
+     * @return The URL to fetch the corresponding data
      */
-    public static URL buildGeneralUrl(String sortBy) {
+    public static URL buildSearchUrl(String searchType, String sortBy, int movieId) {
 
         URL url = null;
 
-        String criteria = determineSearchCriteria(sortBy);
-
-        Uri buildUri = Uri.parse(MOVIEDB_URL + criteria).buildUpon()
-                .appendQueryParameter(PARAM_KEY, API_KEY)
-                .build();
         try {
+            Uri buildUri = buildUri(searchType, sortBy, Integer.toString(movieId));
             url = new URL(buildUri.toString());
+
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -72,86 +84,69 @@ public class NetworkUtils {
     }
 
     /**
-     * Builds a URL to query for the details of the movie passed as argument
-     * @param movieId The ID of the movie
-     * @return The URL to fetch the movie's details
+     * Build a Uri to fetch data from the internet according to the criteria passed as argument
+     *
+     * @param searchType One of the search types defined in the class constants. Either
+     *                   "general", "details", "reviews", "trailers" or "cast".
+     * @param sortBy If the search type if "general", a sort type to determine which movies to fetch.
+     *               Either "Most Popular" or "Top Rated". Pass null us the type is not "general"
+     * @param movieId The MovieDB Id of the movie selected by the user. Pass null if
+     *                the type is not "general"
+     *
+     * @return A Uri to fetch the corresponding data
      */
-    public static URL buildMovieDetailsUrl(int movieId) {
+    private static Uri buildUri(String searchType, String sortBy, String movieId) {
 
-        URL url = null;
+        Uri buildUri;
 
-        Uri buildUri = Uri.parse(MOVIEDB_URL + movieId).buildUpon()
+        String baseUri = buildBaseUri(searchType, sortBy, movieId);
+
+        // Build Uri
+        buildUri = Uri.parse(baseUri).buildUpon()
                 .appendQueryParameter(PARAM_KEY, API_KEY)
                 .build();
 
-        try {
-            url = new URL(buildUri.toString());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-
-        return url;
+        return buildUri;
     }
 
     /**
-     *  Build a URL to fetch the review for the movie passed as argument
-     * @param movieId The ID of the movie
-     * @return The URL to fetch the movie's reviews
+     * Build the base Uri for a Network Request according to the criteria passed as argument
+     *
+     * @param searchType One of the search types defined in the class constants. Either
+     *                   "general", "details", "reviews", "trailers" or "cast".
+     * @param sortBy If the search type if "general", a sort type to determine which movies to fetch.
+     *               Either "Most Popular" or "Top Rated". Pass null us the type is not "general"
+     * @param movieId The MovieDB Id of the movie selected by the user. Pass null if
+     *                the type is not "general"
+     *
+     * @return A String with the corresponding base path to be parsed as a Uri
      */
-    public static URL buildMovieReviewsUrl(int movieId) {
+    private static String buildBaseUri(String searchType, String sortBy, String movieId) {
+        String baseUri;
 
-        URL url = null;
-
-        Uri buildUri = Uri.parse(MOVIEDB_URL + movieId + "/reviews").buildUpon()
-                .appendQueryParameter(PARAM_KEY, API_KEY)
-                .build();
-
-        try {
-            url = new URL(buildUri.toString());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        // Determine base path of the Uri
+        switch (searchType) {
+            case SEARCH_TYPE_GENERAL_DATA:
+                String criteria = determineSearchCriteria(sortBy);
+                baseUri = MOVIEDB_URL + criteria;
+                break;
+            case SEARCH_TYPE_DETAILS:
+                baseUri = MOVIEDB_URL + movieId;
+                break;
+            case SEARCH_TYPE_REVIEWS:
+                baseUri = MOVIEDB_URL + movieId + "/reviews";
+                break;
+            case SEARCH_TYPE_TRAILERS:
+                baseUri = MOVIEDB_URL + movieId + "/videos";
+                break;
+            case SEARCH_TYPE_CAST:
+                baseUri = MOVIEDB_URL + movieId + "/credits";
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown search type: " + searchType);
         }
 
-        return url;
-    }
-
-    /**
-     * Build a URL to fetch the trailers for the movie passed as argument
-     * @param movieId The movie ID
-     * @return The URL to fetch movie's trailers
-     */
-    public static URL buildMovieTrailersUrl(int movieId) {
-
-        URL url = null;
-
-        Uri buildUri = Uri.parse(MOVIEDB_URL + movieId + "/videos").buildUpon()
-                .appendQueryParameter(PARAM_KEY, API_KEY)
-                .build();
-
-        try {
-            url = new URL(buildUri.toString());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-
-        return url;
-    }
-
-    public static URL buildMovieCastUrl(int movieId) {
-
-        URL url = null;
-
-        Uri buildUri = Uri.parse(MOVIEDB_URL + movieId + "/credits").buildUpon()
-                .appendQueryParameter(PARAM_KEY, API_KEY)
-                .build();
-
-        try {
-            url = new URL(buildUri.toString());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-
-        return url;
+        return baseUri;
     }
 
     /**
@@ -159,7 +154,7 @@ public class NetworkUtils {
      *
      * @param url The url used to fetched the data
      * @return The data returned as String
-     * @throws IOException
+     * @throws IOException An exception thrown if the URL connection fails
      */
     public static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -223,7 +218,7 @@ public class NetworkUtils {
      * @param sortBy User's preference in String format.
      *               Either "Most Popular" or "Top Rated"
      * @return The formatted criteria for the API request.
-     * Either "popular" or "top_rated"
+     *         Either "popular" or "top_rated"
      */
     private static String determineSearchCriteria(String sortBy) {
 

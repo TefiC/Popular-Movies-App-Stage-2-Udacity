@@ -17,6 +17,8 @@ public class RectangularImageView extends android.support.v7.widget.AppCompatIma
     protected void onMeasure(int width, int height) {
         super.onMeasure(width, height);
         int measuredWidth = getMeasuredWidth();
+
+        // Keep poster proportions
         Double posterHeight = Math.floor(measuredWidth*1.5);
         setMeasuredDimension(measuredWidth, posterHeight.intValue());
     }

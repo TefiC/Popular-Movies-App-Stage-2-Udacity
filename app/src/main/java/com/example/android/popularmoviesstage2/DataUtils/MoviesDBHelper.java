@@ -5,17 +5,29 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 /**
- * Creates the Movies SQLite database
+ * Creates and upgrades the Movies SQLite database
  */
 
 public class MoviesDBHelper extends SQLiteOpenHelper {
 
+    /*
+     * Constants
+     */
+
     private static final String DATABASE_NAME = "movies.db";
     private static final int DATABASE_VERSION = 1;
+
+    /*
+     * Constructor
+     */
 
     public MoviesDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
+
+    /*
+     * Methods
+     */
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
@@ -43,7 +55,6 @@ public class MoviesDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        // TODO: IMPLEMENT onUpgrade METHOD
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " +
                 MoviesDBContract.FavoriteMoviesEntry.TABLE_NAME);
         onCreate(sqLiteDatabase);

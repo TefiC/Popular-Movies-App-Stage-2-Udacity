@@ -4,22 +4,30 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Represents a movie trailer thumbnail
+ * Represents a movie trailer thumbnail with a Path and a Key
  */
 
 public class MovieTrailerThumbnail implements Parcelable {
 
-    private String thumbnailPath;
-    private String thumbnailTag;
+    /*
+     * Fields
+     */
 
-    public MovieTrailerThumbnail(String thumbnailPath, String thumbnailTag) {
+    private String thumbnailPath;
+    private String thumbnailKey;
+
+    /*
+     * Constructors
+     */
+
+    public MovieTrailerThumbnail(String thumbnailPath, String thumbnailKey) {
         this.thumbnailPath = thumbnailPath;
-        this.thumbnailTag = thumbnailTag;
+        this.thumbnailKey = thumbnailKey;
     }
 
     private MovieTrailerThumbnail(Parcel in) {
         thumbnailPath = in.readString();
-        thumbnailTag = in.readString();
+        thumbnailKey = in.readString();
     }
 
     @Override
@@ -27,10 +35,14 @@ public class MovieTrailerThumbnail implements Parcelable {
         return 0;
     }
 
+    /*
+     * Implementing Parcelable
+     */
+
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(thumbnailPath);
-        parcel.writeString(thumbnailTag);
+        parcel.writeString(thumbnailKey);
     }
 
     public static Parcelable.Creator<MovieTrailerThumbnail> CREATOR = new Parcelable.Creator<MovieTrailerThumbnail>() {
@@ -46,19 +58,27 @@ public class MovieTrailerThumbnail implements Parcelable {
         }
     };
 
+    /*
+     * Getters
+     */
+
     public String getThumbnailPath() {
         return thumbnailPath;
     }
 
     public String getThumbnailTag() {
-        return thumbnailTag;
+        return thumbnailKey;
     }
+
+    /*
+     * Setters
+     */
 
     public void setThumbnailPath(String thumbnailPath) {
         this.thumbnailPath = thumbnailPath;
     }
 
     public void setThumbnailTag(String thumbnailTag) {
-        this.thumbnailTag = thumbnailTag;
+        this.thumbnailKey = thumbnailTag;
     }
 }

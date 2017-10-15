@@ -7,8 +7,7 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 
 /**
- * Represents a Movie which contains a title, release date,
- * a reference to a poster path, a user vote average and plot.
+ * Represents a Movie with its associated data
  */
 
 public class Movie implements Parcelable {
@@ -29,12 +28,10 @@ public class Movie implements Parcelable {
 
     private double movieRuntime;
     private ArrayList<String> movieCast;
-
     private ArrayList<MovieReview> movieReviews;
-    private boolean isMoviewForAdults;
 
+    private boolean isMoviewForAdults;
     private String movieBackdropPath;
-//    private ArrayList<String> movieTrailersThumbnails;
     private ArrayList<MovieTrailerThumbnail> movieTrailersThumbnails;
 
     private boolean isFavorite = false;
@@ -45,21 +42,21 @@ public class Movie implements Parcelable {
      */
 
     public Movie(int movieId, String movieTitle, String movieReleaseDate, String moviePoster,
-                 double movieVoteAverage, String moviePlot,String movieLanguage, double movieRuntime,
+                 double movieVoteAverage, String moviePlot, String movieLanguage, double movieRuntime,
                  ArrayList<String> movieCast, ArrayList<MovieReview> movieReviews, boolean isMoviewForAdults,
                  String movieBackdropPath, ArrayList<MovieTrailerThumbnail> movieTrailersThumbnails) {
-        this.movieId = movieId;
-        this.movieTitle = movieTitle;
 
+        this.movieId = movieId;
+
+        this.movieTitle = movieTitle;
         this.movieReleaseDate = movieReleaseDate;
         this.moviePosterPath = moviePoster;
 
         this.movieVoteAverage = movieVoteAverage;
         this.moviePlot = moviePlot;
-
         this.movieLanguage = movieLanguage;
-        this.movieRuntime = movieRuntime;
 
+        this.movieRuntime = movieRuntime;
         this.movieCast = movieCast;
         this.movieReviews = movieReviews;
 
@@ -70,18 +67,19 @@ public class Movie implements Parcelable {
 
 
     private Movie(Parcel in) {
+
         movieId = in.readInt();
+
         movieTitle = in.readString();
         movieReleaseDate = in.readString();
-
         moviePosterPath = in.readString();
+
         movieVoteAverage = in.readDouble();
         moviePlot = in.readString();
-
         movieLanguage = in.readString();
+
         movieRuntime = in.readDouble();
         movieCast = in.createStringArrayList();
-
         movieReviews = in.createTypedArrayList(MovieReview.CREATOR);
 
         isMoviewForAdults = in.readInt() == 1;
@@ -100,20 +98,25 @@ public class Movie implements Parcelable {
         return 0;
     }
 
+    /*
+     * Implementing Parcelable
+     */
+
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+
         parcel.writeInt(movieId);
+
         parcel.writeString(movieTitle);
         parcel.writeString(movieReleaseDate);
-
         parcel.writeString(moviePosterPath);
+
         parcel.writeDouble(movieVoteAverage);
         parcel.writeString(moviePlot);
-
         parcel.writeString(movieLanguage);
+
         parcel.writeDouble(movieRuntime);
         parcel.writeStringList(movieCast);
-
         parcel.writeTypedList(movieReviews);
 
         parcel.writeInt(isMoviewForAdults ? 1 : 0);
@@ -140,7 +143,9 @@ public class Movie implements Parcelable {
      * Getters
      */
 
-    public int getMovieId() { return this.movieId; }
+    public int getMovieId() {
+        return this.movieId;
+    }
 
     public String getMovieTitle() {
         return this.movieTitle;
@@ -162,21 +167,37 @@ public class Movie implements Parcelable {
         return this.moviePlot;
     }
 
-    public String getMovieLanguage() { return this.movieLanguage; }
+    public String getMovieLanguage() {
+        return this.movieLanguage;
+    }
 
-    public double getMovieRuntime() { return this.movieRuntime; }
+    public double getMovieRuntime() {
+        return this.movieRuntime;
+    }
 
-    public ArrayList<String> getMovieCast() { return this.movieCast; }
+    public ArrayList<String> getMovieCast() {
+        return this.movieCast;
+    }
 
-    public ArrayList<MovieReview> getMovieReviews() { return this.movieReviews; }
+    public ArrayList<MovieReview> getMovieReviews() {
+        return this.movieReviews;
+    }
 
-    public boolean getIsMovieForAdults() { return this.isMoviewForAdults; }
+    public boolean getIsMovieForAdults() {
+        return this.isMoviewForAdults;
+    }
 
-    public String getMovieBackdropPath() { return this.movieBackdropPath; }
+    public String getMovieBackdropPath() {
+        return this.movieBackdropPath;
+    }
 
-    public boolean getIsMovieFavorite() { return this.isFavorite; }
+    public boolean getIsMovieFavorite() {
+        return this.isFavorite;
+    }
 
-    public ArrayList<MovieTrailerThumbnail> getMovieTrailersThumbnails() { return this.movieTrailersThumbnails; }
+    public ArrayList<MovieTrailerThumbnail> getMovieTrailersThumbnails() {
+        return this.movieTrailersThumbnails;
+    }
 
     /*
      * Setters
@@ -204,20 +225,35 @@ public class Movie implements Parcelable {
         this.moviePlot = plot;
     }
 
-    public void setMovieLanguage(String language) { this.movieLanguage = language; }
+    public void setMovieLanguage(String language) {
+        this.movieLanguage = language;
+    }
 
-    public void setMovieRuntime(double runtime) { this.movieRuntime = runtime; }
+    public void setMovieRuntime(double runtime) {
+        this.movieRuntime = runtime;
+    }
 
-    public void setMovieCast(ArrayList<String> cast) { this.movieCast = cast; }
+    public void setMovieCast(ArrayList<String> cast) {
+        this.movieCast = cast;
+    }
 
-    public void setMovieReviews(ArrayList<MovieReview> movieReviews) { this.movieReviews = movieReviews; }
+    public void setMovieReviews(ArrayList<MovieReview> movieReviews) {
+        this.movieReviews = movieReviews;
+    }
 
-    public void setIsMovieForAdults(boolean isMovieForAdults) { this.isMoviewForAdults = isMovieForAdults; }
+    public void setIsMovieForAdults(boolean isMovieForAdults) {
+        this.isMoviewForAdults = isMovieForAdults;
+    }
 
-    public void setMovieBackdropPath(String movieBackdropPath) { this.movieBackdropPath = movieBackdropPath; }
+    public void setMovieBackdropPath(String movieBackdropPath) {
+        this.movieBackdropPath = movieBackdropPath;
+    }
 
-    public void setIsMovieFavorite(boolean isFavorite) { this.isFavorite = isFavorite; }
+    public void setIsMovieFavorite(boolean isFavorite) {
+        this.isFavorite = isFavorite;
+    }
 
-    public void setMovieTrailersThumbnails(ArrayList<MovieTrailerThumbnail> trailersThumbnails) { this.movieTrailersThumbnails = trailersThumbnails; }
-
+    public void setMovieTrailersThumbnails(ArrayList<MovieTrailerThumbnail> trailersThumbnails) {
+        this.movieTrailersThumbnails = trailersThumbnails;
+    }
 }

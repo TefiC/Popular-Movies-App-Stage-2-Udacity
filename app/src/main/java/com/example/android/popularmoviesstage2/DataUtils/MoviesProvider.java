@@ -11,13 +11,16 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 /**
  * A Content Provider for Favorite movies and Watchlist movies
  */
 
 public class MoviesProvider extends ContentProvider {
+
+    /*
+     * Constants
+     */
 
     private static final String TAG = MoviesProvider.class.getSimpleName();
 
@@ -27,22 +30,34 @@ public class MoviesProvider extends ContentProvider {
 
     //UriMatcher and Database helper
     private static final UriMatcher sUriMatcher = buildUriMatcher();
+
+    private static final String ID_SELECTION_PARAMETER = "movieDBId=?";
+
+    /*
+     * Fields
+     */
+
     private MoviesDBHelper mMoviesDBHelper;
 
+    /*
+     * Methods
+     */
 
     /**
      * Matches the different paths to their corresponding integers
+     *
      * @return A UriMatcher
      */
     public static UriMatcher buildUriMatcher() {
 
         final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-        //Match favorite movies
+        // Match favorite movies
         uriMatcher.addURI(MoviesDBContract.CONTENT_AUTHORITY,
                 MoviesDBContract.PATH_FAVORITE_MOVIES,
                 CODE_FAVORITE_MOVIES);
 
+        // Match individual favorite movies
         uriMatcher.addURI(MoviesDBContract.CONTENT_AUTHORITY,
                 MoviesDBContract.PATH_FAVORITE_MOVIES + "/#",
                 CODE_FAVORITE_MOVIE_WITH_ID);
@@ -81,18 +96,16 @@ public class MoviesProvider extends ContentProvider {
 
             case CODE_FAVORITE_MOVIE_WITH_ID:
                 String id = uri.getPathSegments().get(1);
-                String mSelection = "movieDBId=?";
                 String[] mSelectionArgs = new String[]{id};
 
                 returnCursor = db.query(MoviesDBContract.FavoriteMoviesEntry.TABLE_NAME,
                         projection,
-                        mSelection,
+                        ID_SELECTION_PARAMETER,
                         mSelectionArgs,
                         null,
                         null,
                         sortOrder);
                 break;
-
             default:
                 throw new UnsupportedOperationException("Unknown Uri: " + uri);
         }
@@ -109,12 +122,12 @@ public class MoviesProvider extends ContentProvider {
 
         switch (match) {
             case CODE_FAVORITE_MOVIES:
-                return "vnd.android.cursor.dir"               + "/" +
-                        MoviesDBContract.CONTENT_AUTHORITY    + "/" +
+                return "vnd.android.cursor.dir"                + "/" +
+                        MoviesDBContract.CONTENT_AUTHORITY     + "/" +
                         MoviesDBContract.PATH_FAVORITE_MOVIES;
             case CODE_FAVORITE_MOVIE_WITH_ID:
                 return "vnd.android.cursor.item"               + "/" +
-                        MoviesDBContract.CONTENT_AUTHORITY    + "/" +
+                        MoviesDBContract.CONTENT_AUTHORITY     + "/" +
                         MoviesDBContract.PATH_FAVORITE_MOVIES;
             default:
                 throw new UnsupportedOperationException("Unknown Uri: " + uri);
@@ -200,12 +213,10 @@ public class MoviesProvider extends ContentProvider {
 
         switch (match) {
             case CODE_FAVORITE_MOVIE_WITH_ID:
-                Log.v("DB", "FAVORITE MOVIE WITH ID ");
                 String id = uri.getPathSegments().get(1);
-                Log.v("DB", "FAVORITE MOVIE WITH ID " + id);
                 moviesUpdated = db.update(MoviesDBContract.FavoriteMoviesEntry.TABLE_NAME,
                         contentValues,
-                        "movieDBId=?",
+                        ID_SELECTION_PARAMETER,
                         new String[]{id});
                 break;
             default:
@@ -215,8 +226,6 @@ public class MoviesProvider extends ContentProvider {
         if(moviesUpdated != 0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }
-
-        Log.v("DB", "PATH UPDATED: " + moviesUpdated);
 
         return moviesUpdated;
     }

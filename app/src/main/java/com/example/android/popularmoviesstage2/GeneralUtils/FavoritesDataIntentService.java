@@ -4,7 +4,8 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 
-import com.example.android.popularmoviesstage2.DataUtils.DataTasks;
+import com.example.android.popularmoviesstage2.Activities.MainActivity;
+import com.example.android.popularmoviesstage2.DataUtils.DBServiceTasks;
 import com.example.android.popularmoviesstage2.MovieData.Movie;
 
 /**
@@ -14,28 +15,43 @@ import com.example.android.popularmoviesstage2.MovieData.Movie;
 public class FavoritesDataIntentService extends IntentService {
 
 
+    /*
+     * Constructor
+     */
+
     public FavoritesDataIntentService() {
         super("FavoritesDataIntentService");
     }
 
+    /*
+     * Methods
+     */
+
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        String action = intent.getAction();
 
-        Movie movieObject = null;
+        String action;
 
-        if(intent.hasExtra("movieObject")) {
-            movieObject = intent.getParcelableExtra("movieObject");
-        }
+        if (intent != null) {
 
-        if(action.equals(DataTasks.ACTION_INSERT_FAVORITE)) {
+            // Get the action requested
+            action = intent.getAction();
 
-            DataTasks.executeTask(this, action, movieObject);
+            // If the intent contains a movie object
+            if(intent.hasExtra(MainActivity.INTENT_MOVIE_OBJECT_KEY)) {
 
-        } else if (action.equals(DataTasks.ACTION_REMOVE_FAVORITE)) {
+                Movie movieObject = intent.getParcelableExtra(MainActivity.INTENT_MOVIE_OBJECT_KEY);
 
-            DataTasks.executeTask(this, action, movieObject);
+                // Start executing the task
+                switch (action) {
+                    case DBServiceTasks.ACTION_INSERT_FAVORITE:
+                    case DBServiceTasks.ACTION_REMOVE_FAVORITE:
+                        DBServiceTasks.executeTask(this, action, movieObject);
+                        break;
+                    default:
+                        throw new UnsupportedOperationException("Action not recognized: " + action);
+                }
+            }
         }
     }
-
 }

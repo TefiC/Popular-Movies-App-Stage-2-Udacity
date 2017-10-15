@@ -1,27 +1,21 @@
 package com.example.android.popularmoviesstage2.DataUtils;
 
 import android.app.AlertDialog;
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.util.Log;
+import android.preference.PreferenceManager;
 
 import com.example.android.popularmoviesstage2.Activities.MainActivity;
+import com.example.android.popularmoviesstage2.GeneralUtils.FavoritesDataIntentService;
 import com.example.android.popularmoviesstage2.MovieData.Movie;
 import com.example.android.popularmoviesstage2.R;
-import com.example.android.popularmoviesstage2.GeneralUtils.FavoritesDataIntentService;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Utility method to handle everything related to adding, maintaining and retrieving
@@ -30,11 +24,29 @@ import java.io.IOException;
 
 public class FavoritesUtils {
 
+
+    /*
+     * Constants
+     */
+
+
+    // Image types
     public static final String IMAGE_TYPE_POSTER = "poster";
     public static final String IMAGE_TYPE_BACKDROP = "backdrop";
     public static final String IMAGE_TYPE_TRAILER_THUMBNAIL = "trailerThumbnail";
 
-    // Database methods ==================================================================
+    // Characters to separate data
+    public static final String CHARACTER_TO_SEPARATE_THUMBNAIL_TAG = ">";
+    public static final String CHARACTER_TO_SEPARATE_THUMBNAILS = "==>";
+
+    private static final String SHARED_PREFERENCES_FAVORITES_STRING = "favoriteMoviesPreferences";
+
+
+    /*
+     * Database methods
+     */
+
+    // Database methods ============================================================================
 
     /**
      * Checks if the movieDBID passed as argument is in the database
@@ -54,7 +66,9 @@ public class FavoritesUtils {
                 new String[]{movieDBId},
                 null);
 
-        if (cursor.getCount() <= 0) {
+        if(cursor == null) {
+            return false;
+        } else if (cursor.getCount() <= 0) {
             cursor.close();
             return false;
         }
@@ -63,6 +77,8 @@ public class FavoritesUtils {
         return true;
     }
 
+    // Methods to add movie to favorites ====================
+
     /**
      * Adds movie poster to the database
      *
@@ -70,168 +86,66 @@ public class FavoritesUtils {
      * @param movieSelected Movie selected by the user as a favorite
      */
     public static void addFavoriteToDatabase(Context context, Movie movieSelected) {
+
+        // Create intent
         Intent intent = new Intent(context, FavoritesDataIntentService.class);
-        intent.setAction(DataTasks.ACTION_INSERT_FAVORITE);
-        intent.putExtra("movieObject", movieSelected);
+        intent.setAction(DBServiceTasks.ACTION_INSERT_FAVORITE);
+        intent.putExtra(MainActivity.INTENT_MOVIE_OBJECT_KEY, movieSelected);
+
+        // Start service
         context.startService(intent);
     }
 
-    //    Based on https://stackoverflow.com/questions/17674634/saving-and-reading-bitmaps-images-from-internal-memory-in-android
+    // Methods to toggle movie from SharedPreference ===============================================
 
     /**
-     * Saves an image to the internal storage with a custom path that
-     * depends on the imageType being saved. Calls a method that
-     * saves the image path to the database.
+     * Removes the movie's MovieDB Id from Shared Preferences
+     * @param context The context of the activity that called this method
+     * @param movieSelected The movie selected by the user
      *
-     * @param bitmapPoster A Bitmap of the poster image
-     * @param movieDBId The MovieDB's ID
-     * @param imageType The type of image resource to save, in order to determine
-     *                  the correct directory. Either "poster", "backdrop" or "trailerThumbnail"
-     * @param context The context of the activity that invoked this method
-     *
-     * @return The directory's absolute path
+     * @return True if the movie Id was successfully removed from the String set
      */
-    public static String saveImageToInternalStorage(Bitmap bitmapPoster, String movieDBId,
-                                                     String imageType, Context context, Movie movieSelected,
-                                                    int thumbnailIndex) {
+    public static boolean removeFavoriteFromSharedPreferences(Context context, Movie movieSelected) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-        ContextWrapper cw = new ContextWrapper(context);
-
-        File directory = null;
-
-        switch (imageType) {
-            case IMAGE_TYPE_POSTER:
-                directory = cw.getDir("postersDir", Context.MODE_PRIVATE);
-                break;
-            case IMAGE_TYPE_BACKDROP:
-                directory = cw.getDir("backdropsDir", Context.MODE_PRIVATE);
-                break;
-            case IMAGE_TYPE_TRAILER_THUMBNAIL:
-                directory = cw.getDir("thumbnailDir", Context.MODE_PRIVATE);
-                break;
-            default:
-                break;
-        }
-
-        if (directory != null) {
-
-            File posterPath = null;
-
-            if(imageType.equals(FavoritesUtils.IMAGE_TYPE_TRAILER_THUMBNAIL)) {
-                posterPath = new File(directory, movieDBId + thumbnailIndex + ".jpg");
-            } else {
-                // Create imageDir
-                posterPath = new File(directory, movieDBId + ".jpg");
-            }
-
-            FileOutputStream fos = null;
-            try {
-                fos = new FileOutputStream(posterPath);
-                // Use the compress method on the BitMap object to write image to the OutputStream
-                bitmapPoster.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                saveImagePathToDatabase(context, directory.getAbsolutePath(), movieDBId, imageType, movieSelected, thumbnailIndex);
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    if (fos != null) {
-                        fos.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return directory.getAbsolutePath();
-    }
-
-    public static final String CHARACTER_TO_SEPARATE_THUMBNAIL_TAG = ">";
-    public static final String CHARACTER_TO_SEPARATE_THUMBNAILS = "==>";
-
-    /**
-     * Saves the image path to the database
-     *
-     * @param context The Context of the Activity that invoked this method
-     * @param imageInternalPath Absolute path for the image without its ID
-     * @param movieDBId The Movie's MovieDB Id
-     */
-    private static void saveImagePathToDatabase(Context context, String imageInternalPath,
-                                                String movieDBId, String imageType, Movie movieSelected,
-                                                int thumbnailIndex) {
-
-        ContentValues cv = new ContentValues();
-
-        Uri uri = MoviesDBContract.FavoriteMoviesEntry.CONTENT_URI.buildUpon()
-                .appendPath(movieDBId)
-                .build();
-
-        switch (imageType) {
-            case FavoritesUtils.IMAGE_TYPE_POSTER:
-                cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH, imageInternalPath);
-                break;
-            case FavoritesUtils.IMAGE_TYPE_BACKDROP:
-                cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP, imageInternalPath);
-                break;
-            case FavoritesUtils.IMAGE_TYPE_TRAILER_THUMBNAIL:
-                Cursor previousThumbnails = context.getContentResolver().query(uri,
-                        new String[] {MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS},
-                        null,
-                        null);
-
-                previousThumbnails.moveToFirst();
-
-                String previousString = MainActivity.getStringFromCursor(previousThumbnails,
-                        MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS);
-
-                String newThumbnails = "";
-
-                newThumbnails += previousString +
-                        imageInternalPath +
-                        CHARACTER_TO_SEPARATE_THUMBNAIL_TAG +
-                        movieSelected.getMovieTrailersThumbnails().get(thumbnailIndex).getThumbnailTag() +
-                        CHARACTER_TO_SEPARATE_THUMBNAILS;
-
-                cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS,
-                        newThumbnails);
-
-                Log.v("FavoriteUtils ", "UPDATING THUMBNAILS");
-
-                break;
-        }
-
-        int updateResult = context.getContentResolver().update(uri, cv, null, null);
-
-        Log.v("UPDATED ", "NUMBER " + updateResult);
+        return sharedPreferences.getStringSet(SHARED_PREFERENCES_FAVORITES_STRING, null)
+                .remove(Integer.toString(movieSelected.getMovieId()));
     }
 
     /**
-     * Loads an image from local storage
+     * Adds a favorite movie's MovieDB Id to SharedPreferences by adding it to a
+     * String Set that is stored under the key "favoriteMoviesPreferences".
+     * If this key doesn't exist in SharedPreferences, it creates one and adds
+     * the movie ID.
      *
-     * @param path Full path to the image
-     * @param movieDBId MovieDBId of the movie selected
-     *
-     * @return A Bitmap of the corresponding image
+     * @param context       The Context of the activity that called this method
+     * @param movieSelected The Movie selected by the user
+     * @return True if the movie was added correctly. False otherwise.
      */
-    public static Bitmap loadImageFromStorage(String path, String movieDBId, String imageType, int thumbnailIndex) {
+    public static boolean addFavoriteToSharedPreferences(Context context, Movie movieSelected) {
 
-        Bitmap bitmap = null;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-        try {
+        // If there is a favorites list in SharedPreferences, add the movie's MovieDB ID
+        // Else, create a String Set under the key SHARED_PREFERENCES_FAVORITES_STRING
+        // and add the movie's ID.
+        if (sharedPreferences.contains(SHARED_PREFERENCES_FAVORITES_STRING)) {
+            return sharedPreferences.getStringSet(SHARED_PREFERENCES_FAVORITES_STRING, null)
+                    .add(Integer.toString(movieSelected.getMovieId()));
 
-            File f;
+        } else {
+            // Create a String Set and add the movie's ID
+            SharedPreferences.Editor editor = sharedPreferences.edit();
 
-            if(imageType.equals(FavoritesUtils.IMAGE_TYPE_TRAILER_THUMBNAIL)) {
-                f = new File(path, movieDBId + thumbnailIndex + ".jpg");
-            } else {
-                f = new File(path, movieDBId + ".jpg");
-            }
+            Set<String> stringSet = new HashSet<String>();
+            stringSet.add(Integer.toString(movieSelected.getMovieId()));
 
-            bitmap = BitmapFactory.decodeStream(new FileInputStream(f));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            editor.putStringSet(SHARED_PREFERENCES_FAVORITES_STRING, stringSet);
+            editor.apply();
+
+            // Return if the String Set was correctly stored in SharedPreferences
+            return sharedPreferences.contains(SHARED_PREFERENCES_FAVORITES_STRING);
         }
-        return bitmap;
     }
 
     // User interaction methods ==================================================================
@@ -260,6 +174,4 @@ public class FavoritesUtils {
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-
-
 }
