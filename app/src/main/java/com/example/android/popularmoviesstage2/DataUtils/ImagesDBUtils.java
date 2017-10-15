@@ -11,7 +11,6 @@ import android.net.Uri;
 import com.example.android.popularmoviesstage2.Activities.DetailsActivity;
 import com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils;
 import com.example.android.popularmoviesstage2.MovieData.Movie;
-import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -128,7 +127,6 @@ public class ImagesDBUtils {
         try {
             bitmap = Picasso.with(context)
                     .load(path)
-                    .networkPolicy(NetworkPolicy.OFFLINE)
                     .get();
         } catch (IOException e) {
             e.printStackTrace();
