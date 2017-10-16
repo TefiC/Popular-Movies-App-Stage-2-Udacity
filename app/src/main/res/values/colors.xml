@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#D50000</color>
-    <color name="colorPrimaryDark">#9B0000</color>
-    <color name="colorSecondary">#81c784</color>
+
+    <!--Main colors-->
+    <color name="colorPrimary">#d50000</color>
+    <color name="colorPrimaryDark">#9b0000</color>
+    <color name="colorSecondary">#4ba3c7</color>
 
     <color name="text_color">#ffffff</color>
 
+    <!--Poster background-->
     <color name="items_background">#282828</color>
+
+    <!--Read Reviews -->
+    <color name="read_reviews_color">#147dfc</color>
+
 </resources>

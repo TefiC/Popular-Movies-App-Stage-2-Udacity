@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--Main grid movie poster layout-->
+
+    <style name="mainGridPosterText">
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="mainGridPosterLogos">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+    </style>
+
+    <style name="mainGridPosterForAdults">
+        <item name="android:layout_width">50dp</item>
+        <item name="android:layout_height">50dp</item>
+    </style>
+
+    <style name="mainGridPosterHeart">
+        <item name="android:layout_width">50dp</item>
+        <item name="android:layout_height">50dp</item>
+    </style>
+
+
+
+    <!--Details activity-->
+
+    <style name="detailsText">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="detailsMovieTitle" parent="detailsText">
+        <item name="android:textSize">30sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="detailsMovieParagraph" parent="detailsText">
+        <item name="android:textSize">20sp</item>
+        <item name="android:layout_marginLeft">20dp</item>
+        <item name="android:layout_marginRight">20dp</item>
+        <item name="android:layout_marginBottom">20dp</item>
+        <item name="android:padding">12dp</item>
+    </style>
+
+    <style name="detailsDataLogos">
+        <item name="android:layout_width">35dp</item>
+        <item name="android:layout_height">35dp</item>
+        <item name="android:layout_margin">10dp</item>
+    </style>
+
+    <style name="detailsMainDataText" parent="detailsText">
+        <item name="android:textSize">20sp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">15dp</item>
+    </style>
+
+    <!--Dividing bar-->
+    <style name="dividingBar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0.5dp</item>
+        <item name="android:background">#eeeff0</item>
+    </style>
+
+    <!--Dividing bar-->
+    <style name="titleDividingBar" parent="dividingBar">
+        <item name="android:layout_width">250dp</item>
+        <item name="android:layout_height">0.5dp</item>
+        <item name="android:background">#eeeff0</item>
+    </style>
+
+
+    <style name="detailsSectionTitle" parent="detailsMovieTitle">
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="detailsReadReviewsText">
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <!--Reviews activity-->
+
+    <style name="reviewsActivity">
+        <item name="android:padding">40dp</item>
+    </style>
+
+    <style name="reviewsText">
+        <item name="android:textSize">20sp</item>
+    </style>
+
+</resources>

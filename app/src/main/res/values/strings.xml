@@ -19,11 +19,27 @@
     <string name="favorites_dialog_title">No Favorite Movies Selected</string>
     <string name="favorites_dialog_message">You can select as many as you like : )</string>
 
-
     <!--Details activity-->
     <string name="vote_average">Rating</string>
     <string name="release_date">Released</string>
     <string name="poster_description">Movie poster</string>
     <string name="plot">Plot</string>
+    <string name="cast">Cast</string>
+    <string name="trailers">Trailers</string>
+    <string name="reviews">Reviews</string>
+    <string name="read_reviews">Read Reviews</string>
+
+    <!--Backdrop image size-->
+    <string name="backdrop_size">w300</string>
+
+    <!--Poster image size-->
+    <string name="poster_size">w185</string>
+
+    <!--Descriptions for accessibility-->
+    <string name="star_logo_description">Star logo</string>
+    <string name="clock_logo_description">Clock logo</string>
+    <string name="language_logo_description">Language logo</string>
+    <string name="calendar_logo_description">Calendar logo</string>
+    <string name="backdrop_description">Movie Backdrop</string>
 
 </resources>

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.CursorLoader;
@@ -74,6 +75,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private MovieRecyclerViewAdapter mAdapter;
     private RecyclerView mMainRecyclerView;
     private Spinner mSpinnerView;
+
+    //Scroll state
+    private Parcelable mState;
 
 
     /*
@@ -232,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             int id = movie.getInt("id");
             String title = movie.getString("title");
             String posterPath = DetailsActivity.MOVIEDB_POSTER_BASE_URL +
-                                DetailsActivity.IMAGE_SIZE +
+                                getString(R.string.poster_size) +
                                 movie.getString("poster_path");
             String plot = movie.getString("overview");
             String releaseDate = movie.getString("release_date");
@@ -264,6 +268,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // Create and set the adapter
         mAdapter = new MovieRecyclerViewAdapter(mMoviesArray, mMoviesArray.size(), this, this, mSearchCriteria);
         mMainRecyclerView.setAdapter(mAdapter);
+
+        //TODO:
+        mGridLayoutManager.onRestoreInstanceState(mState);
     }
 
     /**
@@ -441,6 +448,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
 
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mState = mGridLayoutManager.onSaveInstanceState();
     }
 
     // Methods and classes to load data  from the internet =========================================

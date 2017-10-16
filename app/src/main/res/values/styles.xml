@@ -18,8 +18,7 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="TextAppearance.ExpandedTitle"
-        parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+    <style name="TextAppearance.ExpandedTitle" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="android:textSize">26sp</item>
 
         <!--CUSTOM-->
@@ -29,8 +28,7 @@
         <item name="android:shadowRadius">2</item>
     </style>
 
-    <style name="TextAppearance.CollapsedTitle"
-        parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+    <style name="TextAppearance.CollapsedTitle" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="android:textSize">15sp</item>
 
         <!--CUSTOM-->
@@ -40,6 +38,28 @@
     </style>
 
 
+    <!--Main grid movie poster layout-->
+
+    <style name="mainGridPosterText"></style>
+
+    <style name="mainGridPosterRatingText"></style>
+
+
+    <style name="mainGridPosterLogos">
+        <item name="android:layout_width">20dp</item>
+        <item name="android:layout_height">20dp</item>
+    </style>
+
+    <style name="mainGridPosterForAdults" parent="mainGridPosterLogos">
+        <item name="android:layout_width">25dp</item>
+        <item name="android:layout_height">25dp</item>
+    </style>
+
+    <style name="mainGridPosterHeart" parent="mainGridPosterLogos">
+        <item name="android:layout_width">25dp</item>
+        <item name="android:layout_height">25dp</item>
+    </style>
+
     <!--Details activity styles-->
 
     <style name="detailsText">
@@ -47,7 +67,7 @@
     </style>
 
     <style name="detailsMovieTitle" parent="detailsText">
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
@@ -79,12 +99,26 @@
         <item name="android:layout_marginLeft">40dp</item>
         <item name="android:layout_marginRight">40dp</item>
         <item name="android:layout_marginBottom">40dp</item>
+    </style>
 
+    <style name="detailsReadReviewsText">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/read_reviews_color</item>
+    </style>
+
+    <!--Reviews activity-->
+
+    <style name="reviewsActivity">
+        <item name="android:padding">12dp</item>
+    </style>
+
+    <style name="reviewsText">
+        <item name="android:textSize">15sp</item>
     </style>
 
     <style name="reviewTitle">
-
-
+        <item name="android:textSize">17sp</item>
     </style>
+
 
 </resources>

@@ -14,10 +14,10 @@
         style="@style/reviewTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/white"
+        android:textColor="@android:color/black"
         android:padding="5dp"
         android:paddingLeft="20dp"
-        android:background="#424040"/>
+        android:background="#cfd8dc"/>
 
     <com.ms.square.android.expandabletextview.ExpandableTextView
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -31,12 +31,12 @@
 
         <TextView
             android:id="@+id/expandable_text"
+            style="@style/reviewsText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:textColor="@color/items_background"
-            android:textSize="13sp"/>
+            android:textColor="@color/items_background"/>
 
         <ImageButton
             android:id="@+id/expand_collapse"

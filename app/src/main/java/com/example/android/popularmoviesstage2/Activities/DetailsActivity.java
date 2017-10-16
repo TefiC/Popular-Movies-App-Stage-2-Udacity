@@ -68,10 +68,6 @@ public class DetailsActivity extends AppCompatActivity {
 
     // Constants to form the movie poster URL
     public static final String MOVIEDB_POSTER_BASE_URL = "http://image.tmdb.org/t/p/";
-    public static final String IMAGE_SIZE = "w185";
-
-    // Constants to form the movie backdrop URL
-    public static final String BACKDROP_SIZE = "w300";
 
     // Constants to form the movie trailer thumbails URL
     public static final String TRAILER_THUMBNAIL_BASE_PATH = "https://img.youtube.com/vi/";
@@ -87,7 +83,7 @@ public class DetailsActivity extends AppCompatActivity {
      */
 
     // Activity context
-    private Context mContext;
+    private static Context mContext;
 
     // Movie selected by the user
     public Movie movieSelected;
@@ -629,7 +625,7 @@ public class DetailsActivity extends AppCompatActivity {
                 final String trailerKey = trailer.getString("key");
 
                 //Create ImageView, set its properties and add it to the layout
-                ImageView trailerView = CreateTrailerView(this, mMovieDetailsTrailerLinearContainer, i, trailerKey);
+                ImageView trailerView = createTrailerView(this, mMovieDetailsTrailerLinearContainer, i, trailerKey);
 
                 // Load the thumbnail
                 loadMovieTrailerThumbnail(trailerView, trailerKey);
@@ -653,7 +649,7 @@ public class DetailsActivity extends AppCompatActivity {
      * @param trailerKey The trailer's key
      * @return The trailer's ImageView with custom properties
      */
-    private static ImageView CreateTrailerView(Context context, LinearLayout container, int index, String trailerKey) {
+    private static ImageView createTrailerView(Context context, LinearLayout container, int index, String trailerKey) {
         ImageView trailerView = new ImageView(context);
         setTrailerViewProperties(context, trailerView, trailerKey);
         container.addView(trailerView, index);
@@ -828,8 +824,8 @@ public class DetailsActivity extends AppCompatActivity {
     private static void setTrailerViewProperties(Context context, ImageView trailerView, String trailerKey) {
 
         // Set dimensions
-        int height = convertDpToPixels(120, context);
-        int width = convertDpToPixels(150, context);
+        int width = convertDpToPixels(context.getResources().getInteger(R.integer.trailerWidth), context);
+        int height = convertDpToPixels(context.getResources().getInteger(R.integer.trailerHeight), context);
 
         // Create Layout Parameters
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(width, height);
@@ -848,6 +844,8 @@ public class DetailsActivity extends AppCompatActivity {
 
         // Include parameters
         trailerView.setLayoutParams(params);
+
+        trailerView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
         //Image scale type
         trailerView.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -925,7 +923,7 @@ public class DetailsActivity extends AppCompatActivity {
      * @return A full URL to request the image
      */
     public static String createFullBackdropPath(String backdropPath) {
-        return MOVIEDB_POSTER_BASE_URL + BACKDROP_SIZE + backdropPath;
+        return MOVIEDB_POSTER_BASE_URL + mContext.getResources().getString(R.string.backdrop_size) + backdropPath;
     }
 
     /**

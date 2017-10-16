@@ -33,9 +33,6 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
      * Constants
      */
 
-    // To determine item width
-    private static int gridItemWidth = 170;
-
 
     /*
      * Fields
@@ -278,6 +275,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
     public static int calculateColumns(Context context) {
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
         float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+        int gridItemWidth = context.getResources().getInteger(R.integer.mainPosterLayoutWidthInt);
         int columns = (int) (dpWidth / gridItemWidth);
         return columns;
     }

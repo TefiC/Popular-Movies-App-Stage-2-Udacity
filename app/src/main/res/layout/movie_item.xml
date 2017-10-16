@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="170dp"
+    android:layout_width="@dimen/mainPosterLayoutWidth"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:layout_margin="4dp"
@@ -20,6 +20,7 @@
 
         <TextView
             android:id="@+id/movie_item_title"
+            style="@style/mainGridPosterText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -41,16 +42,18 @@
 
             <ImageView
                 android:id="@+id/movie_item_star"
+                style="@style/mainGridPosterLogos"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:src="@drawable/star" />
 
             <TextView
                 android:id="@+id/movie_item_rating"
+                style="@style/mainGridPosterRatingText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/white"
-                android:layout_margin="3dp"
+                android:layout_margin="2dp"
                 tools:text="8.6" />
 
         </LinearLayout>
@@ -58,6 +61,7 @@
         <!--Adults?-->
         <ImageView
             android:id="@+id/movie_item_adults"
+            style="@style/mainGridPosterForAdults"
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_below="@id/movie_item_title"
@@ -70,6 +74,7 @@
         <!--Favorite?-->
         <ImageView
             android:id="@+id/movie_item_favorite"
+            style="@style/mainGridPosterHeart"
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_alignParentEnd="true"

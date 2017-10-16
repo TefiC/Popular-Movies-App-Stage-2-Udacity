@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coordinator_layout"
@@ -25,9 +26,7 @@
             app:expandedTitleGravity="bottom"
             app:expandedTitleTextAppearance="@style/TextAppearance.ExpandedTitle"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
-            <!--Background color on toolbar collapse-->
 
-            <!--NOTE: IMAGE MUST BE FIST THAN TOOLBAR FOR CONTENTSCRIM TO WORK-->
             <ImageView
                 android:id="@+id/movie_details_backdrop"
                 android:layout_width="match_parent"
@@ -35,7 +34,8 @@
                 android:fitsSystemWindows="true"
                 android:scaleType="centerCrop"
                 app:layout_collapseMode="parallax"
-                tools:src="@drawable/placeholder" />
+                tools:src="@drawable/placeholder"
+                android:contentDescription="@string/backdrop_description"/>
 
 
             <android.support.v7.widget.Toolbar
@@ -76,7 +76,6 @@
                 android:visibility="gone"
                 android:layout_gravity="center"/>
 
-
             <RelativeLayout
                 android:id="@+id/details_relative_layout"
                 android:layout_width="match_parent"
@@ -88,10 +87,11 @@
                 <!--Poster-->
                 <ImageView
                     android:id="@+id/movie_details_poster_view"
-                    android:layout_width="180dp"
-                    android:layout_height="250dp"
+                    android:layout_width="@dimen/posterWidth"
+                    android:layout_height="@dimen/posterHeight"
                     android:layout_margin="10dp"
-                    tools:src="@drawable/placeholder" />
+                    tools:src="@drawable/placeholder"
+                    android:contentDescription="@string/poster_description"/>
 
                 <!--Name-->
                 <TextView
@@ -99,8 +99,9 @@
                     style="@style/detailsMovieTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="40dp"
                     android:layout_toRightOf="@id/movie_details_poster_view"
+                    android:layout_toEndOf="@id/movie_details_poster_view"
                     tools:text="Pirates of the Caribbean" />
 
                 <!--Dividing bar-->
@@ -109,8 +110,10 @@
                     style="@style/dividingBar"
                     android:layout_below="@id/movie_details_title_view"
                     android:layout_marginRight="8dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginTop="8dp"
-                    android:layout_toRightOf="@id/movie_details_poster_view" />
+                    android:layout_toRightOf="@id/movie_details_poster_view"
+                    android:layout_toEndOf="@id/movie_details_poster_view"/>
 
                 <!--Star-->
                 <ImageView
@@ -118,7 +121,9 @@
                     style="@style/detailsDataLogos"
                     android:layout_below="@id/movie_details_title_horizontal_line"
                     android:layout_toRightOf="@id/movie_details_poster_view"
-                    android:src="@drawable/star" />
+                    android:layout_toEndOf="@id/movie_details_poster_view"
+                    android:src="@drawable/star"
+                    android:contentDescription="@string/star_logo_description"/>
 
                 <!--Rating-->
                 <TextView
@@ -127,6 +132,7 @@
                     android:layout_below="@id/movie_details_title_horizontal_line"
                     android:layout_marginTop="15dp"
                     android:layout_toRightOf="@id/movie_details_star"
+                    android:layout_toEndOf="@id/movie_details_star"
                     tools:text="8.6" />
 
                 <!--Clock-->
@@ -135,8 +141,9 @@
                     style="@style/detailsDataLogos"
                     android:layout_below="@id/movie_details_star"
                     android:layout_toRightOf="@id/movie_details_poster_view"
-                    android:src="@drawable/clock" />
-
+                    android:layout_toEndOf="@id/movie_details_poster_view"
+                    android:src="@drawable/clock"
+                    android:contentDescription="@string/clock_logo_description"/>
 
                 <!--Runtime-->
                 <TextView
@@ -144,6 +151,7 @@
                     style="@style/detailsMainDataText"
                     android:layout_below="@id/movie_details_star"
                     android:layout_toRightOf="@id/movie_details_clock"
+                    android:layout_toEndOf="@id/movie_details_clock"
                     android:textColor="@android:color/white"
                     tools:text="120 min" />
 
@@ -153,7 +161,9 @@
                     style="@style/detailsDataLogos"
                     android:layout_below="@id/movie_details_clock"
                     android:layout_toRightOf="@id/movie_details_poster_view"
-                    android:src="@drawable/language" />
+                    android:layout_toEndOf="@id/movie_details_poster_view"
+                    android:src="@drawable/language"
+                    android:contentDescription="@string/language_logo_description"/>
 
                 <!--Language-->
                 <TextView
@@ -161,6 +171,7 @@
                     style="@style/detailsMainDataText"
                     android:layout_below="@id/movie_details_clock"
                     android:layout_toRightOf="@id/movie_details_language_logo"
+                    android:layout_toEndOf="@id/movie_details_language_logo"
                     tools:text="en" />
 
                 <!--Release logo-->
@@ -169,7 +180,9 @@
                     style="@style/detailsDataLogos"
                     android:layout_below="@id/movie_details_language_logo"
                     android:layout_toRightOf="@id/movie_details_poster_view"
-                    android:src="@drawable/released" />
+                    android:layout_toEndOf="@id/movie_details_poster_view"
+                    android:src="@drawable/released"
+                    android:contentDescription="@string/calendar_logo_description"/>
 
                 <TextView
                     android:id="@+id/movie_details_release_view"
@@ -178,37 +191,26 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/movie_details_language_logo"
                     android:layout_toRightOf="@id/movie_details_release_logo"
+                    android:layout_toEndOf="@id/movie_details_release_logo"
                     tools:text="2006" />
 
-                <!--PLOT-->
-                <!--==========================-->
-
                 <!--Plot-->
-
-                <LinearLayout
+                <TextView
                     android:id="@+id/movie_details_plot_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    style="@style/detailsSectionTitle"
                     android:layout_below="@id/movie_details_poster_view"
-                    android:layout_marginTop="15dp"
-                    android:gravity="center">
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/plot"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:drawableRight="@drawable/plot"
+                    android:drawableEnd="@drawable/plot"
+                    android:layout_centerHorizontal="true"
+                    android:drawablePadding="15dp"/>
 
-                    <TextView
-                        style="@style/detailsSectionTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="Plot"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
-                        android:src="@drawable/plot" />
-
-
-                </LinearLayout>
 
                 <!--Dividing bar-->
                 <View
@@ -221,7 +223,6 @@
                     android:layout_marginTop="8dp" />
 
                 <!--Plot text-->
-
                 <TextView
                     android:id="@+id/movie_details_plot_view"
                     style="@style/detailsMovieParagraph"
@@ -232,31 +233,19 @@
                     tools:text="Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit" />
 
                 <!--Cast-->
-
-                <LinearLayout
+                <TextView
                     android:id="@+id/movie_details_cast_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    style="@style/detailsSectionTitle"
                     android:layout_below="@id/movie_details_plot_view"
-                    android:gravity="center">
-
-                    <TextView
-                        android:id="@+id/details_cast_title_text"
-                        style="@style/detailsSectionTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="Cast"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
-                        android:src="@drawable/people" />
-
-
-                </LinearLayout>
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/cast"
+                    android:textStyle="bold"
+                    android:drawableRight="@drawable/people"
+                    android:drawableEnd="@drawable/people"
+                    android:drawablePadding="15dp"
+                    android:layout_centerHorizontal="true" />
 
                 <!--Dividing bar-->
                 <View
@@ -268,12 +257,7 @@
                     android:layout_marginRight="70dp"
                     android:layout_marginTop="8dp" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
                 <!--Cast text-->
-
                 <TextView
                     android:id="@+id/details_cast_text"
                     style="@style/detailsMovieParagraph"
@@ -283,6 +267,7 @@
                     android:layout_centerHorizontal="true"
                     tools:text="Jhonny Deep\nOrlando Bloom\nKeira Knightly" />
 
+                <!--Trailers-->
                 <LinearLayout
                     android:id="@+id/movie_details_trailers_main_section"
                     android:layout_width="match_parent"
@@ -296,29 +281,17 @@
 
                     <!--Trailers section-->
 
-                    <LinearLayout
+                    <TextView
                         android:id="@+id/movie_details_trailers_title"
-                        android:layout_width="match_parent"
+                        style="@style/detailsSectionTitle"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="center">
-
-                        <TextView
-                            android:id="@+id/details_trailers_title_text"
-                            style="@style/detailsSectionTitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="Trailers"
-                            android:textStyle="bold" />
-
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="8dp"
-                            android:src="@drawable/movie" />
-
-
-                    </LinearLayout>
+                        android:layout_gravity="center"
+                        android:drawablePadding="15dp"
+                        android:drawableRight="@drawable/movie"
+                        android:drawableEnd="@drawable/movie"
+                        android:text="@string/trailers"
+                        android:textStyle="bold" />
 
                     <!--Dividing bar-->
                     <View
@@ -331,7 +304,6 @@
                         android:background="@android:color/white" />
 
                     <!--Scroll Trailers-->
-
                     <HorizontalScrollView
                         android:id="@+id/movie_details_trailers_horizontal_scroll"
                         android:layout_width="wrap_content"
@@ -349,35 +321,22 @@
 
                     </HorizontalScrollView>
 
-
                 </LinearLayout>
 
                 <!--Reviews section-->
-
-                <LinearLayout
+                <TextView
                     android:id="@+id/movie_details_reviews_title"
-                    android:layout_width="match_parent"
+                    style="@style/detailsSectionTitle"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/movie_details_trailers_main_section"
-                    android:gravity="center">
-
-                    <TextView
-                        android:id="@+id/details_trailers_reviews_text"
-                        style="@style/detailsSectionTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="Reviews"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
-                        android:src="@drawable/review" />
-
-
-                </LinearLayout>
+                    android:layout_gravity="center"
+                    android:text="@string/reviews"
+                    android:textStyle="bold"
+                    android:drawableRight="@drawable/review"
+                    android:drawableEnd="@drawable/review"
+                    android:drawablePadding="15dp"
+                    android:layout_below="@+id/movie_details_trailers_main_section"
+                    android:layout_centerHorizontal="true" />
 
                 <!--Dividing bar-->
                 <View
@@ -390,15 +349,15 @@
                     android:layout_marginTop="8dp"
                     android:background="@android:color/white" />
 
+                <!--Read Reviews-->
                 <TextView
                     android:id="@+id/movie_details_reviews_read_more"
+                    style="@style/detailsReadReviewsText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/movie_details_reviews_horizontal_line"
                     android:layout_centerHorizontal="true"
-                    android:text="Read Reviews"
-                    android:textColor="#147dfc"
-                    android:textSize="20sp"
+                    android:text="@string/read_reviews"
                     android:padding="10dp"/>
 
             </RelativeLayout>
@@ -407,11 +366,12 @@
 
     </android.support.v4.widget.NestedScrollView>
 
+    <!--Favorite floating action button-->
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/favorite_floating_button"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center_vertical|left"
+        android:layout_width="@dimen/floatingActionButtonFavorite"
+        android:layout_height="@dimen/floatingActionButtonFavorite"
+        android:layout_gravity="center_vertical|start"
         android:layout_margin="16dp"
         android:clickable="true"
         android:src="@drawable/heart_not_pressed"

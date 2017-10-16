@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--Main Grid Movie poster layout-->
+    <dimen name="mainPosterLayoutWidth">250dp</dimen>
+    <integer name="mainPosterLayoutWidthInt">250</integer>
+
+    <!--Floating action button Favorite-->
+    <dimen name="floatingActionButtonFavorite">60dp</dimen>
+
+    <!--Movie poster-->
+    <dimen name="posterWidth">250dp</dimen>
+    <dimen name="posterHeight">350dp</dimen>
+
+    <!--Trailer thumbnails-->
+    <integer name="trailerWidth">250</integer>
+    <integer name="trailerHeight">200</integer>
+</resources>
