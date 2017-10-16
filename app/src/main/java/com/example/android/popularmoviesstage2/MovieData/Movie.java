@@ -32,7 +32,7 @@ public class Movie implements Parcelable {
 
     private boolean isMoviewForAdults;
     private String movieBackdropPath;
-    private ArrayList<MovieTrailerThumbnail> movieTrailersThumbnails;
+    private ArrayList<MovieTrailerThumbnail> movieTrailersThumbnails = new ArrayList<MovieTrailerThumbnail>();
 
     private boolean isFavorite = false;
 

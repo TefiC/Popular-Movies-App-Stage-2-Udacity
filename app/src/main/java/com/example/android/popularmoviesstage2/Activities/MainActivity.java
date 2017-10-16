@@ -269,8 +269,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mAdapter = new MovieRecyclerViewAdapter(mMoviesArray, mMoviesArray.size(), this, this, mSearchCriteria);
         mMainRecyclerView.setAdapter(mAdapter);
 
-        //TODO:
-        mGridLayoutManager.onRestoreInstanceState(mState);
+        // Restore RecyclerView scroll
+        if(mState != null) {
+            mGridLayoutManager.onRestoreInstanceState(mState);
+            mState = null;
+        }
     }
 
     /**
@@ -453,6 +456,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     protected void onPause() {
         super.onPause();
+        // To restore RecyclerView scroll
         mState = mGridLayoutManager.onSaveInstanceState();
     }
 

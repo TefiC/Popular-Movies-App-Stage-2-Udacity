@@ -1,7 +1,12 @@
 package com.example.android.popularmoviesstage2.Activities;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -58,10 +63,15 @@ public class ReviewsActivity extends AppCompatActivity {
         if(intentThatStartedThisActivity.hasExtra(MainActivity.INTENT_MOVIE_OBJECT_KEY)) {
 
             mMovieSelected = intentThatStartedThisActivity.getExtras().getParcelable(MainActivity.INTENT_MOVIE_OBJECT_KEY);
+
             mMovieReviewsArray = mMovieSelected.getMovieReviews();
 
-            // Set adapter
-            setReviewsAdapter();
+            if(mMovieReviewsArray.size() > 0) {
+                // Set adapter
+                setReviewsAdapter();
+            } else {
+                createNoReviewsDialog(this);
+            }
         }
     }
 
@@ -119,5 +129,33 @@ public class ReviewsActivity extends AppCompatActivity {
         // Adapter
         mReviewsAdapter = new ReviewsRecyclerViewAdapter(mMovieReviewsArray, mMovieReviewsArray.size(), this);
         mReviewsRecyclerView.setAdapter(mReviewsAdapter);
+    }
+
+    // Methods for User interaction ======================================================================
+
+    /**
+     * Creates and displays an alert dialog telling the user
+     * the movie he/she selected has no reviews available
+     *
+     * @param context Context of the Activity where the dialog is launched
+     */
+    public static void createNoReviewsDialog(final Context context) {
+
+        //Create dialog builder with corresponding settings
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(context);
+        // Set content
+        builder.setTitle(context.getString(R.string.no_reviews_dialog_title))
+                .setMessage(context.getString(R.string.no_reviews_dialog_message));
+        // Set button
+        builder.setPositiveButton(context.getString(R.string.ok), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+                NavUtils.navigateUpFromSameTask((Activity) context);
+            }
+        });
+
+        // Create dialog and display it to the user
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }

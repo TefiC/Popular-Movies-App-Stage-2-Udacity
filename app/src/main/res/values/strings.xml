@@ -19,6 +19,10 @@
     <string name="favorites_dialog_title">No Favorite Movies Selected</string>
     <string name="favorites_dialog_message">You can select as many as you like : )</string>
 
+    <!--No Reviews dialog-->
+    <string name="no_reviews_dialog_title">WARNING</string>
+    <string name="no_reviews_dialog_message">No Reviews available : (</string>
+
     <!--Details activity-->
     <string name="vote_average">Rating</string>
     <string name="release_date">Released</string>

@@ -666,7 +666,10 @@ public class DetailsActivity extends AppCompatActivity {
 
         // Create Trailer URL and assign add to the movie object
         String searchURL = TRAILER_THUMBNAIL_BASE_PATH + trailerKey + "/0.jpg";
-        movieSelected.getMovieTrailersThumbnails().add(new MovieTrailerThumbnail(searchURL, trailerKey));
+
+        if(movieSelected.getMovieTrailersThumbnails() != null) {
+            movieSelected.getMovieTrailersThumbnails().add(new MovieTrailerThumbnail(searchURL, trailerKey));
+        }
 
         // Load the thumbnail with Picasso
         Picasso.with(this)
@@ -839,8 +842,10 @@ public class DetailsActivity extends AppCompatActivity {
             params.setMargins(marginEnd, marginEnd, marginEnd, marginEnd);
         }
 
-        //Set tag
-        trailerView.setTag(trailerKey);
+        if(trailerKey != null) {
+            //Set tag
+            trailerView.setTag(trailerKey);
+        }
 
         // Include parameters
         trailerView.setLayoutParams(params);
@@ -1216,9 +1221,13 @@ public class DetailsActivity extends AppCompatActivity {
         for (String trailer : trailersArray) {
 
             String[] trailerData = trailer.split(FavoritesUtils.CHARACTER_TO_SEPARATE_THUMBNAIL_TAG);
-            String trailerKey = trailerData[1];
 
-            trailerTagArray.add(trailerKey);
+            if(trailerData.length > 1) {
+                String trailerKey = trailerData[1];
+                trailerTagArray.add(trailerKey);
+            } else {
+                trailerTagArray.add(null);
+            }
         }
 
         return trailerTagArray;
@@ -1273,7 +1282,9 @@ public class DetailsActivity extends AppCompatActivity {
             ImageView trailerView = new ImageView(this);
             setTrailerViewProperties(this, trailerView, trailersKeys.get(i));
 
-            setTrailerOnClickListener(this, trailerView, trailersKeys.get(i));
+            if(trailersKeys.get(i) != null) {
+                setTrailerOnClickListener(this, trailerView, trailersKeys.get(i));
+            }
 
             mMovieDetailsTrailerLinearContainer.addView(trailerView, i);
             trailerView.setImageBitmap(trailersThumbnails.get(i));
