@@ -39,7 +39,7 @@ public class FavoritesUtils {
     public static final String CHARACTER_TO_SEPARATE_THUMBNAIL_TAG = ">";
     public static final String CHARACTER_TO_SEPARATE_THUMBNAILS = "==>";
 
-    private static final String SHARED_PREFERENCES_FAVORITES_STRING = "favoriteMoviesPreferences";
+    public static final String SHARED_PREFERENCES_FAVORITES_STRING = "favoriteMoviesPreferences";
 
 
     /*

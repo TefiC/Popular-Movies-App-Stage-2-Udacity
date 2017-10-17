@@ -8,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 
+import com.example.android.popularmoviesstage2.Activities.MainActivity;
 import com.example.android.popularmoviesstage2.R;
 
 import java.io.IOException;
@@ -225,10 +226,10 @@ public class NetworkUtils {
         String criteria;
 
         switch (sortBy) {
-            case "Most Popular":
+            case MainActivity.MOST_POPULAR_CRITERIA_STRING:
                 criteria = "popular";
                 break;
-            case "Top Rated":
+            case MainActivity.TOP_RATED_CRITERIA_STRING:
                 criteria = "top_rated";
                 break;
             // Handle any other cases

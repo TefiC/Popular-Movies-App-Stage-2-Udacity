@@ -17,6 +17,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
@@ -47,6 +48,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 
+import static com.example.android.popularmoviesstage2.Activities.MainActivity.INTENT_MOVIE_OBJECT_KEY;
 import static com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils.CAST_SEARCH_LOADER;
 import static com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils.FAVORITE_MOVIES_LOADER_BY_ID;
 import static com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils.REVIEWS_LOADER;
@@ -83,7 +85,7 @@ public class DetailsActivity extends AppCompatActivity {
      */
 
     // Activity context
-    private static Context mContext;
+    private Context mContext;
 
     // Movie selected by the user
     public Movie movieSelected;
@@ -120,7 +122,7 @@ public class DetailsActivity extends AppCompatActivity {
     private String mCachedReviews;
 
     // Uri
-    private static Uri mMovieSelectedUri;
+    public static Uri mMovieSelectedUri;
 
     /*
      * Methods ============================================================
@@ -324,23 +326,23 @@ public class DetailsActivity extends AppCompatActivity {
                     switch (id) {
                         case LoaderUtils.DETAILS_SEARCH_LOADER:
                             searchQueryURL = NetworkUtils.buildSearchUrl(NetworkUtils.SEARCH_TYPE_DETAILS,
-                                                                         null,
-                                                                         movie.getMovieId());
+                                    null,
+                                    movie.getMovieId());
                             break;
                         case LoaderUtils.TRAILERS_SEARCH_LOADER:
                             searchQueryURL = NetworkUtils.buildSearchUrl(NetworkUtils.SEARCH_TYPE_TRAILERS,
-                                                                         null,
-                                                                         movie.getMovieId());
+                                    null,
+                                    movie.getMovieId());
                             break;
                         case LoaderUtils.CAST_SEARCH_LOADER:
                             searchQueryURL = NetworkUtils.buildSearchUrl(NetworkUtils.SEARCH_TYPE_CAST,
-                                                                         null,
-                                                                         movie.getMovieId());
+                                    null,
+                                    movie.getMovieId());
                             break;
                         case LoaderUtils.REVIEWS_LOADER:
                             searchQueryURL = NetworkUtils.buildSearchUrl(NetworkUtils.SEARCH_TYPE_REVIEWS,
-                                                                         null,
-                                                                         movie.getMovieId());
+                                    null,
+                                    movie.getMovieId());
                             break;
                     }
 
@@ -442,7 +444,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         String movieRuntime = Integer.toString((int) movie.getMovieRuntime());
         boolean isMovieForAdults = movie.getIsMovieForAdults();
-        String movieBackdropPath = createFullBackdropPath(movie.getMovieBackdropPath());
+        String movieBackdropPath = createFullBackdropPath(this, movie.getMovieBackdropPath());
 
         // Update views with the data
 
@@ -507,14 +509,14 @@ public class DetailsActivity extends AppCompatActivity {
         if (mIsMovieSelectedFavorite) {
 
             // Poster
-            fillMoviePosterDetailsFromDB(loadImageFromDatabase(
+            fillMoviePosterDetailsFromDB(ImagesDBUtils.loadImageFromDatabase(
                     this,
                     movieSelected,
                     MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH,
                     FavoritesUtils.IMAGE_TYPE_POSTER));
 
             // Backdrop
-            fillMovieBackdropDetailsFromDB(loadImageFromDatabase(
+            fillMovieBackdropDetailsFromDB(ImagesDBUtils.loadImageFromDatabase(
                     this,
                     movieSelected,
                     MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP,
@@ -667,7 +669,7 @@ public class DetailsActivity extends AppCompatActivity {
         // Create Trailer URL and assign add to the movie object
         String searchURL = TRAILER_THUMBNAIL_BASE_PATH + trailerKey + "/0.jpg";
 
-        if(movieSelected.getMovieTrailersThumbnails() != null) {
+        if (movieSelected.getMovieTrailersThumbnails() != null) {
             movieSelected.getMovieTrailersThumbnails().add(new MovieTrailerThumbnail(searchURL, trailerKey));
         }
 
@@ -725,7 +727,7 @@ public class DetailsActivity extends AppCompatActivity {
 
                 // Intent
                 Intent intent = new Intent(context, destinationActivity);
-                intent.putExtra(MainActivity.INTENT_MOVIE_OBJECT_KEY, movieSelected);
+                intent.putExtra(INTENT_MOVIE_OBJECT_KEY, movieSelected);
 
                 startActivity(intent);
             }
@@ -768,7 +770,7 @@ public class DetailsActivity extends AppCompatActivity {
         // Start a service that will remove the movie from the database
         Intent intent = new Intent(context, FavoritesDataIntentService.class);
         intent.setAction(DBServiceTasks.ACTION_REMOVE_FAVORITE);
-        intent.putExtra("movieObject", movieSelected);
+        intent.putExtra(MainActivity.INTENT_MOVIE_OBJECT_KEY, movieSelected);
         context.startService(intent);
     }
 
@@ -842,7 +844,7 @@ public class DetailsActivity extends AppCompatActivity {
             params.setMargins(marginEnd, marginEnd, marginEnd, marginEnd);
         }
 
-        if(trailerKey != null) {
+        if (trailerKey != null) {
             //Set tag
             trailerView.setTag(trailerKey);
         }
@@ -927,8 +929,8 @@ public class DetailsActivity extends AppCompatActivity {
      * @param backdropPath The final piece of the path to the movie's backdrop image
      * @return A full URL to request the image
      */
-    public static String createFullBackdropPath(String backdropPath) {
-        return MOVIEDB_POSTER_BASE_URL + mContext.getResources().getString(R.string.backdrop_size) + backdropPath;
+    public static String createFullBackdropPath(Context context, String backdropPath) {
+        return MOVIEDB_POSTER_BASE_URL + context.getString(R.string.backdrop_size) + backdropPath;
     }
 
     /**
@@ -1015,6 +1017,9 @@ public class DetailsActivity extends AppCompatActivity {
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+            Log.v(TAG, "LOADING FROM CURSOR");
+
             if (data.getCount() > 0) {
 
                 loadMovieDetailsFromDB(data);
@@ -1133,48 +1138,11 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads a movie image (poster or backdrop) from internal storage
-     *
-     * @param context Context of the activity that called this method
-     * @param movieSelected Movie object selected by the user
-     * @param databaseColumnName Database column name with the corresponding image category
-     * @param imageType The corresponding image type
-     *
-     * @return The image as a Bitmap
-     */
-    public static Bitmap loadImageFromDatabase(Context context, Movie movieSelected, String databaseColumnName, String imageType) {
-
-        String[] projection = {
-                databaseColumnName
-        };
-
-        Cursor pathCursor = context.getContentResolver().query(
-                mMovieSelectedUri,
-                projection,
-                null,
-                null,
-                MoviesDBContract.FavoriteMoviesEntry._ID);
-
-        pathCursor.moveToFirst();
-
-        String imagePath = pathCursor.getString(pathCursor.getColumnIndex(databaseColumnName));
-
-        pathCursor.close();
-
-        return ImagesDBUtils.loadImageFromStorage(
-                imagePath,
-                Integer.toString(movieSelected.getMovieId()),
-                imageType,
-                -1);
-    }
-
-    /**
      * Creates an ArrayList of Bitmaps representing the movie's trailers thumbnails from
      * the trailer thumbnails data retrieved from the database
      *
-     * @param context Context of the activity
+     * @param context       Context of the activity
      * @param movieSelected Movie selected by the user
-     *
      * @return An ArrayList of Bitmaps of the trailers thumbnails
      */
     private static ArrayList<Bitmap> loadMovieTrailersFromDatabase(Context context, Movie movieSelected) {
@@ -1208,7 +1176,6 @@ public class DetailsActivity extends AppCompatActivity {
      * Creates an ArrayList of Strings with the trailers keys retrieved from the database
      *
      * @param context The activity context
-     *
      * @return an ArrayList of Strings with the trailers keys
      */
     private static ArrayList<String> loadTrailerKeysFromDatabase(Context context) {
@@ -1222,7 +1189,7 @@ public class DetailsActivity extends AppCompatActivity {
 
             String[] trailerData = trailer.split(FavoritesUtils.CHARACTER_TO_SEPARATE_THUMBNAIL_TAG);
 
-            if(trailerData.length > 1) {
+            if (trailerData.length > 1) {
                 String trailerKey = trailerData[1];
                 trailerTagArray.add(trailerKey);
             } else {
@@ -1238,10 +1205,9 @@ public class DetailsActivity extends AppCompatActivity {
      * and trailer keys)
      *
      * @param context Context of the activity that called this method
-     *
      * @return An array of Strings that represent the movie thumbnails with their corresponding data
      */
-    private static String[] queryTrailersArray(Context context) {
+    public static String[] queryTrailersArray(Context context) {
         String[] posterProjection = {
                 MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS
         };
@@ -1273,7 +1239,7 @@ public class DetailsActivity extends AppCompatActivity {
      * Creates an ImageView for each trailer, sets its properties and adds it to the layout
      *
      * @param trailersThumbnails ArrayList of Bitmaps representing the trailers thumbnails
-     * @param trailersKeys ArrayList of Strings with the trailers keys
+     * @param trailersKeys       ArrayList of Strings with the trailers keys
      */
     private void displayTrailersBitmapsOnUI(ArrayList<Bitmap> trailersThumbnails, ArrayList<String> trailersKeys) {
 
@@ -1282,7 +1248,7 @@ public class DetailsActivity extends AppCompatActivity {
             ImageView trailerView = new ImageView(this);
             setTrailerViewProperties(this, trailerView, trailersKeys.get(i));
 
-            if(trailersKeys.get(i) != null) {
+            if (trailersKeys.get(i) != null) {
                 setTrailerOnClickListener(this, trailerView, trailersKeys.get(i));
             }
 

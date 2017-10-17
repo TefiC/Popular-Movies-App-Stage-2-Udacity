@@ -2,6 +2,7 @@ package com.example.android.popularmoviesstage2.DataUtils;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
@@ -11,6 +12,8 @@ import com.example.android.popularmoviesstage2.MovieData.MovieReview;
 import java.util.ArrayList;
 
 import static android.content.ContentValues.TAG;
+import static com.example.android.popularmoviesstage2.DataUtils.ImagesDBUtils.deleteImageFromStorage;
+import static com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils.getStringFromCursor;
 
 /**
  * Tasks to insert data into the database using a service
@@ -39,7 +42,6 @@ public class DBServiceTasks {
     /*
      * Methods
      */
-
 
     // Methods to execute DB tasks  ================================================================
 
@@ -85,12 +87,30 @@ public class DBServiceTasks {
     }
 
     /**
-     * Removes the movie selected from the "Favorites" table in the database
+     * Removes the movie selected from the "Favorites" table in the database and from internal storage
      */
     private static void removeMovieFromFavoritesDB(Context context, Movie movieSelected) {
 
         Uri uri = MoviesDBContract.FavoriteMoviesEntry.CONTENT_URI.buildUpon()
-                .appendPath(Integer.toString(movieSelected.getMovieId())).build();
+                .appendPath(Integer.toString(movieSelected.getMovieId()))
+                .build();
+
+        // Poster
+        boolean posterDeleted = ImagesDBUtils.deleteImageFromStorage(context,
+                getImagePathFromDB(context, uri, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH),
+                Integer.toString(movieSelected.getMovieId()),
+                FavoritesUtils.IMAGE_TYPE_POSTER,
+                -1);
+
+        // Backdrop
+        boolean backdropDeleted = deleteImageFromStorage(context,
+                getImagePathFromDB(context, uri, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP),
+                Integer.toString(movieSelected.getMovieId()),
+                FavoritesUtils.IMAGE_TYPE_BACKDROP,
+                -1);
+
+        // Thumbnails
+        boolean thumbnailsDeleted = ImagesDBUtils.deleteThumbnailsFromStorage(context, Integer.toString(movieSelected.getMovieId()));
 
         int numDeleted = context.getContentResolver().delete(uri, "movieDBId=?", new String[]{"id"});
 
@@ -100,10 +120,29 @@ public class DBServiceTasks {
     }
 
     /**
+     * Gets the path in the database to internal storage for an image resource
+     *
+     * @param context The context of the activity that called this method
+     * @param uri The Uri to find an individual movie
+     * @param columnName The name of the image resource column in the database
+     *
+     * @return The image path to internal storage
+     */
+    public static String getImagePathFromDB(Context context, Uri uri, String columnName) {
+        Cursor imagePathCursor = context.getContentResolver().query(uri,
+                new String[]{columnName},
+                null,
+                null,
+                MoviesDBContract.FavoriteMoviesEntry._ID);
+
+        imagePathCursor.moveToFirst();
+        return getStringFromCursor(imagePathCursor, columnName);
+    }
+
+    /**
      * Creates a ContentValues instance that contains the data for the movie selected
      *
      * @param movieSelected The movie selected by the user
-     *
      * @return ContentValues with the movie's data
      */
     private static ContentValues createMovieContentValuesForDB(Movie movieSelected) {
@@ -146,7 +185,6 @@ public class DBServiceTasks {
      * Build the Uri for database operations for the movie selected
      *
      * @param movieSelected The movie selected by the user
-     *
      * @return The Uri to operate with for the movie selected
      */
     public static Uri buildMovieSelectedDBUri(Movie movieSelected) {

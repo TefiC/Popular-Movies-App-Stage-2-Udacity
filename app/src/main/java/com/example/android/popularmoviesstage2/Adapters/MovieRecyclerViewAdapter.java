@@ -30,11 +30,6 @@ import java.util.ArrayList;
 public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecyclerViewAdapter.MovieViewHolder> {
 
     /*
-     * Constants
-     */
-
-
-    /*
      * Fields
      */
 
@@ -148,8 +143,8 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
     private boolean determineIfMovieIsFavorite(Movie movie) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
-        if (sharedPreferences.contains("favoriteMoviesPreferences")) {
-            return sharedPreferences.getStringSet("favoriteMoviesPreferences", null).contains(Integer.toString(movie.getMovieId()));
+        if (sharedPreferences.contains(FavoritesUtils.SHARED_PREFERENCES_FAVORITES_STRING)) {
+            return sharedPreferences.getStringSet(FavoritesUtils.SHARED_PREFERENCES_FAVORITES_STRING, null).contains(Integer.toString(movie.getMovieId()));
         } else {
             return FavoritesUtils.checkIfMovieIsFavorite(mContext, Integer.toString(movie.getMovieId()));
         }
@@ -256,6 +251,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
      * @param movieView  The view that will hold the image
      */
     private void loadMoviePoster(String posterPath, RectangularImageView movieView) {
+
         if (posterPath != null) {
             Picasso.with(mContext)
                     .load(posterPath)

@@ -38,7 +38,7 @@ public class ImagesDBUtils {
     // Directory constants
     private static final String DIRECTORY_POSTERS = "postersDir";
     private static final String DIRECTORY_BACKDROPS = "backdropsDir";
-    private static final String DIRECTORY_THUMBNAILS =  "thumbnailDir";
+    private static final String DIRECTORY_THUMBNAILS = "thumbnailDir";
 
     /*
      * Methods
@@ -49,7 +49,7 @@ public class ImagesDBUtils {
     /**
      * Saves all movie images to internal storage and updates its path in the database
      *
-     * @param context The context of the activity that called this method
+     * @param context       The context of the activity that called this method
      * @param movieSelected The movie selected by the user
      */
     public static void saveAllMovieImages(Context context, Movie movieSelected) {
@@ -63,7 +63,7 @@ public class ImagesDBUtils {
         saveMovieImage(FavoritesUtils.IMAGE_TYPE_BACKDROP,
                 context,
                 movieSelected,
-                DetailsActivity.createFullBackdropPath(movieSelected.getMovieBackdropPath()));
+                DetailsActivity.createFullBackdropPath(context, movieSelected.getMovieBackdropPath()));
 
         //Save trailer thumbnails
         saveMovieThumbnails(context, movieSelected);
@@ -72,11 +72,11 @@ public class ImagesDBUtils {
     /**
      * Saves an individual movie image to internal storage and updates its path in the database
      *
-     * @param imageType The type of image to be saved.
-     *                  Either FavoritesUtils.IMAGE_TYPE_POSTER or FavoritesUtils.IMAGE_TYPE_BACKDROP
-     * @param context The context of the activity that called this method
+     * @param imageType     The type of image to be saved.
+     *                      Either FavoritesUtils.IMAGE_TYPE_POSTER or FavoritesUtils.IMAGE_TYPE_BACKDROP
+     * @param context       The context of the activity that called this method
      * @param movieSelected The movie selected by the user
-     * @param loadPath The path used to load the image with Picasso
+     * @param loadPath      The path used to load the image with Picasso
      */
     private static void saveMovieImage(String imageType, Context context, Movie movieSelected, String loadPath) {
         Bitmap bitmap = getImageBitmapFromPicasso(context, loadPath);
@@ -92,7 +92,7 @@ public class ImagesDBUtils {
     /**
      * Saves all the movie thumbnails to the database and updates their corresponding path
      *
-     * @param context The context of the activity that called this method
+     * @param context       The context of the activity that called this method
      * @param movieSelected The movie selected by the user
      */
     private static void saveMovieThumbnails(Context context, Movie movieSelected) {
@@ -116,8 +116,7 @@ public class ImagesDBUtils {
      * Loads a bitmap using the Picasso library, retrieving images from local storage
      *
      * @param context The context of the activity that called this method
-     * @param path The URL used to load the image with Picasso
-     *
+     * @param path    The URL used to load the image with Picasso
      * @return A Bitmap representing the image retrieved
      */
     private static Bitmap getImageBitmapFromPicasso(Context context, String path) {
@@ -139,15 +138,14 @@ public class ImagesDBUtils {
      * depends on the imageType being saved. Calls a method that
      * saves the image path to the database.
      *
-     * @param bitmapImage A Bitmap of the poster image
-     * @param movieDBId The MovieDB's ID
-     * @param imageType The type of image resource to save, in order to determine
-     *                  the correct directory. Either "poster", "backdrop" or "trailerThumbnail"
-     * @param context The context of the activity that invoked this method
+     * @param bitmapImage    A Bitmap of the poster image
+     * @param movieDBId      The MovieDB's ID
+     * @param imageType      The type of image resource to save, in order to determine
+     *                       the correct directory. Either "poster", "backdrop" or "trailerThumbnail"
+     * @param context        The context of the activity that invoked this method
      * @param thumbnailIndex If the imageType is FavoritesUtils.IMAGE_TYPE_TRAILER_THUMBNAIL, an integer
      *                       describing the thumbnail's position in the thumbnails list stored in
      *                       the movie object. Else, -1
-     *
      * @return The directory's absolute path
      */
     public static String saveImageToInternalStorage(Bitmap bitmapImage, String movieDBId,
@@ -172,9 +170,8 @@ public class ImagesDBUtils {
     /**
      * Create a file directory for the corresponding image type
      *
-     * @param context The context of the activity that called this method
+     * @param context   The context of the activity that called this method
      * @param imageType The type of image being saved
-     *
      * @return A File directory
      */
     private static File createFileDirectory(Context context, String imageType) {
@@ -203,18 +200,17 @@ public class ImagesDBUtils {
     /**
      * Create a bitmap path for the corresponding image
      *
-     * @param directory Directory for the file
-     * @param imageType Type of image to be saved
-     * @param movieDBId MovieDB Id of the movie selected
+     * @param directory      Directory for the file
+     * @param imageType      Type of image to be saved
+     * @param movieDBId      MovieDB Id of the movie selected
      * @param thumbnailIndex If the imageType is a thumbnail, the thumbnail position in the movie
      *                       object ArrayList
-     *
      * @return The path where the image will be saved to in internal storage
      */
     private static File createBitmapPath(File directory, String imageType, String movieDBId, int thumbnailIndex) {
         File bitmapPath;
 
-        if(imageType.equals(IMAGE_TYPE_TRAILER_THUMBNAIL)) {
+        if (imageType.equals(IMAGE_TYPE_TRAILER_THUMBNAIL)) {
             bitmapPath = new File(directory, movieDBId + thumbnailIndex + ".jpg");
         } else {
             // Create imageDir
@@ -228,7 +224,7 @@ public class ImagesDBUtils {
      * Saves the bitmap passed as argument to the path passed as argument in internal storage
      *
      * @param bitmapImage A Bitmap representing the image being saved
-     * @param bitmapPath The path where the bitmap must be saved
+     * @param bitmapPath  The path where the bitmap must be saved
      */
     private static void createBitmapOutputStream(Bitmap bitmapImage, File bitmapPath) {
         FileOutputStream fos = null;
@@ -255,12 +251,12 @@ public class ImagesDBUtils {
     /**
      * Saves the image path to the database
      *
-     * @param context The context of the activity that called this method
+     * @param context           The context of the activity that called this method
      * @param imageInternalPath Path where the image was stored in internal storage
-     * @param imageType Type of image to be stored
-     * @param movieSelected Movie Selected by the user
-     * @param thumbnailIndex If the imageType is thumbnail, the thumbnail's position in the
-     *                       movie object's trailer thumbnails ArrayList
+     * @param imageType         Type of image to be stored
+     * @param movieSelected     Movie Selected by the user
+     * @param thumbnailIndex    If the imageType is thumbnail, the thumbnail's position in the
+     *                          movie object's trailer thumbnails ArrayList
      */
     public static void saveImagePathToDatabase(Context context, String imageInternalPath,
                                                String imageType, Movie movieSelected,
@@ -280,16 +276,15 @@ public class ImagesDBUtils {
     /**
      * Generates the content values with the image internal storage path
      *
-     * @param context The context of the activity that called this method
+     * @param context           The context of the activity that called this method
      * @param imageInternalPath The image path in internal storage
-     * @param imageType The type of image being updated
-     * @param movieSelected The movie selected by the user
-     * @param thumbnailIndex If the image type is thumbnail, the position of the thumbnail in the
-     *                       movie object's trailer thumbnail ArrayList
-     * @param uri The Uri to find the movie in the database
-     *
+     * @param imageType         The type of image being updated
+     * @param movieSelected     The movie selected by the user
+     * @param thumbnailIndex    If the image type is thumbnail, the position of the thumbnail in the
+     *                          movie object's trailer thumbnail ArrayList
+     * @param uri               The Uri to find the movie in the database
      * @return Content values with the database column that corresponds to the image type
-     *         and the path that will be updated
+     * and the path that will be updated
      */
     private static ContentValues generateContentValuesForImagePath(Context context, String imageInternalPath,
                                                                    String imageType, Movie movieSelected,
@@ -324,24 +319,23 @@ public class ImagesDBUtils {
      * Creates a new thumbnails string by querying the previous one from the database,
      * and appending the new thumbnail path to the existing string in the database
      *
-     * @param context The context of the activity that called this method
+     * @param context           The context of the activity that called this method
      * @param imageInternalPath The path to the image stored in internal storage
-     * @param movieSelected The movie selected by the user
-     * @param uri The Uri to access the movie in the database
-     * @param thumbnailIndex The thumbnail's position in the movie object's thumbnails ArrayList
-     *
+     * @param movieSelected     The movie selected by the user
+     * @param uri               The Uri to access the movie in the database
+     * @param thumbnailIndex    The thumbnail's position in the movie object's thumbnails ArrayList
      * @return A updated thumbnails String with the new thumbnail data
      */
     private static String formatThumbnailsForDB(Context context, String imageInternalPath, Movie movieSelected,
                                                 Uri uri, int thumbnailIndex) {
 
         Cursor previousThumbnails = context.getContentResolver().query(uri,
-                new String[] {MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS},
+                new String[]{MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS},
                 null,
                 null,
                 null);
 
-        if(previousThumbnails.moveToFirst()) {
+        if (previousThumbnails.moveToFirst()) {
             String previousString = LoaderUtils.getStringFromCursor(previousThumbnails,
                     MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS);
 
@@ -357,11 +351,10 @@ public class ImagesDBUtils {
      * Creates a new thumbnails String from the previous thumbnails String by adding the new
      * thumbnail's data to the end of the existing String
      *
-     * @param previousString Previous thumbnails String
+     * @param previousString    Previous thumbnails String
      * @param imageInternalPath Path to internal storage where the image is saved
-     * @param movieSelected Movie selected by the user
-     * @param thumbnailIndex The thumbnail's position in the movie object's thumbnails ArrayList
-     *
+     * @param movieSelected     Movie selected by the user
+     * @param thumbnailIndex    The thumbnail's position in the movie object's thumbnails ArrayList
      * @return An updated String that includes the new thumbnail data
      */
     private static String createNewThumbnails(String previousString, String imageInternalPath,
@@ -382,14 +375,13 @@ public class ImagesDBUtils {
     /**
      * Loads an image from local storage
      *
-     * @param path Full path to the image
-     * @param movieDBId MovieDBId of the movie selected
-     * @param imageType The type of image that will be retrieved from local storage.
-     *                  Either IMAGE_TYPE_TRAILER_THUMBNAIL, IMAGE_TYPE_TRAILER_BACKDROP,
-     *                  IMAGE_TYPE_TRAILER_POSTER.
+     * @param path           Full path to the image
+     * @param movieDBId      MovieDBId of the movie selected
+     * @param imageType      The type of image that will be retrieved from local storage.
+     *                       Either IMAGE_TYPE_TRAILER_THUMBNAIL, IMAGE_TYPE_TRAILER_BACKDROP,
+     *                       IMAGE_TYPE_TRAILER_POSTER.
      * @param thumbnailIndex If the image type is thumbnail, the thumbnail's position
      *                       in the movie object's thumbnails ArrayList. Else -1.
-     *
      * @return A Bitmap of the corresponding image
      */
     public static Bitmap loadImageFromStorage(String path, String movieDBId, String imageType, int thumbnailIndex) {
@@ -399,7 +391,7 @@ public class ImagesDBUtils {
         try {
             File f;
 
-            if(imageType.equals(FavoritesUtils.IMAGE_TYPE_TRAILER_THUMBNAIL)) {
+            if (imageType.equals(FavoritesUtils.IMAGE_TYPE_TRAILER_THUMBNAIL)) {
                 f = new File(path, movieDBId + thumbnailIndex + ".jpg");
             } else {
                 f = new File(path, movieDBId + ".jpg");
@@ -412,5 +404,99 @@ public class ImagesDBUtils {
         }
 
         return bitmap;
+    }
+
+    /**
+     * Removes an image from internal storage
+     *
+     * @param context        The context of the activity that called this method
+     * @param path           The image path (directory)
+     * @param movieDBId      The ID of the movie selected by the user
+     * @param imageType      The type of image to be deleted (poster, backdrop, trailer thumbnail)
+     * @param thumbnailIndex The position of the trailer thumbnail in the movie object's ArrayList
+     * @return true if the file is deleted, false otherwise.
+     */
+    public static boolean deleteImageFromStorage(Context context, String path, String movieDBId, String imageType, int thumbnailIndex) {
+
+        File file;
+
+        switch (imageType) {
+            case FavoritesUtils.IMAGE_TYPE_BACKDROP:
+            case FavoritesUtils.IMAGE_TYPE_POSTER:
+                file = new File(path, movieDBId + ".jpg");
+                break;
+            case FavoritesUtils.IMAGE_TYPE_TRAILER_THUMBNAIL:
+                file = new File(path, movieDBId + thumbnailIndex + ".jpg");
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown image type: " + imageType);
+        }
+
+        return file.delete();
+    }
+
+    /**
+     * Removes trailer thumbnails from internal storage
+     *
+     * @param context   The context of the activity that called this method
+     * @param movieDBId The MovieDB Id of the movie selected by the user
+     * @return true if all the thumbnails were removed correctly. False otherwise
+     */
+    public static boolean deleteThumbnailsFromStorage(Context context, String movieDBId) {
+
+        boolean allRemoved = true;
+
+        String[] trailersArray = DetailsActivity.queryTrailersArray(context);
+
+        for (int i = 0; i < trailersArray.length; i++) {
+
+            String trailerPath = trailersArray[i].split(FavoritesUtils.CHARACTER_TO_SEPARATE_THUMBNAIL_TAG)[0];
+
+            boolean removed = ImagesDBUtils.deleteImageFromStorage(context,
+                    trailerPath,
+                    movieDBId,
+                    FavoritesUtils.IMAGE_TYPE_TRAILER_THUMBNAIL,
+                    i);
+
+            if (!removed) {
+                allRemoved = false;
+            }
+        }
+        return allRemoved;
+    }
+
+    /**
+     * Loads a movie image (poster or backdrop) from internal storage
+     *
+     * @param context            Context of the activity that called this method
+     * @param movieSelected      Movie object selected by the user
+     * @param databaseColumnName Database column name with the corresponding image category
+     * @param imageType          The corresponding image type
+     * @return The image as a Bitmap
+     */
+    public static Bitmap loadImageFromDatabase(Context context, Movie movieSelected, String databaseColumnName, String imageType) {
+
+        String[] projection = {
+                databaseColumnName
+        };
+
+        Cursor pathCursor = context.getContentResolver().query(
+                DetailsActivity.mMovieSelectedUri,
+                projection,
+                null,
+                null,
+                MoviesDBContract.FavoriteMoviesEntry._ID);
+
+        pathCursor.moveToFirst();
+
+        String imagePath = pathCursor.getString(pathCursor.getColumnIndex(databaseColumnName));
+
+        pathCursor.close();
+
+        return ImagesDBUtils.loadImageFromStorage(
+                imagePath,
+                Integer.toString(movieSelected.getMovieId()),
+                imageType,
+                -1);
     }
 }

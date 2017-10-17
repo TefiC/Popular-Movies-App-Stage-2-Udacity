@@ -168,7 +168,9 @@ public class MoviesProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown Uri " + uri);
         }
+
         getContext().getContentResolver().notifyChange(uri, null);
+
         return returnUri;
     }
 
@@ -191,16 +193,17 @@ public class MoviesProvider extends ContentProvider {
             case CODE_FAVORITE_MOVIE_WITH_ID:
                 String id = uri.getPathSegments().get(1);
                 numOfMoviesDeleted = db.delete(MoviesDBContract.FavoriteMoviesEntry.TABLE_NAME,
-                        "movieDBId" + " = ? ",
+                        "movieDBId=?",
                         new String[]{id});
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown Uri: " + uri);
         }
 
-        if(numOfMoviesDeleted != 0) {
+        if(numOfMoviesDeleted > 0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }
+
         return numOfMoviesDeleted;
     }
 
@@ -223,7 +226,7 @@ public class MoviesProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
-        if(moviesUpdated != 0) {
+        if(moviesUpdated > 0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }
 
