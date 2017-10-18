@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.util.Log;
 
 import com.example.android.popularmoviesstage2.Activities.DetailsActivity;
 import com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils;
@@ -53,6 +54,10 @@ public class ImagesDBUtils {
      * @param movieSelected The movie selected by the user
      */
     public static void saveAllMovieImages(Context context, Movie movieSelected) {
+
+        Log.v("DB SAVE POSTER",  movieSelected.getMoviePosterPath());
+        Log.v("DB SAVE bACKDROP",  movieSelected.getMovieBackdropPath());
+
         // Save poster to internal storage and update path in database
         saveMovieImage(FavoritesUtils.IMAGE_TYPE_POSTER,
                 context,
@@ -79,6 +84,9 @@ public class ImagesDBUtils {
      * @param loadPath      The path used to load the image with Picasso
      */
     private static void saveMovieImage(String imageType, Context context, Movie movieSelected, String loadPath) {
+
+        Log.v("DB", loadPath);
+
         Bitmap bitmap = getImageBitmapFromPicasso(context, loadPath);
 
         ImagesDBUtils.saveImageToInternalStorage(bitmap,
@@ -96,6 +104,10 @@ public class ImagesDBUtils {
      * @param movieSelected The movie selected by the user
      */
     private static void saveMovieThumbnails(Context context, Movie movieSelected) {
+
+        Log.v("DB THUMBNAILS ",  "THUMBNAILS" + movieSelected.getMovieTrailersThumbnails());
+
+        Log.v("DB THUMBNAILS", movieSelected.getMovieTrailersThumbnails().toString());
 
         // Load and Save each thumbnail to internal storage
         for (int i = 0; i < movieSelected.getMovieTrailersThumbnails().size(); i++) {
@@ -293,26 +305,61 @@ public class ImagesDBUtils {
 
         switch (imageType) {
             case IMAGE_TYPE_POSTER:
-                cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH, imageInternalPath);
+                cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_POSTER_PATH, imageInternalPath);
                 break;
             case IMAGE_TYPE_BACKDROP:
-                cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP, imageInternalPath);
+                cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_BACKDROP_PATH, imageInternalPath);
                 break;
             case IMAGE_TYPE_TRAILER_THUMBNAIL:
 
-                String newThumbnails = formatThumbnailsForDB(context,
+                String newInternetThumbnails = formatInternetTrailersForDB(context, movieSelected, uri, thumbnailIndex);
+
+                String newDatabaseThumbnailsString = formatThumbnailsForDB(context,
                         imageInternalPath,
                         movieSelected,
                         uri,
                         thumbnailIndex);
 
+                cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_TRAILERS_THUMBNAILS,
+                        newDatabaseThumbnailsString);
+
                 cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS,
-                        newThumbnails);
+                        newInternetThumbnails);
 
                 break;
         }
 
         return cv;
+    }
+
+    private static String formatInternetTrailersForDB(Context context, Movie movieSelected,
+                                                     Uri uri, int thumbnailIndex) {
+        Cursor previousInternetThumbnails = context.getContentResolver().query(uri,
+                new String[]{MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS},
+                null,
+                null,
+                null);
+
+        if (previousInternetThumbnails.moveToFirst()) {
+            String previousString = LoaderUtils.getStringFromCursor(previousInternetThumbnails,
+                    MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS);
+
+            previousInternetThumbnails.close();
+
+            return createNewInternetThumbnails(previousString,
+                    movieSelected.getMovieTrailersThumbnails().get(thumbnailIndex).getThumbnailPath(),
+                    movieSelected.getMovieTrailersThumbnails().get(thumbnailIndex).getThumbnailTag());
+        } else {
+            return null;
+        }
+    }
+
+    private static String createNewInternetThumbnails(String previousThumbnails, String trailerPath, String trailerKey) {
+        return previousThumbnails +
+                trailerPath +
+                CHARACTER_TO_SEPARATE_THUMBNAIL_TAG +
+                trailerKey +
+                CHARACTER_TO_SEPARATE_THUMBNAILS;
     }
 
     /**
@@ -330,14 +377,14 @@ public class ImagesDBUtils {
                                                 Uri uri, int thumbnailIndex) {
 
         Cursor previousThumbnails = context.getContentResolver().query(uri,
-                new String[]{MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS},
+                new String[]{MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_TRAILERS_THUMBNAILS},
                 null,
                 null,
                 null);
 
         if (previousThumbnails.moveToFirst()) {
             String previousString = LoaderUtils.getStringFromCursor(previousThumbnails,
-                    MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS);
+                    MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_TRAILERS_THUMBNAILS);
 
             previousThumbnails.close();
 

@@ -14,6 +14,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -39,6 +40,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 
+import static com.example.android.popularmoviesstage2.DataUtils.FavoritesUtils.SHARED_PREFERENCES_FAVORITES_STRING;
 import static com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils.FAVORITE_MOVIES_LOADER;
 import static com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils.MAIN_SEARCH_LOADER;
 
@@ -269,6 +271,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
      */
     private void setMainActivityAdapter() {
 
+        Log.v("MAIN", "SETTING MAIN ACTIVITY ADAPTER");
+
         mMainRecyclerView = (RecyclerView) findViewById(R.id.root_recycler_view);
 
         // Layout Manager
@@ -276,7 +280,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         // Create and set the adapter
         mAdapter = new MovieRecyclerViewAdapter(mMoviesArray, mMoviesArray.size(), this, this, mSearchCriteria);
-        mMainRecyclerView.setAdapter(mAdapter);
+
+        if(mMoviesArray.size() > 0) {
+            mMainRecyclerView.setAdapter(mAdapter);
+        }
     }
 
     /**
@@ -430,11 +437,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             } else {
                 makeSearchQuery(mSearchCriteria);
             }
-        } else {
+        } else if (!mSearchCriteria.equals(FAVORITES_CRITERIA_STRING)){
             setMainActivityAdapter();
         }
-
-
     }
 
     /**
@@ -549,6 +554,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
                 mProgressBar.setVisibility(View.GONE);
                 createMovieObjects(data);
+                Log.v("MAIN", "SETTING MAIN ADAPTER");
                 setMainActivityAdapter();
 
                 // Restore RecyclerView scroll
@@ -557,10 +563,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     mState = null;
                 }
             }
-//            } else {
-//                // Handle if "Favorites" was selected
-//                setMainActivityAdapter();
-//            }
         }
 
         @Override
@@ -620,12 +622,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-
             if (data.getCount() >= 0 && mSearchCriteria.equals(FAVORITES_CRITERIA_STRING)) {
                 convertCursorIntoMoviesArray(data);
-                setMainActivityAdapter();
             }
+
         }
 
         @Override
@@ -642,60 +642,85 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
      */
     private void convertCursorIntoMoviesArray(Cursor cursor) {
 
-        ArrayList<Movie> moviesDBArray = new ArrayList<Movie>();
-
-        if (cursor.getCount() == 0) {
-            handleNoFavoriteMoviesSelected();
-        }
-
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        while (cursor.moveToNext()) {
+        ArrayList<Movie> moviesDBArray = new ArrayList<Movie>();
 
-            // Get movie data from cursor
-            String movieDBId = LoaderUtils.getStringFromCursor(cursor,
-                    MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_MOVIEDB_ID);
+        Log.v("FAVORITE MOVIES", Integer.toString(cursor.getCount()));
 
-            if(sharedPreferences.getStringSet(FavoritesUtils.SHARED_PREFERENCES_FAVORITES_STRING, null).contains(movieDBId)) {
+        if (cursor.getCount() == 0 || sharedPreferences.getStringSet(SHARED_PREFERENCES_FAVORITES_STRING, null).size() == 0) {
 
-                String movieTitle = LoaderUtils.getStringFromCursor(cursor,
-                        MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TITLE);
-                String movieReleaseDate = LoaderUtils.getStringFromCursor(cursor,
-                        MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_RELEASE_DATE);
-                String moviePosterPath = LoaderUtils.getStringFromCursor(cursor,
-                        MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH);
-                String movieVoteAverage = LoaderUtils.getStringFromCursor(cursor,
-                        MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_VOTE_AVERAGE);
-                String moviePlot = LoaderUtils.getStringFromCursor(cursor,
-                        MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_PLOT);
-                String movieIsForAdults = LoaderUtils.getStringFromCursor(cursor,
-                        MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_IS_FOR_ADULTS);
-                String backdropPath = LoaderUtils.getStringFromCursor(cursor,
-                        MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP);
+            handleNoFavoriteMoviesSelected();
 
-                Movie movie = new Movie(
-                        Integer.parseInt(movieDBId),
-                        movieTitle,
-                        movieReleaseDate,
-                        moviePosterPath,
-                        Double.parseDouble(movieVoteAverage),
-                        moviePlot,
-                        null,
-                        0.0,
-                        null,
-                        null,
-                        Boolean.parseBoolean(movieIsForAdults),
-                        backdropPath,
-                        null);
+        } else {
 
-                movie.setIsMovieFavorite(true);
+            while (cursor.moveToNext()) {
 
-                // Add the movie to an ArrayList
-                moviesDBArray.add(movie);
+                // Get movie data from cursor
+                String movieDBId = LoaderUtils.getStringFromCursor(cursor,
+                        MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_MOVIEDB_ID);
+
+                if(sharedPreferences.getStringSet(SHARED_PREFERENCES_FAVORITES_STRING, null).contains(movieDBId)) {
+
+                    String movieTitle = LoaderUtils.getStringFromCursor(cursor,
+                            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TITLE);
+                    String movieReleaseDate = LoaderUtils.getStringFromCursor(cursor,
+                            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_RELEASE_DATE);
+
+                    //
+                    String moviePosterPath = LoaderUtils.getStringFromCursor(cursor,
+                            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH);
+
+                    String movieDatabasePosterPath = LoaderUtils.getStringFromCursor(cursor,
+                            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_POSTER_PATH);
+
+
+                    String movieVoteAverage = LoaderUtils.getStringFromCursor(cursor,
+                            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_VOTE_AVERAGE);
+                    String moviePlot = LoaderUtils.getStringFromCursor(cursor,
+                            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_PLOT);
+                    String movieIsForAdults = LoaderUtils.getStringFromCursor(cursor,
+                            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_IS_FOR_ADULTS);
+
+                    //
+                    String backdropPath = LoaderUtils.getStringFromCursor(cursor,
+                            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP);
+                    String databaseBackdropPath = LoaderUtils.getStringFromCursor(cursor,
+                            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_BACKDROP_PATH);
+
+                    String databaseInternetTrailerThumbnails = LoaderUtils.getStringFromCursor(cursor,
+                            MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS);
+
+                    Movie movie = new Movie(
+                            Integer.parseInt(movieDBId),
+                            movieTitle,
+                            movieReleaseDate,
+                            moviePosterPath,
+                            Double.parseDouble(movieVoteAverage),
+                            moviePlot,
+                            null,
+                            0.0,
+                            null,
+                            null,
+                            Boolean.parseBoolean(movieIsForAdults),
+                            backdropPath,
+                            null);
+
+                    movie.setMovieDatabasePosterPath(movieDatabasePosterPath);
+                    movie.setMovieDatabaseBackdropPath(databaseBackdropPath);
+                    movie.setMovieTrailersThumbnails(DetailsActivity.formatTrailersFromDB(databaseInternetTrailerThumbnails, movie));
+
+                    movie.setIsMovieFavorite(true);
+
+                    // Add the movie to an ArrayList
+                    moviesDBArray.add(movie);
+                }
             }
-        }
 
-        mMoviesArray = moviesDBArray;
+            mMoviesArray = moviesDBArray;
+            setMainActivityAdapter();
+
+        }
     }
 
     /**

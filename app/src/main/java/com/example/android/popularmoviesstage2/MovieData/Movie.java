@@ -21,6 +21,7 @@ public class Movie implements Parcelable {
     private String movieTitle;
     private String movieReleaseDate;
     private String moviePosterPath;
+    private String movieDatabasePosterPath = null;
 
     private double movieVoteAverage;
     private String moviePlot;
@@ -32,6 +33,8 @@ public class Movie implements Parcelable {
 
     private boolean isMoviewForAdults;
     private String movieBackdropPath;
+    private String movieDatabaseBackdropPath = null;
+
     private ArrayList<MovieTrailerThumbnail> movieTrailersThumbnails = new ArrayList<MovieTrailerThumbnail>();
 
     private boolean isFavorite = false;
@@ -73,6 +76,7 @@ public class Movie implements Parcelable {
         movieTitle = in.readString();
         movieReleaseDate = in.readString();
         moviePosterPath = in.readString();
+        movieDatabasePosterPath = in.readString();
 
         movieVoteAverage = in.readDouble();
         moviePlot = in.readString();
@@ -84,6 +88,7 @@ public class Movie implements Parcelable {
 
         isMoviewForAdults = in.readInt() == 1;
         movieBackdropPath = in.readString();
+        movieDatabaseBackdropPath = in.readString();
         movieTrailersThumbnails = in.createTypedArrayList(MovieTrailerThumbnail.CREATOR);
 
         isFavorite = in.readInt() == 1;
@@ -110,6 +115,7 @@ public class Movie implements Parcelable {
         parcel.writeString(movieTitle);
         parcel.writeString(movieReleaseDate);
         parcel.writeString(moviePosterPath);
+        parcel.writeString(movieDatabasePosterPath);
 
         parcel.writeDouble(movieVoteAverage);
         parcel.writeString(moviePlot);
@@ -121,6 +127,7 @@ public class Movie implements Parcelable {
 
         parcel.writeInt(isMoviewForAdults ? 1 : 0);
         parcel.writeString(movieBackdropPath);
+        parcel.writeString(movieDatabaseBackdropPath);
         parcel.writeTypedList(movieTrailersThumbnails);
 
         parcel.writeInt(isFavorite ? 1 : 0);
@@ -159,6 +166,8 @@ public class Movie implements Parcelable {
         return this.moviePosterPath;
     }
 
+    public String getMovieDatabasePosterPath() { return this.movieDatabasePosterPath; }
+
     public double getMovieVoteAverage() {
         return this.movieVoteAverage;
     }
@@ -191,6 +200,8 @@ public class Movie implements Parcelable {
         return this.movieBackdropPath;
     }
 
+    public String getMovieDatabaseBackdropPath() { return this.movieDatabaseBackdropPath; }
+
     public boolean getIsMovieFavorite() {
         return this.isFavorite;
     }
@@ -216,6 +227,8 @@ public class Movie implements Parcelable {
     public void setMoviePosterPath(String posterPath) {
         this.moviePosterPath = posterPath;
     }
+
+    public void setMovieDatabasePosterPath(String posterDatabasePath) { this.movieDatabaseBackdropPath = posterDatabasePath; }
 
     public void setMovieVoteAverage(double voteAverage) {
         this.movieVoteAverage = voteAverage;
@@ -247,6 +260,10 @@ public class Movie implements Parcelable {
 
     public void setMovieBackdropPath(String movieBackdropPath) {
         this.movieBackdropPath = movieBackdropPath;
+    }
+
+    public void setMovieDatabaseBackdropPath(String movieDatabaseBackdropPath) {
+        this.movieDatabaseBackdropPath = movieDatabaseBackdropPath;
     }
 
     public void setIsMovieFavorite(boolean isFavorite) {

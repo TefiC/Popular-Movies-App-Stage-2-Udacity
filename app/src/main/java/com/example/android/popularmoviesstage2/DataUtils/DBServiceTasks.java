@@ -96,15 +96,15 @@ public class DBServiceTasks {
                 .build();
 
         // Poster
-        boolean posterDeleted = ImagesDBUtils.deleteImageFromStorage(context,
-                getImagePathFromDB(context, uri, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH),
+        boolean posterDeleted = deleteImageFromStorage(context,
+                getImagePathFromDB(context, uri, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_POSTER_PATH),
                 Integer.toString(movieSelected.getMovieId()),
                 FavoritesUtils.IMAGE_TYPE_POSTER,
                 -1);
 
         // Backdrop
         boolean backdropDeleted = deleteImageFromStorage(context,
-                getImagePathFromDB(context, uri, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP),
+                getImagePathFromDB(context, uri, MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_BACKDROP_PATH),
                 Integer.toString(movieSelected.getMovieId()),
                 FavoritesUtils.IMAGE_TYPE_BACKDROP,
                 -1);
@@ -115,6 +115,7 @@ public class DBServiceTasks {
         int numDeleted = context.getContentResolver().delete(uri, "movieDBId=?", new String[]{"id"});
 
         if (numDeleted == 1) {
+            Log.v(TAG, "MOVIE REMOVED");
             movieSelected.setIsMovieFavorite(false);
         }
     }
@@ -175,8 +176,15 @@ public class DBServiceTasks {
         cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS_TEXT, formattedReviewsText);
 
         // Images path placeholders
+        //TODO
+        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH, movieSelected.getMoviePosterPath());
+        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_BACKDROP_PATH, "");
+
         cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP, movieSelected.getMovieBackdropPath());
+        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_BACKDROP_PATH, "");
+
         cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS, "");
+        cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_TRAILERS_THUMBNAILS, "");
 
         return cv;
     }

@@ -7,6 +7,7 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,14 +15,18 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.android.popularmoviesstage2.DataUtils.DBServiceTasks;
 import com.example.android.popularmoviesstage2.DataUtils.FavoritesUtils;
 import com.example.android.popularmoviesstage2.DataUtils.ImagesDBUtils;
+import com.example.android.popularmoviesstage2.DataUtils.MoviesDBContract;
 import com.example.android.popularmoviesstage2.MovieData.Movie;
 import com.example.android.popularmoviesstage2.MovieData.RectangularImageView;
 import com.example.android.popularmoviesstage2.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * RecyclerView for a grid of movies
@@ -104,13 +109,14 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
         Movie movie = mMoviesArray.get(position);
         movie.setIsMovieFavorite(determineIfMovieIsFavorite(movie));
 
-        // Load poster
-        String posterPath = movie.getMoviePosterPath();
 
         if (!mSearchCriteria.equals("Favorites")) {
             // Set data on the corresponding view
+            String posterPath = movie.getMoviePosterPath();
             loadMoviePoster(posterPath, holder.mMoviePoster);
         } else {
+            String posterPath = DBServiceTasks.getImagePathFromDB(mContext, DBServiceTasks.buildMovieSelectedDBUri(movie), MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_POSTER_PATH);
+            Log.v(TAG, "POSTER PATH " + posterPath);
             Bitmap poster = ImagesDBUtils.loadImageFromStorage(posterPath,
                     Integer.toString(movie.getMovieId()),
                     FavoritesUtils.IMAGE_TYPE_POSTER,

@@ -45,6 +45,7 @@ public final class MoviesDBContract {
         public static final String COLUMN_NAME_TITLE = "title";
         public static final String COLUMN_NAME_RELEASE_DATE = "releaseDate";
         public static final String COLUMN_NAME_POSTER_PATH = "posterPath";
+        public static final String COLUMN_NAME_DATABASE_POSTER_PATH = "databasePosterPath";
 
         public static final String COLUMN_NAME_VOTE_AVERAGE = "voteAverage";
         public static final String COLUMN_NAME_PLOT = "plot";
@@ -57,6 +58,9 @@ public final class MoviesDBContract {
 
         public static final String COLUMN_NAME_IS_FOR_ADULTS = "isForAdults";
         public static final String COLUMN_NAME_BACKDROP = "backdrop";
+        public static final String COLUMN_NAME_DATABASE_BACKDROP_PATH = "databaseBackdropPath";
+
         public static final String COLUMN_NAME_TRAILERS_THUMBNAILS = "trailersThumbnails";
+        public static final String COLUMN_NAME_DATABASE_TRAILERS_THUMBNAILS = "databaseTrailersThumbnails";
     }
 }

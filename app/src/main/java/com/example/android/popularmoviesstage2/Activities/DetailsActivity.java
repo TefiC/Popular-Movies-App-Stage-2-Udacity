@@ -124,6 +124,8 @@ public class DetailsActivity extends AppCompatActivity {
     // Uri
     public static Uri mMovieSelectedUri;
 
+    private boolean dataFromDBpopulated = false;
+
     /*
      * Methods ============================================================
      */
@@ -512,14 +514,14 @@ public class DetailsActivity extends AppCompatActivity {
             fillMoviePosterDetailsFromDB(ImagesDBUtils.loadImageFromDatabase(
                     this,
                     movieSelected,
-                    MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH,
+                    MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_POSTER_PATH,
                     FavoritesUtils.IMAGE_TYPE_POSTER));
 
             // Backdrop
             fillMovieBackdropDetailsFromDB(ImagesDBUtils.loadImageFromDatabase(
                     this,
                     movieSelected,
-                    MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP,
+                    MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_BACKDROP_PATH,
                     FavoritesUtils.IMAGE_TYPE_BACKDROP));
 
             // Trailers
@@ -620,6 +622,7 @@ public class DetailsActivity extends AppCompatActivity {
             JSONObject trailersJSON = new JSONObject(data);
             JSONArray trailersArray = trailersJSON.getJSONArray("results");
 
+
             // Iterate over the trailers array
             for (int i = 0; i < trailersArray.length(); i++) {
 
@@ -680,6 +683,7 @@ public class DetailsActivity extends AppCompatActivity {
                 .error(generateGradientDrawable())
                 .into(trailerView);
     }
+
 
     // Methods for UI interaction ===================================================================
 
@@ -1018,12 +1022,12 @@ public class DetailsActivity extends AppCompatActivity {
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
-            Log.v(TAG, "LOADING FROM CURSOR");
-
             if (data.getCount() > 0) {
 
-                loadMovieDetailsFromDB(data);
-                fillMovieData(movieSelected);
+                if(!dataFromDBpopulated) {
+                    loadMovieDetailsFromDB(data);
+                    fillMovieData(movieSelected);
+                }
 
                 addOnClickListenerToFloatingActionButton();
 
@@ -1073,12 +1077,13 @@ public class DetailsActivity extends AppCompatActivity {
             // Is the movie for Adults?
             String movieIsForAdults = LoaderUtils.getStringFromCursor(movieDetailsCursor,
                     MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_IS_FOR_ADULTS);
-            // Backdrop internal storage path
+            // Backdrop internet path
             String movieBackdropPath = LoaderUtils.getStringFromCursor(movieDetailsCursor,
                     MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_BACKDROP);
-            // Trailer thumbnails internal storage paths
-            String movieTrailersThumbnails = LoaderUtils.getStringFromCursor(movieDetailsCursor,
-                    MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS);
+
+            // Backdrop internal storage path
+            String movieDatabaseBackdropPath = LoaderUtils.getStringFromCursor(movieDetailsCursor,
+                    MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_BACKDROP_PATH);
 
              /*
               Assign data
@@ -1087,12 +1092,33 @@ public class DetailsActivity extends AppCompatActivity {
             movieSelected.setMovieLanguage(movieLanguage);
             movieSelected.setMovieRuntime(Double.parseDouble(movieRuntime));
             movieSelected.setIsMovieForAdults(Boolean.parseBoolean(movieIsForAdults));
+
+            // TODO
             movieSelected.setMovieBackdropPath(movieBackdropPath);
+            movieSelected.setMovieDatabaseBackdropPath(movieDatabaseBackdropPath);
 
             fillMovieReviewsFromDB(movieReviewsAuthor, movieReviewsText);
             fillMovieCastFromDB(movieCast);
+
+            dataFromDBpopulated = true;
         }
     }
+
+    public static ArrayList<MovieTrailerThumbnail> formatTrailersFromDB(String trailerThumbnailsString, Movie movieSelected) {
+
+        String[] trailersArray = trailerThumbnailsString.split(FavoritesUtils.CHARACTER_TO_SEPARATE_THUMBNAILS);
+
+        ArrayList<MovieTrailerThumbnail> trailerThumbnailsObjectsArray = new ArrayList<>();
+
+        for(String thumbnail : trailersArray) {
+
+            String[] thumbnailData = thumbnail.split(FavoritesUtils.CHARACTER_TO_SEPARATE_THUMBNAIL_TAG);
+
+            trailerThumbnailsObjectsArray.add(new MovieTrailerThumbnail(thumbnailData[0], thumbnailData[1]));
+        }
+
+        return trailerThumbnailsObjectsArray;
+    };
 
     /**
      * Formats the movie reviews from the data retrieved from the database and assigns
@@ -1209,7 +1235,7 @@ public class DetailsActivity extends AppCompatActivity {
      */
     public static String[] queryTrailersArray(Context context) {
         String[] posterProjection = {
-                MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS
+                MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_TRAILERS_THUMBNAILS
         };
 
         Cursor trailersPathsCursor = context.getContentResolver().query(
@@ -1222,7 +1248,7 @@ public class DetailsActivity extends AppCompatActivity {
         trailersPathsCursor.moveToFirst();
 
         String trailersDataString = LoaderUtils.getStringFromCursor(trailersPathsCursor,
-                MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_TRAILERS_THUMBNAILS);
+                MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_TRAILERS_THUMBNAILS);
 
         trailersPathsCursor.close();
 
