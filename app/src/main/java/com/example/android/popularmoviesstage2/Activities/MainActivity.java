@@ -14,7 +14,6 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -48,9 +47,11 @@ import static com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils.M
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener,
         MovieRecyclerViewAdapter.MovieAdapterOnClickHandler {
 
+
     /*
      * Constants
      */
+
 
     // Tag for logging
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -68,9 +69,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public static final String MOST_POPULAR_CRITERIA_STRING = "Most Popular";
     public static final String TOP_RATED_CRITERIA_STRING = "Top Rated";
 
+
     /*
      * Fields
      */
+
 
     // Default search criteria
     private String mSearchCriteria = "Most Popular";
@@ -94,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     /*
      * Methods
      */
+
 
     // Methods that request and update data ========================================================
 
@@ -208,6 +212,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
      *
      * @param resultsArray JSONArray that contains JSON objects for each movie
      *                     fetched from the API request to movieDB
+     *
      * @return an ArrayList of Movie objects
      */
     private ArrayList<Movie> createMoviesArrayFromJSONArray(JSONArray resultsArray) {
@@ -239,6 +244,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
      * and vote average.
      *
      * @param movie a JSONObject containing the data for a movie
+     *
      * @return Movie object
      */
     private Movie createMovie(JSONObject movie) {
@@ -270,8 +276,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
      * Sets the Movie Adapter for the main layout that will contain movie posters
      */
     private void setMainActivityAdapter() {
-
-        Log.v("MAIN", "SETTING MAIN ACTIVITY ADAPTER");
 
         mMainRecyclerView = (RecyclerView) findViewById(R.id.root_recycler_view);
 
@@ -327,6 +331,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
      * Creates the options menu and spinner
      *
      * @param menu menu to be created
+     *
      * @return true
      */
     @Override
@@ -554,7 +559,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
                 mProgressBar.setVisibility(View.GONE);
                 createMovieObjects(data);
-                Log.v("MAIN", "SETTING MAIN ADAPTER");
                 setMainActivityAdapter();
 
                 // Restore RecyclerView scroll
@@ -646,8 +650,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         ArrayList<Movie> moviesDBArray = new ArrayList<Movie>();
 
-        Log.v("FAVORITE MOVIES", Integer.toString(cursor.getCount()));
-
         if (cursor.getCount() == 0 || sharedPreferences.getStringSet(SHARED_PREFERENCES_FAVORITES_STRING, null).size() == 0) {
 
             handleNoFavoriteMoviesSelected();
@@ -708,7 +710,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
                     movie.setMovieDatabasePosterPath(movieDatabasePosterPath);
                     movie.setMovieDatabaseBackdropPath(databaseBackdropPath);
-                    movie.setMovieTrailersThumbnails(DetailsActivity.formatTrailersFromDB(databaseInternetTrailerThumbnails, movie));
+                    movie.setMovieTrailersThumbnails(DetailsActivity.formatTrailersFromDB(databaseInternetTrailerThumbnails));
 
                     movie.setIsMovieFavorite(true);
 
@@ -719,7 +721,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
             mMoviesArray = moviesDBArray;
             setMainActivityAdapter();
-
         }
     }
 

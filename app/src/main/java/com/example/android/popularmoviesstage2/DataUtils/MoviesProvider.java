@@ -18,9 +18,11 @@ import android.support.annotation.Nullable;
 
 public class MoviesProvider extends ContentProvider {
 
+
     /*
      * Constants
      */
+
 
     private static final String TAG = MoviesProvider.class.getSimpleName();
 
@@ -33,15 +35,19 @@ public class MoviesProvider extends ContentProvider {
 
     private static final String ID_SELECTION_PARAMETER = "movieDBId=?";
 
+
     /*
      * Fields
      */
 
+
     private MoviesDBHelper mMoviesDBHelper;
+
 
     /*
      * Methods
      */
+
 
     /**
      * Matches the different paths to their corresponding integers

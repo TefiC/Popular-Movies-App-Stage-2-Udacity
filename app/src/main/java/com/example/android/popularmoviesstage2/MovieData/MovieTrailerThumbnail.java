@@ -9,16 +9,20 @@ import android.os.Parcelable;
 
 public class MovieTrailerThumbnail implements Parcelable {
 
+
     /*
      * Fields
      */
 
+
     private String thumbnailPath;
     private String thumbnailKey;
+
 
     /*
      * Constructors
      */
+
 
     public MovieTrailerThumbnail(String thumbnailPath, String thumbnailKey) {
         this.thumbnailPath = thumbnailPath;
@@ -35,9 +39,11 @@ public class MovieTrailerThumbnail implements Parcelable {
         return 0;
     }
 
+
     /*
      * Implementing Parcelable
      */
+
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
@@ -58,9 +64,11 @@ public class MovieTrailerThumbnail implements Parcelable {
         }
     };
 
+
     /*
      * Getters
      */
+
 
     public String getThumbnailPath() {
         return thumbnailPath;
@@ -70,9 +78,11 @@ public class MovieTrailerThumbnail implements Parcelable {
         return thumbnailKey;
     }
 
+
     /*
      * Setters
      */
+
 
     public void setThumbnailPath(String thumbnailPath) {
         this.thumbnailPath = thumbnailPath;

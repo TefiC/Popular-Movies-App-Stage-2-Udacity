@@ -20,7 +20,7 @@ The user interface will update automatically to respond to this new selection.
 
 4 - Once you've browsed through the posters and found a movie that you would like to learn more about, clicking or tapping on a poster will take you to a movie details screen where you can find additional data like the movie's poster, title, release year, user average rating, plot, cast, trailers and reviews. 
 
-5 - If you click on a trailer thumbnail, an app will be launched to play  its corresponding youtube video.
+5 - If you click on a trailer thumbnail, an app will be launched to play its corresponding youtube video.
 
 6 - If you click on "Read Reviews", a new screen will be displayed with the movie reviews. If there aren't any, a dialog will warn the user and return automatically to the details screen.
 
@@ -35,7 +35,7 @@ There is a comment on the NetworkUtils class indicating where you need to includ
 #### Special features
 ---
 
-- The user can select a movie as a "Favorite" in the details activity by clicking on a floating action button with a heart symbol. This selection can be toggled with the same button. 
+- The user can select a movie as a "Favorite" in the movie's details activity by clicking on a floating action button with a heart symbol. This selection can be toggled with the same button. 
 
 - On device rotation on the main posters grid, the scroll position will be maintained so the user doesn't have to scroll down again to find the movie he/she was interested in.
 
@@ -52,7 +52,7 @@ There is a comment on the NetworkUtils class indicating where you need to includ
 
 - The user's favorite movies data is saved to an SQLite database through a Service, including images (poster, backdrop, trailer thumbnails). Images are first downloaded through Picasso's `.get( )` method and then they are saved to internal storage and their path is updated in the database.
 
-- The user interface is responsive. A custom layout for the main and details activities is displayed to devices with a smallest width of 600dp. 
+- The user interface is responsive. A custom layout for the main and details activities is displayed for devices with a smallest width of 600dp. 
 
 - Images contain a contentDescription tag for accessibility.
 
@@ -62,15 +62,15 @@ There is a comment on the NetworkUtils class indicating where you need to includ
 #### Handling errors
 ---
 
-- **No internet connection:**  If there is no internet connection available, a dialog box will alert the user. If the app has loaded data previously, this data will remain responsive but the user won't be able to request new data until there is an internet connection. 
+- **No internet connection:**  If there is no internet connection available, a dialog box will alert the user. If the app has loaded data previously, this data will remain responsive but the user won't be able to request new data until there is an internet connection.  The "Favorites' category will be displayed automatically when there is no internet connection.
 
     If the user had no internet connection and no data was loaded previously but he/she reconnects and restarts the app, data will be fetched automatically.
 
 - **Poster didn't load correctly:** An error poster will be shown instead. On the main screen, the error poster will prompt the user to click if he/she wants to access the movie data, even if the poster is not available. Once inside the movie details screen, a second error poster will display a message saying that the poster couldn't be loaded. 
 
-- **No favorite movies selected:** If the user tries to access to the "Favorites" section without selecting favorite movies first, a dialog will warn them and automatically select the "Most Popular" section so the user can select favorite movies.
+- **No favorite movies selected:** If the user tries to access the "Favorites" section without selecting favorite movies first, a dialog will warn hum/her and the "Most Popular" section will be selected automatically so the user can select favorite movies.
 
-- **No reviews available:** A dialog with be displayed and the  user will be taken automatically to the corresponding movie details activity.
+- **No reviews available:** A dialog with be displayed and the user will be taken automatically to the corresponding movie details activity.
 
 <br>
 
@@ -95,7 +95,7 @@ There is a comment on the NetworkUtils class indicating where you need to includ
 
 - Spinner information found in StackOverflow forums
 
-- Column number is set programatically using the [method found in this post](https://stackoverflow.com/questions/33575731/gridlayoutmanager-how-to-auto-fit-columns)
+- Column number is set programatically using the [method found on this post](https://stackoverflow.com/questions/33575731/gridlayoutmanager-how-to-auto-fit-columns)
 
 -  Gradient drawable based on [this post](https://stackoverflow.com/questions/32989851/how-can-i-use-a-color-as-placeholder-image-with-picasso)
 

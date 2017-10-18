@@ -4,7 +4,7 @@
     <!--Main colors-->
     <color name="colorPrimary">#d50000</color>
     <color name="colorPrimaryDark">#9b0000</color>
-    <color name="colorSecondary">#4ba3c7</color>
+    <color name="colorSecondary">@android:color/white</color>
 
     <color name="text_color">#ffffff</color>
 
@@ -16,4 +16,8 @@
 
     <!--Review title color-->
     <color name="reviews_title">#c8cacb</color>
+
+    <!--Favorites floating action button color-->
+    <color name="favorite_button_color">#FF0000</color>
+
 </resources>

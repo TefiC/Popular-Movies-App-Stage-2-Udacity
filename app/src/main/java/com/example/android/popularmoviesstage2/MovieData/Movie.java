@@ -12,9 +12,11 @@ import java.util.ArrayList;
 
 public class Movie implements Parcelable {
 
+
     /*
      * Fields
      */
+
 
     private int movieId;
 
@@ -43,6 +45,7 @@ public class Movie implements Parcelable {
     /*
      * Constructors
      */
+
 
     public Movie(int movieId, String movieTitle, String movieReleaseDate, String moviePoster,
                  double movieVoteAverage, String moviePlot, String movieLanguage, double movieRuntime,
@@ -94,18 +97,16 @@ public class Movie implements Parcelable {
         isFavorite = in.readInt() == 1;
     }
 
-    /*
-     * Implementing parcelable
-     */
-
     @Override
     public int describeContents() {
         return 0;
     }
 
+
     /*
-     * Implementing Parcelable
+     * Implementing parcelable
      */
+
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
@@ -146,9 +147,11 @@ public class Movie implements Parcelable {
         }
     };
 
+
     /*
      * Getters
      */
+
 
     public int getMovieId() {
         return this.movieId;
@@ -210,9 +213,11 @@ public class Movie implements Parcelable {
         return this.movieTrailersThumbnails;
     }
 
+
     /*
      * Setters
      */
+
 
     public void setMovieId(int id) { this.movieId = movieId; }
 

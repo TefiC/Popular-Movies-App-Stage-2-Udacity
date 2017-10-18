@@ -6,8 +6,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.widget.Button;
 
 import com.example.android.popularmoviesstage2.Activities.MainActivity;
 import com.example.android.popularmoviesstage2.GeneralUtils.FavoritesDataIntentService;
@@ -43,8 +45,9 @@ public class FavoritesUtils {
 
 
     /*
-     * Database methods
+     * Methods
      */
+
 
     // Database methods ============================================================================
 
@@ -53,6 +56,7 @@ public class FavoritesUtils {
      *
      * @param context Context of the activity where this method was called
      * @param movieDBId The movie ID from The Movie Database API
+     *
      * @return True if the movieDBID is in the database and False otherwise.
      */
     public static boolean checkIfMovieIsFavorite(Context context, String movieDBId) {
@@ -100,6 +104,7 @@ public class FavoritesUtils {
 
     /**
      * Removes the movie's MovieDB Id from Shared Preferences
+     *
      * @param context The context of the activity that called this method
      * @param movieSelected The movie selected by the user
      *
@@ -120,6 +125,7 @@ public class FavoritesUtils {
      *
      * @param context       The Context of the activity that called this method
      * @param movieSelected The Movie selected by the user
+     *
      * @return True if the movie was added correctly. False otherwise.
      */
     public static boolean addFavoriteToSharedPreferences(Context context, Movie movieSelected) {
@@ -172,6 +178,10 @@ public class FavoritesUtils {
 
         // Create dialog and display it to the user
         AlertDialog dialog = builder.create();
+
         dialog.show();
+
+        Button okButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        okButton.setTextColor(Color.RED);
     }
 }

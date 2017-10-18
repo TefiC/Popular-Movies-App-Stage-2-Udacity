@@ -13,10 +13,11 @@ public final class MoviesDBContract {
      * Constants
      */
 
-    //Path constants
+    // Path constants
     public static final String CONTENT_AUTHORITY = "com.example.android.popularmoviesstage2";
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
+    // Path to the favorite movies table
     public static final String PATH_FAVORITE_MOVIES = "favoriteMovies";
 
     /*
@@ -29,7 +30,7 @@ public final class MoviesDBContract {
      * Tables
      */
 
-    //Favorite movies table
+    // Favorite movies table
     public static class FavoriteMoviesEntry implements BaseColumns {
 
         // Path to entire table

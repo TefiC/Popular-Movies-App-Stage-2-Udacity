@@ -45,5 +45,16 @@
     <string name="language_logo_description">Language logo</string>
     <string name="calendar_logo_description">Calendar logo</string>
     <string name="backdrop_description">Movie Backdrop</string>
+    <string name="is_for_adults_description">Is for adults</string>
+    <string name="heart_description">heart logo</string>
+
+    <!--Placeholder strings-->
+    <string name="movie_title_placeholder">Titanic</string>
+    <string name="movie_rating_placeholder">8.6</string>
+    <string name="movie_runtime_placeholder">120 min</string>
+    <string name="movie_language_placeholder">en</string>
+    <string name="movie_release_placeholder">en</string>
+    <string name="movie_plot_placeholder">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit</string>
+    <string name="movie_cast_placeholder">Leonardo DiCaprio\nKate Winslet</string>
 
 </resources>

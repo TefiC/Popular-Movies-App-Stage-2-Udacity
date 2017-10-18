@@ -17,7 +17,6 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
@@ -53,14 +52,15 @@ import static com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils.C
 import static com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils.FAVORITE_MOVIES_LOADER_BY_ID;
 import static com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils.REVIEWS_LOADER;
 import static com.example.android.popularmoviesstage2.GeneralUtils.LoaderUtils.TRAILERS_SEARCH_LOADER;
-import static com.example.android.popularmoviesstage2.R.id.favorite_floating_button;
 import static com.squareup.picasso.Picasso.with;
 
 public class DetailsActivity extends AppCompatActivity {
 
+
      /*
-     * Constants ============================================================
+     * Constants
      */
+
 
     // Tag for logging
     private static final String TAG = DetailsActivity.class.getSimpleName();
@@ -80,9 +80,11 @@ public class DetailsActivity extends AppCompatActivity {
     // Determines the number of cast members to be displayed
     private static final int NUMBER_OF_ACTORS_TO_INCLUDE = 5;
 
+
     /*
-     * Fields ============================================================
+     * Fields
      */
+
 
     // Activity context
     private Context mContext;
@@ -110,7 +112,6 @@ public class DetailsActivity extends AppCompatActivity {
 
     private RelativeLayout mDetailsLayout;
     private ProgressBar mDetailsProgressBar;
-    private FloatingActionButton mFavoriteButton;
 
     // Gradient to fill background color with app's theme color
     private GradientDrawable mGradient;
@@ -124,11 +125,14 @@ public class DetailsActivity extends AppCompatActivity {
     // Uri
     public static Uri mMovieSelectedUri;
 
+    // Check if the data has been loaded from the database
     private boolean dataFromDBpopulated = false;
 
+
     /*
-     * Methods ============================================================
+     * Methods
      */
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,7 +198,6 @@ public class DetailsActivity extends AppCompatActivity {
 
         mDetailsProgressBar = (ProgressBar) findViewById(R.id.details_progress_bar);
         mReviewsReadMoreView = (TextView) findViewById(R.id.movie_details_reviews_read_more);
-        mFavoriteButton = (FloatingActionButton) findViewById(favorite_floating_button);
     }
 
     /**
@@ -412,7 +415,7 @@ public class DetailsActivity extends AppCompatActivity {
                        display and add onClickListener to the button that adds
                        the movie to favorites to make sure that all the data has
                        loaded correctly before inserting it to the database */
-                    movieSelected.setMovieReviews(ReviewsActivity.formatJSONfromReviewsString(data, movieSelected));
+                    movieSelected.setMovieReviews(ReviewsActivity.formatJSONfromReviewsString(data));
                     addOnClickListenerToFloatingActionButton();
                     mFloatingActionButtonFavorite.setVisibility(View.VISIBLE);
                     break;
@@ -466,7 +469,6 @@ public class DetailsActivity extends AppCompatActivity {
         appendCastToUI(movieSelected.getMovieCast());
 
         addReadReviewsOnClickListener();
-
     }
 
     /**
@@ -531,6 +533,7 @@ public class DetailsActivity extends AppCompatActivity {
         } else {
             // Poster
             loadMoviePoster(posterPath);
+
             // Backdrop
             loadMovieBackdrop(movieBackdropPath);
         }
@@ -543,7 +546,6 @@ public class DetailsActivity extends AppCompatActivity {
      */
     private void fillMoviePosterDetailsFromDB(Bitmap posterImage) {
         mMoviePosterView.setImageBitmap(posterImage);
-        mFloatingActionButtonFavorite.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -605,6 +607,7 @@ public class DetailsActivity extends AppCompatActivity {
      *
      * @param releaseDate A String that represents
      *                    a date with the format YYYY-MM-DD
+     *
      * @return A four-digit year in String format
      */
     private String extractReleaseYear(String releaseDate) {
@@ -615,7 +618,7 @@ public class DetailsActivity extends AppCompatActivity {
      * Creates ImageViews for each movie trailer, appends it to the corresponding ViewGroup
      * sets its properties and add an onClickListener
      *
-     * @param data
+     * @param data A JSON in string format with the movie trailers data
      */
     private void createMovieTrailers(String data) {
         try {
@@ -652,6 +655,7 @@ public class DetailsActivity extends AppCompatActivity {
      * @param container  The Layout that will contain the trailer's ImageView
      * @param index      The index in which the ImageView must by inserted to the container view
      * @param trailerKey The trailer's key
+     *
      * @return The trailer's ImageView with custom properties
      */
     private static ImageView createTrailerView(Context context, LinearLayout container, int index, String trailerKey) {
@@ -665,6 +669,7 @@ public class DetailsActivity extends AppCompatActivity {
     /**
      * Loads the movie trailer thumbnail from Youtube
      *
+     * @param trailerView The ImageView where the trailer thumbnail will be displayed
      * @param trailerKey The corresponding trailer's key
      */
     private void loadMovieTrailerThumbnail(ImageView trailerView, String trailerKey) {
@@ -691,6 +696,7 @@ public class DetailsActivity extends AppCompatActivity {
      * Sets an onClickListener for the trailer ImageView to launch an implicit
      * intent to the Youtube URL that corresponds to the trailer.
      *
+     * @param context The context of the activity that called this method
      * @param trailerView The trailer's ImageView
      * @param trailerKey  The trailer's key to append to Youtube's URL
      */
@@ -706,6 +712,7 @@ public class DetailsActivity extends AppCompatActivity {
     /**
      * Launches a movie trailer on Youtube with an implicit intent
      *
+     * @param context The context of the activity that called this method
      * @param trailerKey The trailer's key to add to Youtube's base path
      */
     private static void launchTrailer(Context context, String trailerKey) {
@@ -743,7 +750,7 @@ public class DetailsActivity extends AppCompatActivity {
      */
     private void addOnClickListenerToFloatingActionButton() {
 
-        mFavoriteButton.setOnClickListener(new View.OnClickListener() {
+        mFloatingActionButtonFavorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -762,6 +769,13 @@ public class DetailsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Removes a favorite movie from the database, shared preferences and removes
+     * images from internal storage
+     *
+     * @param context The context of the activity that called this method
+     * @param movieSelected The movie selected by the user
+     */
     private static void removeMovieFromFavorites(Context context, Movie movieSelected) {
 
         movieSelected.setIsMovieFavorite(false);
@@ -866,6 +880,8 @@ public class DetailsActivity extends AppCompatActivity {
      * Converts Dp to Pixels to use when setting LayoutParams
      *
      * @param dimensionInDp The dimension to convert
+     * @param context The context of the activity that called this method
+     *
      * @return The dimension passed as argument in pixels
      */
     private static int convertDpToPixels(int dimensionInDp, Context context) {
@@ -930,7 +946,9 @@ public class DetailsActivity extends AppCompatActivity {
     /**
      * Generate a full backdrop URL to load image from MovieDB API
      *
+     * @param context The context of the activity that called this method
      * @param backdropPath The final piece of the path to the movie's backdrop image
+     *
      * @return A full URL to request the image
      */
     public static String createFullBackdropPath(Context context, String backdropPath) {
@@ -1027,9 +1045,9 @@ public class DetailsActivity extends AppCompatActivity {
                 if(!dataFromDBpopulated) {
                     loadMovieDetailsFromDB(data);
                     fillMovieData(movieSelected);
+                    addOnClickListenerToFloatingActionButton();
+                    mFloatingActionButtonFavorite.setVisibility(View.VISIBLE);
                 }
-
-                addOnClickListenerToFloatingActionButton();
 
                 // Make UI visible to the user
                 mDetailsProgressBar.setVisibility(View.GONE);
@@ -1093,7 +1111,6 @@ public class DetailsActivity extends AppCompatActivity {
             movieSelected.setMovieRuntime(Double.parseDouble(movieRuntime));
             movieSelected.setIsMovieForAdults(Boolean.parseBoolean(movieIsForAdults));
 
-            // TODO
             movieSelected.setMovieBackdropPath(movieBackdropPath);
             movieSelected.setMovieDatabaseBackdropPath(movieDatabaseBackdropPath);
 
@@ -1104,16 +1121,24 @@ public class DetailsActivity extends AppCompatActivity {
         }
     }
 
-    public static ArrayList<MovieTrailerThumbnail> formatTrailersFromDB(String trailerThumbnailsString, Movie movieSelected) {
+    /**
+     * Formats trailer thumbnails data retrieved from the database
+     * and creates MovieTrailerThumbnail objects in an ArrayList
+     *
+     * @param trailerThumbnailsString String with trailers data retrieved from the database
+     *
+     * @return An ArrayList of movie trailer thumbnails objects
+     */
+    public static ArrayList<MovieTrailerThumbnail> formatTrailersFromDB(String trailerThumbnailsString) {
 
         String[] trailersArray = trailerThumbnailsString.split(FavoritesUtils.CHARACTER_TO_SEPARATE_THUMBNAILS);
 
         ArrayList<MovieTrailerThumbnail> trailerThumbnailsObjectsArray = new ArrayList<>();
 
+        //  Add each thumbnail object to the new ArrayList
         for(String thumbnail : trailersArray) {
 
             String[] thumbnailData = thumbnail.split(FavoritesUtils.CHARACTER_TO_SEPARATE_THUMBNAIL_TAG);
-
             trailerThumbnailsObjectsArray.add(new MovieTrailerThumbnail(thumbnailData[0], thumbnailData[1]));
         }
 
@@ -1169,6 +1194,7 @@ public class DetailsActivity extends AppCompatActivity {
      *
      * @param context       Context of the activity
      * @param movieSelected Movie selected by the user
+     *
      * @return An ArrayList of Bitmaps of the trailers thumbnails
      */
     private static ArrayList<Bitmap> loadMovieTrailersFromDatabase(Context context, Movie movieSelected) {
@@ -1202,6 +1228,7 @@ public class DetailsActivity extends AppCompatActivity {
      * Creates an ArrayList of Strings with the trailers keys retrieved from the database
      *
      * @param context The activity context
+     *
      * @return an ArrayList of Strings with the trailers keys
      */
     private static ArrayList<String> loadTrailerKeysFromDatabase(Context context) {
@@ -1231,6 +1258,7 @@ public class DetailsActivity extends AppCompatActivity {
      * and trailer keys)
      *
      * @param context Context of the activity that called this method
+     *
      * @return An array of Strings that represent the movie thumbnails with their corresponding data
      */
     public static String[] queryTrailersArray(Context context) {

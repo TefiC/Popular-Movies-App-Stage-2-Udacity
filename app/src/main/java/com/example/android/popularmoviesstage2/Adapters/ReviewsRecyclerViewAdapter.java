@@ -2,7 +2,6 @@ package com.example.android.popularmoviesstage2.Adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,9 +21,11 @@ import java.util.ArrayList;
 
 public class ReviewsRecyclerViewAdapter extends RecyclerView.Adapter<ReviewsRecyclerViewAdapter.ReviewViewHolder> {
 
+
     /*
      * Fields
      */
+
 
     private Context mContext;
     private ArrayList<MovieReview> mMovieReviewsArray;
@@ -66,7 +67,6 @@ public class ReviewsRecyclerViewAdapter extends RecyclerView.Adapter<ReviewsRecy
             reviewTextView = itemView.findViewById(R.id.expandable_text);
         }
     }
-
 
     @Override
     public ReviewsRecyclerViewAdapter.ReviewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

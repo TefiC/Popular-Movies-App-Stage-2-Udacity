@@ -5,11 +5,13 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.widget.Button;
 
 import com.example.android.popularmoviesstage2.Adapters.ReviewsRecyclerViewAdapter;
 import com.example.android.popularmoviesstage2.MovieData.Movie;
@@ -24,9 +26,11 @@ import java.util.ArrayList;
 
 public class ReviewsActivity extends AppCompatActivity {
 
+
     /*
      * Constants
      */
+
 
     // Tag for logging
     private static final String TAG = ReviewsActivity.class.getSimpleName();
@@ -34,18 +38,22 @@ public class ReviewsActivity extends AppCompatActivity {
     // Activity title
     private static final String REVIEWS_ACTIVITY_TITLE = "Reviews";
 
+
     /*
      * Fields
      */
+
 
     private Movie mMovieSelected;
     private ArrayList<MovieReview> mMovieReviewsArray;
     private RecyclerView mReviewsRecyclerView;
     private ReviewsRecyclerViewAdapter mReviewsAdapter;
 
+
     /*
      * Methods
      */
+
 
     // Methods to initialize activity ==============================================================
 
@@ -75,7 +83,6 @@ public class ReviewsActivity extends AppCompatActivity {
         }
     }
 
-
     // Methods to process data =====================================================================
 
     /**
@@ -83,10 +90,10 @@ public class ReviewsActivity extends AppCompatActivity {
      * converts it into an ArrayList of movie reviews
      *
      * @param reviewsString A JSON in String format with the reviews data
-     * @param movieSelected The movie selected by the user
+     *
      * @return An ArrayList of MovieReviews
      */
-    public static ArrayList<MovieReview> formatJSONfromReviewsString(String reviewsString, Movie movieSelected) {
+    public static ArrayList<MovieReview> formatJSONfromReviewsString(String reviewsString) {
 
         ArrayList<MovieReview> movieReviewsArray = new ArrayList<>();
 
@@ -112,7 +119,6 @@ public class ReviewsActivity extends AppCompatActivity {
         return movieReviewsArray;
     }
 
-
     // Methods for Reviews UI ======================================================================
 
     /**
@@ -131,7 +137,7 @@ public class ReviewsActivity extends AppCompatActivity {
         mReviewsRecyclerView.setAdapter(mReviewsAdapter);
     }
 
-    // Methods for User interaction ======================================================================
+    // Methods for user interaction ================================================================
 
     /**
      * Creates and displays an alert dialog telling the user
@@ -156,6 +162,10 @@ public class ReviewsActivity extends AppCompatActivity {
 
         // Create dialog and display it to the user
         AlertDialog dialog = builder.create();
+
         dialog.show();
+
+        Button okButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        okButton.setTextColor(Color.RED);
     }
 }

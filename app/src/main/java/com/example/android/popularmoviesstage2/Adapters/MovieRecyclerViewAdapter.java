@@ -7,7 +7,6 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,17 +25,17 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-import static android.content.ContentValues.TAG;
-
 /**
  * RecyclerView for a grid of movies
  */
 
 public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecyclerViewAdapter.MovieViewHolder> {
 
+
     /*
      * Fields
      */
+
 
     // Views
     private int mNumberOfItems;
@@ -55,6 +54,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
      * Constructor
      */
 
+
     public MovieRecyclerViewAdapter(ArrayList<Movie> moviesArray, int numberOfItems,
                                     MovieAdapterOnClickHandler movieAdapterOnClickHandler, Context context,
                                     String searchCriteria) {
@@ -64,6 +64,12 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
         mMoviesArray = moviesArray;
         mSearchCriteria = searchCriteria;
     }
+
+
+    /*
+     * Methods
+     */
+
 
     @Override
     public MovieRecyclerViewAdapter.MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -84,6 +90,11 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
         return new MovieViewHolder(view);
     }
 
+    /**
+     * Creates a rectangular image view with custom properties
+     *
+     * @return A RectangularImageView to represent a poster
+     */
     private RectangularImageView createRectangularImageView() {
 
         RectangularImageView movieView = new RectangularImageView(mContext);
@@ -115,12 +126,15 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
             String posterPath = movie.getMoviePosterPath();
             loadMoviePoster(posterPath, holder.mMoviePoster);
         } else {
-            String posterPath = DBServiceTasks.getImagePathFromDB(mContext, DBServiceTasks.buildMovieSelectedDBUri(movie), MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_POSTER_PATH);
-            Log.v(TAG, "POSTER PATH " + posterPath);
+            String posterPath = DBServiceTasks.getImagePathFromDB(mContext,
+                    DBServiceTasks.buildMovieSelectedDBUri(movie),
+                    MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_POSTER_PATH);
+
             Bitmap poster = ImagesDBUtils.loadImageFromStorage(posterPath,
                     Integer.toString(movie.getMovieId()),
                     FavoritesUtils.IMAGE_TYPE_POSTER,
                     -1);
+
             holder.mMoviePoster.setImageBitmap(poster);
         }
 
@@ -150,7 +164,8 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
         if (sharedPreferences.contains(FavoritesUtils.SHARED_PREFERENCES_FAVORITES_STRING)) {
-            return sharedPreferences.getStringSet(FavoritesUtils.SHARED_PREFERENCES_FAVORITES_STRING, null).contains(Integer.toString(movie.getMovieId()));
+            return sharedPreferences.getStringSet(FavoritesUtils.SHARED_PREFERENCES_FAVORITES_STRING, null)
+                    .contains(Integer.toString(movie.getMovieId()));
         } else {
             return FavoritesUtils.checkIfMovieIsFavorite(mContext, Integer.toString(movie.getMovieId()));
         }
@@ -163,6 +178,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
      *
      * @param holder The corresponding RecyclerView ViewHolder
      * @param movie  The selected Movie object
+     * @param isFavorite whether the movie is one of the user's favorites or not
      */
     private void determineMainPosterFavoriteLogo(MovieRecyclerViewAdapter.MovieViewHolder holder, Movie movie, boolean isFavorite) {
         if (isFavorite) {
@@ -269,9 +285,10 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
     }
 
     /**
-     * Calculates the number of columns to autofit the movie poster layout
+     * Calculates the number of columns to make them adapt to the movie posters main layout
      *
      * @param context The Main Activity context
+     *
      * @return The number of columns to be displayed by a RecyclerView (spanSize)
      */
     public static int calculateColumns(Context context) {

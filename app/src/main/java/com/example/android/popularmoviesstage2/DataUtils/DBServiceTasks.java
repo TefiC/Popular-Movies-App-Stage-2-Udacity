@@ -43,6 +43,7 @@ public class DBServiceTasks {
      * Methods
      */
 
+
     // Methods to execute DB tasks  ================================================================
 
     /**
@@ -115,7 +116,6 @@ public class DBServiceTasks {
         int numDeleted = context.getContentResolver().delete(uri, "movieDBId=?", new String[]{"id"});
 
         if (numDeleted == 1) {
-            Log.v(TAG, "MOVIE REMOVED");
             movieSelected.setIsMovieFavorite(false);
         }
     }
@@ -144,9 +144,11 @@ public class DBServiceTasks {
      * Creates a ContentValues instance that contains the data for the movie selected
      *
      * @param movieSelected The movie selected by the user
+     *
      * @return ContentValues with the movie's data
      */
     private static ContentValues createMovieContentValuesForDB(Movie movieSelected) {
+
         ContentValues cv = new ContentValues();
 
         /*
@@ -176,7 +178,6 @@ public class DBServiceTasks {
         cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_REVIEWS_TEXT, formattedReviewsText);
 
         // Images path placeholders
-        //TODO
         cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTER_PATH, movieSelected.getMoviePosterPath());
         cv.put(MoviesDBContract.FavoriteMoviesEntry.COLUMN_NAME_DATABASE_BACKDROP_PATH, "");
 
@@ -193,6 +194,7 @@ public class DBServiceTasks {
      * Build the Uri for database operations for the movie selected
      *
      * @param movieSelected The movie selected by the user
+     *
      * @return The Uri to operate with for the movie selected
      */
     public static Uri buildMovieSelectedDBUri(Movie movieSelected) {
@@ -209,6 +211,7 @@ public class DBServiceTasks {
      * to distinguish where they must be split.
      *
      * @param movieReviews An ArrayList of MovieReview objects
+     *
      * @return An array of two elements. The first one is the String that
      * contains the authors and the second elements in the String that
      * contains the reviews text.

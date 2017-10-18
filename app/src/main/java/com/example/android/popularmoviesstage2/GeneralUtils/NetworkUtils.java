@@ -4,9 +4,11 @@ package com.example.android.popularmoviesstage2.GeneralUtils;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.widget.Button;
 
 import com.example.android.popularmoviesstage2.Activities.MainActivity;
 import com.example.android.popularmoviesstage2.R;
@@ -25,9 +27,11 @@ import java.util.Scanner;
 
 public class NetworkUtils {
 
+
     /**
      * Constants
      */
+
 
     // Tag for logging
     private static final String TAG = NetworkUtils.class.getSimpleName();
@@ -54,6 +58,7 @@ public class NetworkUtils {
     /*
      * Methods
      */
+
 
     // Methods to build URLs =======================================================================
 
@@ -155,6 +160,7 @@ public class NetworkUtils {
      *
      * @param url The url used to fetched the data
      * @return The data returned as String
+     *
      * @throws IOException An exception thrown if the URL connection fails
      */
     public static String getResponseFromHttpUrl(URL url) throws IOException {
@@ -198,7 +204,11 @@ public class NetworkUtils {
 
         // Create dialog and display it to the user
         AlertDialog dialog = builder.create();
+
         dialog.show();
+
+        Button okButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        okButton.setTextColor(Color.RED);
     }
 
     /**
@@ -218,6 +228,7 @@ public class NetworkUtils {
      *
      * @param sortBy User's preference in String format.
      *               Either "Most Popular" or "Top Rated"
+     *
      * @return The formatted criteria for the API request.
      *         Either "popular" or "top_rated"
      */

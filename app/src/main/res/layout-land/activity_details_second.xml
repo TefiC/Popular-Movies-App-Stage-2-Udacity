@@ -107,7 +107,7 @@
                         android:layout_marginTop="40dp"
                         android:layout_toEndOf="@id/movie_details_poster_view"
                         android:layout_toRightOf="@id/movie_details_poster_view"
-                        tools:text="Pirates of the Caribbean" />
+                        tools:text="@string/movie_title_placeholder" />
 
                     <!--Dividing bar-->
                     <View
@@ -139,7 +139,7 @@
                         android:layout_marginTop="15dp"
                         android:layout_toEndOf="@id/movie_details_star"
                         android:layout_toRightOf="@id/movie_details_star"
-                        tools:text="8.6" />
+                        tools:text="@string/movie_rating_placeholder" />
 
                     <!--Clock-->
                     <ImageView
@@ -159,7 +159,7 @@
                         android:layout_toEndOf="@id/movie_details_clock"
                         android:layout_toRightOf="@id/movie_details_clock"
                         android:textColor="@android:color/white"
-                        tools:text="120 min" />
+                        tools:text="@string/movie_runtime_placeholder" />
 
                     <!--Language logo-->
                     <ImageView
@@ -178,7 +178,7 @@
                         android:layout_below="@id/movie_details_clock"
                         android:layout_toEndOf="@id/movie_details_language_logo"
                         android:layout_toRightOf="@id/movie_details_language_logo"
-                        tools:text="en" />
+                        tools:text="@string/movie_language_placeholder" />
 
                     <!--Release logo-->
                     <ImageView
@@ -198,7 +198,7 @@
                         android:layout_below="@id/movie_details_language_logo"
                         android:layout_toEndOf="@id/movie_details_release_logo"
                         android:layout_toRightOf="@id/movie_details_release_logo"
-                        tools:text="2006" />
+                        tools:text="@string/movie_release_placeholder" />
 
                 </RelativeLayout>
 
@@ -238,7 +238,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/movie_details_plot_horizontal_line"
                     android:textColor="@android:color/white"
-                    tools:text="Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit" />
+                    tools:text="@string/movie_plot_placeholder"/>
 
                 <!--Cast-->
                 <TextView
@@ -273,7 +273,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/movie_details_cast_horizontal_line"
                     android:layout_centerHorizontal="true"
-                    tools:text="Jhonny Deep\nOrlando Bloom\nKeira Knightly" />
+                    tools:text="@string/movie_cast_placeholder" />
 
                 <!--Trailers-->
                 <LinearLayout
@@ -384,7 +384,7 @@
         android:clickable="true"
         android:src="@drawable/heart_not_pressed"
         android:visibility="invisible"
-        app:backgroundTint="#FF0000"
+        app:backgroundTint="@color/favorite_button_color"
         app:layout_anchor="@+id/appBarLayout"
         app:layout_anchorGravity="bottom|right" />
 

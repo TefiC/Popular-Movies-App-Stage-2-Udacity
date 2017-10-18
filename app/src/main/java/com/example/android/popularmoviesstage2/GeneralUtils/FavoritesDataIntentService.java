@@ -19,13 +19,16 @@ public class FavoritesDataIntentService extends IntentService {
      * Constructor
      */
 
+
     public FavoritesDataIntentService() {
         super("FavoritesDataIntentService");
     }
 
+
     /*
      * Methods
      */
+
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {

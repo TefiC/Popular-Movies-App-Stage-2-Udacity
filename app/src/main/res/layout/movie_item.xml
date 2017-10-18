@@ -25,7 +25,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:textColor="@android:color/white"
-            tools:text="Titanic" />
+            tools:text="@string/movie_title_placeholder" />
 
         <!--Start and rating-->
         <LinearLayout
@@ -33,6 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="25dp"
             android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:layout_below="@id/movie_item_title"
             android:layout_gravity="center"
             android:layout_marginTop="5dp"
@@ -45,7 +46,8 @@
                 style="@style/mainGridPosterLogos"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:src="@drawable/star" />
+                android:src="@drawable/star"
+                android:contentDescription="@string/star_logo_description"/>
 
             <TextView
                 android:id="@+id/movie_item_rating"
@@ -54,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/white"
                 android:layout_margin="2dp"
-                tools:text="8.6" />
+                tools:text="@string/movie_rating_placeholder" />
 
         </LinearLayout>
 
@@ -67,9 +69,12 @@
             android:layout_below="@id/movie_item_title"
             android:layout_gravity="end"
             android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="5dp"
             android:layout_toRightOf="@id/movie_item_rating_star_layout"
-            tools:src="@drawable/for_children" />
+            android:layout_toEndOf="@id/movie_item_rating_star_layout"
+            tools:src="@drawable/for_children"
+            android:contentDescription="@string/is_for_adults_description"/>
 
         <!--Favorite?-->
         <ImageView
@@ -80,7 +85,8 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_below="@id/movie_item_title"
-            tools:src="@drawable/heart_not_pressed" />
+            tools:src="@drawable/heart_not_pressed"
+            android:contentDescription="@string/heart_description"/>
 
     </RelativeLayout>
 

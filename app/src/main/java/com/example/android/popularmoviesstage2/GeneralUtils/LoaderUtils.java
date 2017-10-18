@@ -19,6 +19,7 @@ public final class LoaderUtils {
 
     /**
      * Retrieves a String in the given column from a cursor
+     *
      * @param cursor The Cursor with data
      * @param colName The name of the column that contains the String
      *
